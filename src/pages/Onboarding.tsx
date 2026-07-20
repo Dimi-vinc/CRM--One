@@ -50,50 +50,23 @@ export function Onboarding() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Session expirée');
 
-      // 1) Create tenant
-      const { data: tenant, error: tErr } = await supabase.from('tenants').insert({
-        name: companyName || 'Mon entreprise',
-        country_code: country,
-        region,
-        city,
-        currency_code: currency,
-        timezone: countryDef?.timezone || 'Africa/Douala',
-        locale: 'fr',
-        phone_country_code: countryDef?.dial || '+237',
-        plan_id: planId,
-        trial_ends_at: new Date(Date.now() + 7 * 86400000).toISOString(),
-        status: 'trial',
-      }).select().single();
-      if (tErr) throw tErr;
-
-      // 2) Promote this user to admin of the tenant
-      const { error: pErr } = await supabase.from('profiles').update({
-        tenant_id: tenant.id, role: 'admin', full_name: initialName || user.email,
-      }).eq('id', user.id);
-      if (pErr) throw pErr;
-
-      // 3) Create a subscription row in trialing state
-      await supabase.from('subscriptions').insert({
-        tenant_id: tenant.id, plan_id: planId, status: 'trialing',
-        current_period_end: new Date(Date.now() + 7 * 86400000).toISOString(),
+      // Single atomic RPC: bypasses all RLS (SECURITY DEFINER, runs as postgres).
+      // Does tenant insert + profile promote + subscription + roles + tracking in one transaction.
+      const { data: tenantId, error: rpcErr } = await supabase.rpc('complete_onboarding', {
+        p_company_name: companyName || 'Mon entreprise',
+        p_country_code: country,
+        p_region: region || '',
+        p_city: city || '',
+        p_currency_code: currency,
+        p_timezone: countryDef?.timezone || 'Africa/Douala',
+        p_locale: 'fr',
+        p_phone_country_code: countryDef?.dial || '+237',
+        p_plan_id: planId,
+        p_full_name: initialName || user.email,
+        p_commercial_code: commercialCode.trim() || null,
       });
-
-      // 4) Commercial code tracking link (optional)
-      if (commercialCode.trim()) {
-        const { data: code } = await supabase.from('commercial_codes').select('id').eq('code', commercialCode.trim()).eq('is_active', true).maybeSingle();
-        if (code) {
-          await supabase.from('sales_tracking').insert({
-            commercial_code_id: code.id, tenant_id: tenant.id, amount: PLAN_BY_ID[planId].price, currency: PLAN_BY_ID[planId].currency,
-          });
-        }
-      }
-
-      // 5) Seed default custom roles
-      await supabase.from('roles').insert([
-        { tenant_id: tenant.id, name: 'Commercial', description: 'Accès pipeline et deals', permissions: { pipeline: ['view','create','edit'], contacts: ['view','create','edit'], companies: ['view','create','edit'] } },
-        { tenant_id: tenant.id, name: 'Comptable', description: 'Accès facturation et rapports financiers', permissions: { billing: ['view'], reports: ['view'] } },
-        { tenant_id: tenant.id, name: 'Fonctionnel / Support', description: 'Configuration et support', permissions: { contacts: ['view'], tasks: ['view','create','edit'] } },
-      ]);
+      if (rpcErr) throw rpcErr;
+      if (!tenantId) throw new Error('La création du compte a échoué.');
 
       await refresh();
       nav('/dashboard', { replace: true });
