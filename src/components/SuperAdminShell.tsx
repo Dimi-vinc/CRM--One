@@ -27,7 +27,7 @@ export function SuperAdminShell({ children }: { children: ReactNode }) {
     <div className="flex h-screen overflow-hidden bg-gray-50">
       <aside className={`fixed inset-y-0 left-0 z-40 w-64 transform border-r border-gray-100 bg-gradient-to-b from-coral-50/60 to-mint-50/40 transition-transform lg:static lg:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex h-16 items-center justify-between px-4">
-          <Logo size="sm" />
+          <Logo size="md" />
           <button onClick={() => setOpen(false)} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 lg:hidden"><X size={18} /></button>
         </div>
         <div className="px-3 pb-2">

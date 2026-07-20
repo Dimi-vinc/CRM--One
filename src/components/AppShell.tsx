@@ -68,7 +68,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* Sidebar */}
       <aside className={`fixed inset-y-0 left-0 z-40 w-64 transform border-r border-gray-100 bg-mint-50/60 transition-transform lg:static lg:translate-x-0 ${openSidebar ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex h-16 items-center justify-between px-4">
-          <Logo size="sm" />
+          <Logo size="md" />
           <button onClick={() => setOpenSidebar(false)} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 lg:hidden"><X size={18} /></button>
         </div>
         <nav className="flex-1 space-y-4 overflow-y-auto px-3 py-4">

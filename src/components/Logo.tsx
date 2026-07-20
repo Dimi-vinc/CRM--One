@@ -1,18 +1,47 @@
-import { Zap } from 'lucide-react';
-import { PLATFORM_NAME } from '../lib/constants';
 import { classNames } from '../lib/utils';
 
-export function Logo({ size = 'md', light = false }: { size?: 'sm' | 'md' | 'lg'; light?: boolean }) {
-  const box = size === 'sm' ? 'h-7 w-7' : size === 'lg' ? 'h-10 w-10' : 'h-8 w-8';
-  const iconSize = size === 'sm' ? 16 : size === 'lg' ? 22 : 18;
-  const text = size === 'sm' ? 'text-base' : size === 'lg' ? 'text-xl' : 'text-lg';
+interface LogoProps {
+  size?: 'sm' | 'md' | 'lg';
+  /** On dark backgrounds use the white variant */
+  light?: boolean;
+  className?: string;
+}
+
+const SIZES: Record<string, { h: string; w: string; main: string; one: string }> = {
+  sm: { h: 'h-7', w: 'auto', main: 'text-[15px]', one: 'text-[15px]' },
+  md: { h: 'h-9', w: 'auto', main: 'text-[19px]', one: 'text-[19px]' },
+  lg: { h: 'h-11', w: 'auto', main: 'text-[24px]', one: 'text-[24px]' },
+};
+
+export function Logo({ size = 'md', light = false, className }: LogoProps) {
+  const s = SIZES[size];
   return (
-    <div className="flex items-center gap-2">
-      <div className={classNames('rounded-lg bg-gradient-to-br from-coral-400 to-coral-600 flex items-center justify-center text-white shadow-sm', box)}>
-        <Zap size={iconSize} fill="currentColor" />
-      </div>
-      <span className={classNames('font-bold tracking-tight', text, light ? 'text-white' : 'text-gray-900')}>
-        {PLATFORM_NAME}
+    <div
+      className={classNames(
+        'flex items-center gap-0 font-bold leading-none tracking-tight select-none',
+        s.h,
+        className,
+      )}
+      aria-label="LiAfrik One"
+    >
+      <span
+        className={classNames(
+          s.main,
+          'font-extrabold',
+          light ? 'text-white' : 'text-slate-900',
+        )}
+        style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif' }}
+      >
+        LiAfrik
+      </span>
+      <span
+        className={classNames(
+          s.one,
+          'ml-0.5 font-extrabold bg-clip-text text-transparent bg-gradient-to-br from-sky-400 to-blue-600',
+        )}
+        style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif' }}
+      >
+        One
       </span>
     </div>
   );
