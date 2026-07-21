@@ -1,10 +1,10 @@
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import * as Icons from 'lucide-react';
-import { ChevronDown, LogOut, Settings, Crown, Menu, X, Bell, Search } from 'lucide-react';
+import { ChevronDown, LogOut, Settings, Crown, Menu, X, Bell, Search, Building2 } from 'lucide-react';
 import { Logo } from './Logo';
 import { useAuth } from '../context/AuthContext';
-import { MODULES, type ModuleDef, planIncludes, type ModuleKey, PLATFORM_NAME, PLAN_BY_ID, formatMoney } from '../lib/constants';
+import { MODULES, type ModuleDef, planIncludes, type ModuleKey, PLATFORM_NAME, PLAN_BY_ID, formatMoney, SUPER_ADMIN_EMAILS } from '../lib/constants';
 import { classNames, daysUntil, COLOR_RAMPS } from '../lib/utils';
 import { Avatar } from './ui';
 import { supabase } from '../lib/supabase';
@@ -27,7 +27,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const planId = tenant?.plan_id || 'starter';
   const trialDaysLeft = tenant?.trial_ends_at ? daysUntil(tenant.trial_ends_at) : null;
-  const isSuperAdmin = profile?.role === 'super_admin';
+  const isSuperAdmin = profile?.role === 'super_admin' && SUPER_ADMIN_EMAILS.includes(profile?.email?.toLowerCase() || '');
 
   useEffect(() => {
     if (!tenant) return;
@@ -73,36 +73,49 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-40 w-64 transform border-r border-gray-100 bg-mint-50/60 transition-transform lg:static lg:translate-x-0 ${openSidebar ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="flex h-16 items-center justify-between px-4">
+      <aside className={`fixed inset-y-0 left-0 z-40 w-64 transform border-r border-gray-100 bg-gradient-to-b from-mint-50/80 to-white transition-transform lg:static lg:translate-x-0 ${openSidebar ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="flex h-16 items-center justify-between border-b border-gray-100/60 px-4">
           <Logo size="md" />
           <button onClick={() => setOpenSidebar(false)} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 lg:hidden"><X size={18} /></button>
         </div>
-        <nav className="flex-1 space-y-4 overflow-y-auto px-3 py-4">
+        <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
           {['crm', 'insights', 'system', 'admin'].map(group => (
             grouped[group].length > 0 && (
               <div key={group}>
-                <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-400">{groupLabel(group, t)}</p>
+                <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-400">{groupLabel(group, t)}</p>
                 <div className="space-y-0.5">{grouped[group].map(link)}</div>
               </div>
             )
           ))}
           {showSuperAdmin && (
-            <div className="mt-2 rounded-xl border border-red-100 bg-red-50/40 p-2">
-              <p className="px-1 pb-1 text-[10px] font-semibold uppercase tracking-wider text-red-400">{t('group.admin')}</p>
-              <NavLink to="/super-admin" className={({ isActive }) => classNames('sidebar-link', isActive && 'sidebar-link-active', 'border-l-2 border-red-300 pl-2')}>
-                <Crown size={18} className="text-red-500" />
-                <span className="flex-1 font-medium text-red-700">{t('mod.super_admin')}</span>
-              </NavLink>
+            <div className="mt-3">
+              <div className="mb-1.5 h-px bg-gradient-to-r from-transparent via-red-200 to-transparent" />
+              <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-red-500">{t('group.admin')}</p>
+              <div className="rounded-xl border border-red-100 bg-gradient-to-br from-red-50/80 to-red-50/30 p-1.5">
+                <NavLink to="/super-admin" className={({ isActive }) => classNames('sidebar-link', isActive && 'sidebar-link-active', 'border-l-2 border-red-400 bg-red-100/50')}>
+                  <Crown size={18} className="text-red-500" />
+                  <span className="flex-1 font-semibold text-red-700">{t('mod.super_admin')}</span>
+                </NavLink>
+              </div>
             </div>
           )}
         </nav>
-        <div className="border-t border-gray-100 p-3">
-          <div className="rounded-xl bg-white p-3 text-xs">
-            <p className="font-semibold text-gray-900">{tenant?.name || 'Super Admin'}</p>
-            <p className="mt-0.5 text-gray-500">{t('common.plan')} {PLAN_BY_ID[planId]?.name || '—'}</p>
+        <div className="border-t border-gray-100/60 p-3">
+          <div className="rounded-xl bg-white p-3 shadow-sm ring-1 ring-gray-100/80">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-mint-100 text-mint-700">
+                <Building2 size={16} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs font-semibold text-gray-900">{tenant?.name || (isSuperAdmin ? 'Super Admin' : '—')}</p>
+                <p className="truncate text-[11px] text-gray-500">{t('common.plan')} {PLAN_BY_ID[planId]?.name || '—'}</p>
+              </div>
+            </div>
             {trialDaysLeft !== null && trialDaysLeft >= 0 && (
-              <p className="mt-1.5"><span className="badge bg-coral-50 text-coral-700">{t('common.trial')}: {trialDaysLeft}{t('common.daysLeft')}</span></p>
+              <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-coral-50 px-2 py-1">
+                <Icons.Timer size={12} className="text-coral-600" />
+                <span className="text-[11px] font-medium text-coral-700">{t('common.trial')}: {trialDaysLeft}{t('common.daysLeft')}</span>
+              </div>
             )}
           </div>
         </div>

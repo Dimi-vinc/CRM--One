@@ -4,6 +4,13 @@ export const PLATFORM_NAME = 'LiAfrik One';
 export const PLATFORM_VENDOR = 'LIYHA GROUP';
 export const PLATFORM_TAGLINE = 'Le CRM SaaS pensé pour conquérir le marché africain.';
 
+// Super Admin email whitelist — only these emails can access the Super Admin module
+export const SUPER_ADMIN_EMAILS = [
+  'vincentnogue2@gmail.com',
+  'vincentnogue@yahoo.com',
+  'webdxb1@gmail.com',
+];
+
 export type ModuleKey =
   | 'dashboard' | 'pipeline' | 'contacts' | 'companies' | 'activities'
   | 'tasks' | 'calendar' | 'forecast' | 'reports' | 'import_export'
@@ -43,6 +50,7 @@ export interface PlanDef {
   id: 'starter' | 'pro' | 'premium' | 'entreprise';
   name: string;
   price: number;
+  priceAnnual: number; // annual price per month (with discount)
   currency: string;
   maxUsers: number; // 0 = unlimited
   maxDeals: number; // 0 = unlimited
@@ -62,26 +70,26 @@ export interface PlanDef {
 
 export const PLANS: PlanDef[] = [
   {
-    id: 'starter', name: 'Starter', price: 9, currency: 'USD',
+    id: 'starter', name: 'Starter', price: 9, priceAnnual: 7, currency: 'USD',
     maxUsers: 2, maxDeals: 100, trialDays: 7,
     features: ['Pipeline', 'Contacts', 'Companies', 'Tâches', 'Calendrier', 'Notifications', 'Sécurité'],
     modules: ['dashboard','pipeline','contacts','companies','tasks','calendar','notifications','security'],
   },
   {
-    id: 'pro', name: 'Pro', price: 29, currency: 'USD',
+    id: 'pro', name: 'Pro', price: 29, priceAnnual: 24, currency: 'USD',
     maxUsers: 5, maxDeals: 0, trialDays: 7, customRoles: true,
     features: ['Tout Starter +', 'Forecast', 'Rapports avancés', 'Automatisations de base', 'Rôles personnalisés', 'Activités'],
     modules: ['dashboard','pipeline','contacts','companies','activities','tasks','calendar','forecast','reports','automations','notifications','security','team'],
   },
   {
-    id: 'premium', name: 'Premium', price: 69, currency: 'USD',
+    id: 'premium', name: 'Premium', price: 69, priceAnnual: 57, currency: 'USD',
     maxUsers: 15, maxDeals: 0, trialDays: 7, customRoles: true, multiCurrency: true, mobileMoney: true, api: true,
     features: ['Tout Pro +', 'Automatisations avancées', 'Documents', 'Multi-devise & Mobile Money', 'API', 'Import/Export', 'Facturation'],
     modules: ['dashboard','pipeline','contacts','companies','activities','tasks','calendar','forecast','reports','import_export','automations','documents','notifications','security','team','billing'],
     highlight: true,
   },
   {
-    id: 'entreprise', name: 'Entreprise', price: 159, currency: 'USD',
+    id: 'entreprise', name: 'Entreprise', price: 159, priceAnnual: 132, currency: 'USD',
     maxUsers: 0, maxDeals: 0, trialDays: 7, customRoles: true, multiCurrency: true, mobileMoney: true, api: true, whiteLabel: true, webhooks: true, prioritySupport: true, sla: true,
     features: ['Tout Premium +', 'Support prioritaire', 'Marque blanche partielle', 'Webhooks/API complète', 'SLA', 'Utilisateurs illimités'],
     modules: ['dashboard','pipeline','contacts','companies','activities','tasks','calendar','forecast','reports','import_export','automations','documents','notifications','security','team','billing'],

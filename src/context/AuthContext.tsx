@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { SUPER_ADMIN_EMAILS } from '../lib/constants';
 import type { Profile, Tenant } from '../lib/types';
 
 interface AuthState {
@@ -45,6 +46,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
     setProfile(data as Profile | null);
+    // Enforce super admin email whitelist: only whitelisted emails keep super_admin role
+    if (data && data.role === 'super_admin' && !SUPER_ADMIN_EMAILS.includes(data.email?.toLowerCase() || '')) {
+      // Downgrade non-whitelisted super_admin to admin
+      await supabase.from('profiles').update({ role: 'admin' }).eq('id', uid);
+      data.role = 'admin';
+      setProfile(data as Profile | null);
+    } else {
+      setProfile(data as Profile | null);
+    }
     if (data?.tenant_id) {
       const { data: t } = await supabase.from('tenants').select('*').eq('id', data.tenant_id).maybeSingle();
       setTenant(t as Tenant | null);

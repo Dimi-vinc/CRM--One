@@ -26,6 +26,7 @@ export function Onboarding() {
   const [city, setCity] = useState('');
   const [currency, setCurrency] = useState('XAF');
   const [planId, setPlanId] = useState<'starter'|'pro'|'premium'|'entreprise'>('pro');
+  const [billingCycle, setBillingCycle] = useState<'monthly'|'annual'>('monthly');
   const [commercialCode, setCommercialCode] = useState('');
   const [codeValid, setCodeValid] = useState<null | { ok: boolean; label?: string }>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -147,17 +148,30 @@ export function Onboarding() {
             <div className="space-y-4">
               <div className="flex items-center gap-2"><CreditCard className="text-coral-500" size={20} /><h2 className="text-lg font-bold text-gray-900">{t('onboarding.choosePlan')}</h2></div>
               <p className="text-sm text-gray-500">{t('onboarding.planHint')}</p>
+              {/* Billing cycle toggle */}
+              <div className="inline-flex items-center gap-3 rounded-full bg-gray-100 p-1">
+                <button onClick={() => setBillingCycle('monthly')} className={`rounded-full px-4 py-1.5 text-xs font-medium transition ${billingCycle === 'monthly' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}>
+                  {t('common.monthly') === 'common.monthly' ? 'Mensuel' : t('common.monthly')}
+                </button>
+                <button onClick={() => setBillingCycle('annual')} className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-medium transition ${billingCycle === 'annual' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}>
+                  {t('common.annual') === 'common.annual' ? 'Annuel' : t('common.annual')}
+                  <span className="rounded-full bg-mint-100 px-1.5 py-0.5 text-[9px] font-bold text-mint-700">-20%</span>
+                </button>
+              </div>
               <div className="grid gap-3 sm:grid-cols-2">
-                {PLANS.map(p => (
-                  <button key={p.id} onClick={() => setPlanId(p.id)} className={`text-left rounded-xl border p-4 transition ${planId === p.id ? 'border-coral-400 ring-2 ring-coral-100 bg-coral-50/40' : 'border-gray-200 hover:border-gray-300'}`}>
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-semibold text-gray-900">{p.name}</h3>
-                      {p.highlight && <span className="rounded-full bg-coral-100 px-2 py-0.5 text-[10px] font-semibold text-coral-700">Populaire</span>}
-                    </div>
-                    <p className="mt-1 text-lg font-bold text-gray-900">{formatMoney(p.price, p.currency)}<span className="text-xs font-normal text-gray-500">/mois</span></p>
-                    <p className="mt-1 text-xs text-gray-500">{p.maxUsers === 0 ? 'Illimité' : `Jusqu'à ${p.maxUsers}`} utilisateurs</p>
-                  </button>
-                ))}
+                {PLANS.map(p => {
+                  const price = billingCycle === 'annual' ? p.priceAnnual : p.price;
+                  return (
+                    <button key={p.id} onClick={() => setPlanId(p.id)} className={`text-left rounded-xl border p-4 transition ${planId === p.id ? 'border-coral-400 ring-2 ring-coral-100 bg-coral-50/40' : 'border-gray-200 hover:border-gray-300'}`}>
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-semibold text-gray-900">{p.name}</h3>
+                        {p.highlight && <span className="rounded-full bg-coral-100 px-2 py-0.5 text-[10px] font-semibold text-coral-700">{t('common.popular')}</span>}
+                      </div>
+                      <p className="mt-1 text-lg font-bold text-gray-900">{formatMoney(price, p.currency)}<span className="text-xs font-normal text-gray-500">{t('common.perMonth')}</span></p>
+                      <p className="mt-1 text-xs text-gray-500">{p.maxUsers === 0 ? t('common.unlimited') : `${t('common.upTo')} ${p.maxUsers}`} {t('common.users')}</p>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
