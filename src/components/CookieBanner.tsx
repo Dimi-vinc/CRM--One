@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Cookie, X } from 'lucide-react';
 import { Button } from './ui';
+import { useLanguage } from '../context/LanguageContext';
+import { Link } from 'react-router-dom';
 
 type Consent = {
   necessary: boolean;
@@ -32,6 +34,7 @@ declare global {
 }
 
 export function CookieBanner() {
+  const { t } = useLanguage();
   const [consent, setConsent] = useState<Consent>(DEFAULT);
   const [open, setOpen] = useState(false);
   const [customizing, setCustomizing] = useState(false);
@@ -61,21 +64,21 @@ export function CookieBanner() {
           <div className="rounded-full bg-mint-50 p-2 text-mint-600"><Cookie size={20} /></div>
           <div className="flex-1">
             <p className="text-sm text-gray-700">
-              Nous utilisons des cookies pour améliorer votre expérience. Vous pouvez choisir ce que vous acceptez.{' '}
-              <a href="#" className="font-medium text-coral-600 hover:underline">Politique de confidentialité</a>
+              {t('cookie.text')}{' '}
+              <Link to="/privacy" className="font-medium text-coral-600 hover:underline">{t('footer.privacy')}</Link>
             </p>
             {!customizing ? (
               <div className="mt-3 flex flex-wrap gap-2">
-                <Button size="sm" onClick={() => decide({ necessary: true, analytics: true, marketing: true })}>Accepter tout</Button>
-                <Button size="sm" variant="secondary" onClick={() => decide({ necessary: true, analytics: false, marketing: false })}>Refuser</Button>
-                <Button size="sm" variant="ghost" onClick={() => setCustomizing(true)}>Personnaliser</Button>
+                <Button size="sm" onClick={() => decide({ necessary: true, analytics: true, marketing: true })}>{t('cookie.accept')}</Button>
+                <Button size="sm" variant="secondary" onClick={() => decide({ necessary: true, analytics: false, marketing: false })}>{t('cookie.reject')}</Button>
+                <Button size="sm" variant="ghost" onClick={() => setCustomizing(true)}>{t('cookie.customize')}</Button>
               </div>
             ) : (
               <div className="mt-3 space-y-2">
                 {[
-                  { k: 'necessary' as const, l: 'Nécessaires (obligatoire)', d: 'Authentification, sécurité' },
-                  { k: 'analytics' as const, l: 'Analytiques', d: 'Mesure d\'audience anonyme' },
-                  { k: 'marketing' as const, l: 'Marketing', d: 'Personalisation publicitaire' },
+                  { k: 'necessary' as const, l: t('cookie.accept') + ' (obligatoire)', d: 'Auth' },
+                  { k: 'analytics' as const, l: 'Analytics', d: 'Audience' },
+                  { k: 'marketing' as const, l: 'Marketing', d: 'Ads' },
                 ].map(row => (
                   <label key={row.k} className="flex items-center justify-between gap-3 rounded-lg border border-gray-100 px-3 py-2">
                     <span>
@@ -93,7 +96,7 @@ export function CookieBanner() {
                 ))}
                 <div className="flex justify-end gap-2 pt-1">
                   <Button size="sm" onClick={() => decide({ necessary: consent.necessary, analytics: consent.analytics, marketing: consent.marketing })}>
-                    Enregistrer mes choix
+                    {t('common.save')}
                   </Button>
                 </div>
               </div>

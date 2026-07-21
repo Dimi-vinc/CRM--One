@@ -8,6 +8,8 @@ import { MODULES, type ModuleDef, planIncludes, type ModuleKey, PLATFORM_NAME, P
 import { classNames, daysUntil, COLOR_RAMPS } from '../lib/utils';
 import { Avatar } from './ui';
 import { supabase } from '../lib/supabase';
+import { useLanguage } from '../context/LanguageContext';
+import { LanguageSelector } from './LanguageSelector';
 
 function LucIcon({ name, size = 18 }: { name: string; size?: number }) {
   const C = (Icons as any)[name] || Icons.Circle;
@@ -16,6 +18,7 @@ function LucIcon({ name, size = 18 }: { name: string; size?: number }) {
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { profile, tenant, signOut } = useAuth();
+  const { t } = useLanguage();
   const nav = useNavigate();
   const [openSidebar, setOpenSidebar] = useState(false);
   const [userMenu, setUserMenu] = useState(false);
@@ -41,6 +44,9 @@ export function AppShell({ children }: { children: ReactNode }) {
     return MODULES.filter(m => m.key !== 'super_admin' && m.key !== 'admin');
   }, [isSuperAdmin]);
 
+  // Super Admin entry: visible in sidebar only for super_admin role
+  const showSuperAdmin = isSuperAdmin;
+
   const grouped = useMemo(() => {
     const groups: Record<string, ModuleDef[]> = { crm: [], insights: [], system: [], admin: [] };
     visibleModules.forEach(m => groups[m.group].push(m));
@@ -49,7 +55,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const link = (m: ModuleDef) => {
     const included = isSuperAdmin || planIncludes(planId, m.key);
-    const upgrade = !included ? `Débloquer avec ${PLAN_BY_ID[upgradePlanFor(m.key)]?.name || 'Premium'}` : null;
+    const upgrade = !included ? `${t('common.unlock')} ${PLAN_BY_ID[upgradePlanFor(m.key)]?.name || 'Premium'}` : null;
+    const label = t(`mod.${m.key}`) !== `mod.${m.key}` ? t(`mod.${m.key}`) : m.label;
     return (
       <NavLink
         key={m.key}
@@ -57,7 +64,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         className={({ isActive }) => classNames('sidebar-link', isActive && 'sidebar-link-active')}
       >
         <LucIcon name={m.icon} />
-        <span className="flex-1">{m.label}</span>
+        <span className="flex-1">{label}</span>
         {upgrade && <span className="rounded-full bg-coral-100 px-1.5 py-0.5 text-[9px] font-semibold text-coral-700">{upgrade}</span>}
       </NavLink>
     );
@@ -75,18 +82,27 @@ export function AppShell({ children }: { children: ReactNode }) {
           {['crm', 'insights', 'system', 'admin'].map(group => (
             grouped[group].length > 0 && (
               <div key={group}>
-                <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-400">{groupLabel(group)}</p>
+                <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-400">{groupLabel(group, t)}</p>
                 <div className="space-y-0.5">{grouped[group].map(link)}</div>
               </div>
             )
           ))}
+          {showSuperAdmin && (
+            <div className="mt-2 rounded-xl border border-red-100 bg-red-50/40 p-2">
+              <p className="px-1 pb-1 text-[10px] font-semibold uppercase tracking-wider text-red-400">{t('group.admin')}</p>
+              <NavLink to="/super-admin" className={({ isActive }) => classNames('sidebar-link', isActive && 'sidebar-link-active', 'border-l-2 border-red-300 pl-2')}>
+                <Crown size={18} className="text-red-500" />
+                <span className="flex-1 font-medium text-red-700">{t('mod.super_admin')}</span>
+              </NavLink>
+            </div>
+          )}
         </nav>
         <div className="border-t border-gray-100 p-3">
           <div className="rounded-xl bg-white p-3 text-xs">
             <p className="font-semibold text-gray-900">{tenant?.name || 'Super Admin'}</p>
-            <p className="mt-0.5 text-gray-500">Plan {PLAN_BY_ID[planId]?.name || '—'}</p>
+            <p className="mt-0.5 text-gray-500">{t('common.plan')} {PLAN_BY_ID[planId]?.name || '—'}</p>
             {trialDaysLeft !== null && trialDaysLeft >= 0 && (
-              <p className="mt-1.5"><span className="badge bg-coral-50 text-coral-700">Essai : {trialDaysLeft}j restants</span></p>
+              <p className="mt-1.5"><span className="badge bg-coral-50 text-coral-700">{t('common.trial')}: {trialDaysLeft}{t('common.daysLeft')}</span></p>
             )}
           </div>
         </div>
@@ -100,15 +116,16 @@ export function AppShell({ children }: { children: ReactNode }) {
             <button onClick={() => setOpenSidebar(true)} className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 lg:hidden"><Menu size={18} /></button>
             <div className="relative hidden sm:block">
               <Search size={16} className="absolute left-3 top-3 text-gray-400" />
-              <input placeholder="Rechercher…" className="w-64 rounded-lg border border-gray-200 bg-gray-50 pl-9 pr-3 py-2 text-sm outline-none focus:border-coral-400 focus:bg-white" />
+              <input placeholder={t('nav.search')} className="w-64 rounded-lg border border-gray-200 bg-gray-50 pl-9 pr-3 py-2 text-sm outline-none focus:border-coral-400 focus:bg-white" />
             </div>
           </div>
           <div className="flex items-center gap-2">
             {trialDaysLeft !== null && trialDaysLeft >= 0 && trialDaysLeft <= 7 && (
               <button onClick={() => nav('/billing')} className="hidden items-center gap-2 rounded-full bg-coral-50 px-3 py-1.5 text-xs font-medium text-coral-700 hover:bg-coral-100 sm:flex">
-                <Icons.Timer size={14} /> Essai : {trialDaysLeft}j
+                <Icons.Timer size={14} /> {t('common.trial')}: {trialDaysLeft}{t('common.daysLeft')}
               </button>
             )}
+            <LanguageSelector />
             <button onClick={() => nav('/notifications')} className="relative rounded-lg p-2 text-gray-500 hover:bg-gray-100">
               <Bell size={18} />
               {unread > 0 && <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-coral-500" />}
@@ -126,9 +143,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                       <p className="truncate text-sm font-medium text-gray-900">{profile?.full_name || profile?.email}</p>
                       <p className="truncate text-xs text-gray-500">{profile?.email}</p>
                     </div>
-                    <button onClick={() => { setUserMenu(false); nav('/security'); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"><Settings size={15} /> Sécurité</button>
-                    {isSuperAdmin && <button onClick={() => { setUserMenu(false); nav('/super-admin'); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"><Crown size={15} /> Super Admin</button>}
-                    <button onClick={() => { signOut(); nav('/'); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50"><LogOut size={15} /> Déconnexion</button>
+                    <button onClick={() => { setUserMenu(false); nav('/security'); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"><Settings size={15} /> {t('nav.security')}</button>
+                    {isSuperAdmin && <button onClick={() => { setUserMenu(false); nav('/super-admin'); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"><Crown size={15} /> {t('nav.superAdmin')}</button>}
+                    <button onClick={() => { signOut(); nav('/'); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50"><LogOut size={15} /> {t('nav.logout')}</button>
                   </div>
                 </>
               )}
@@ -153,8 +170,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 }
 
-function groupLabel(g: string) {
-  return { crm: 'CRM', insights: 'Analyses', system: 'Système', admin: 'Administration' }[g] || g;
+function groupLabel(g: string, t: (k: string) => string) {
+  return { crm: t('group.crm'), insights: t('group.insights'), system: t('group.system'), admin: t('group.admin') }[g] || g;
 }
 
 function routeFor(key: ModuleKey): string {

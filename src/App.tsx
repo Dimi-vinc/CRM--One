@@ -35,6 +35,7 @@ import { CommercialCodes } from './pages/superadmin/CommercialCodes';
 import { Tracking } from './pages/superadmin/Tracking';
 import { AuditLogPage } from './pages/superadmin/AuditLogPage';
 import { Announcements } from './pages/superadmin/Announcements';
+import { LegalPage } from './pages/LegalPage';
 
 function Shell({ children }: { children: React.ReactNode }) {
   return <AppShell>{children}</AppShell>;
@@ -48,6 +49,11 @@ export default function App() {
           {/* Public */}
           <Route path="/" element={<PublicOnly><Landing /></PublicOnly>} />
           <Route path="/pricing" element={<Pricing />} />
+          <Route path="/privacy" element={<LegalPage type="privacy" />} />
+          <Route path="/terms" element={<LegalPage type="terms" />} />
+          <Route path="/cgu" element={<LegalPage type="cgu" />} />
+          <Route path="/about" element={<LegalPage type="about" />} />
+          <Route path="/contact" element={<LegalPage type="contact" />} />
           <Route path="/login" element={<PublicOnly><Login /></PublicOnly>} />
           <Route path="/signup" element={<PublicOnly><Signup /></PublicOnly>} />
           <Route path="/onboarding" element={<RequireAuth requireTenant={false}><Onboarding /></RequireAuth>} />

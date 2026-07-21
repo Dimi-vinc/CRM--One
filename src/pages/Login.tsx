@@ -2,11 +2,14 @@ import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, AlertCircle } from 'lucide-react';
 import { Logo } from '../components/Logo';
+import { LanguageSelector } from '../components/LanguageSelector';
 import { Button, Input } from '../components/ui';
 import { supabase } from '../lib/supabase';
 import { PLATFORM_NAME } from '../lib/constants';
+import { useLanguage } from '../context/LanguageContext';
 
 export function Login() {
+  const { t } = useLanguage();
   const nav = useNavigate();
   const loc = useLocation();
   const from = (loc.state as any)?.from || '/dashboard';
@@ -29,19 +32,22 @@ export function Login() {
     <div className="flex min-h-screen flex-col bg-mint-50/30 lg:grid lg:grid-cols-2">
       <div className="flex flex-1 items-center justify-center px-4 py-12">
         <div className="w-full max-w-sm">
-          <Link to="/"><Logo size="lg" /></Link>
-          <h1 className="mt-8 text-2xl font-bold text-gray-900">Bon retour</h1>
-          <p className="mt-1 text-sm text-gray-500">Connectez-vous à votre espace {PLATFORM_NAME}.</p>
+          <div className="flex items-center justify-between">
+            <Link to="/"><Logo size="lg" /></Link>
+            <LanguageSelector />
+          </div>
+          <h1 className="mt-8 text-2xl font-bold text-gray-900">{t('auth.loginTitle')}</h1>
+          <p className="mt-1 text-sm text-gray-500">{t('auth.loginSubtitle')} {PLATFORM_NAME}.</p>
           <form onSubmit={submit} className="mt-8 space-y-4">
             <div>
-              <label className="label">Email</label>
+              <label className="label">{t('auth.email')}</label>
               <div className="relative">
                 <Mail size={16} className="absolute left-3 top-3.5 text-gray-400" />
                 <input type="email" required value={email} onChange={e => setEmail(e.target.value)} className="input pl-9" placeholder="vous@entreprise.com" />
               </div>
             </div>
             <div>
-              <label className="label">Mot de passe</label>
+              <label className="label">{t('auth.password')}</label>
               <div className="relative">
                 <Lock size={16} className="absolute left-3 top-3.5 text-gray-400" />
                 <input type="password" required value={password} onChange={e => setPassword(e.target.value)} className="input pl-9" placeholder="••••••••" />
@@ -54,18 +60,18 @@ export function Login() {
               </div>
             )}
             <Button type="submit" disabled={loading} className="w-full" size="lg">
-              {loading ? 'Connexion…' : 'Se connecter'}
+              {loading ? t('common.loading') : t('auth.loginBtn')}
             </Button>
           </form>
           <p className="mt-6 text-center text-sm text-gray-500">
-            Pas encore de compte ? <Link to="/signup" className="font-medium text-coral-600 hover:underline">Créer un compte</Link>
+            {t('auth.noAccount')} <Link to="/signup" className="font-medium text-coral-600 hover:underline">{t('auth.createAccount')}</Link>
           </p>
         </div>
       </div>
       <div className="hidden bg-gradient-to-br from-mint-100 via-mint-50 to-coral-50 lg:flex lg:items-center lg:justify-center lg:p-12">
         <div className="max-w-md">
-          <h2 className="text-3xl font-bold text-gray-900">Le CRM qui parle la langue de l'Afrique</h2>
-          <p className="mt-4 text-gray-600">Pipeline, devises panafricaines, Mobile Money, isolation multi-tenant. Pensé pour scaler par LIYHA GROUP.</p>
+          <h2 className="text-3xl font-bold text-gray-900">{t('landing.heroTitle1')} <span className="text-coral-600">{t('landing.heroTitle2')}</span></h2>
+          <p className="mt-4 text-gray-600">{t('landing.heroSubtitle')}</p>
           <div className="mt-8 grid grid-cols-2 gap-3">
             {[['XOF','FCFA'],['XAF','FCFA'],['NGN','₦'],['KES','KSh'],['GHS','₵'],['ZAR','R']].map(([c,s]) => (
               <div key={c} className="card p-3 text-center"><p className="text-xs text-gray-500">{c}</p><p className="font-bold text-gray-900">{s}</p></div>
