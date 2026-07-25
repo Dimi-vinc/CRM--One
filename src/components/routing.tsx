@@ -12,7 +12,7 @@ function isAuthorizedSuperAdmin(role: Role | undefined, email: string | undefine
 
 // Redirect to /login if no session. Optionally restrict to roles.
 export function RequireAuth({ children, roles, requireTenant = true }: { children: ReactNode; roles?: Role[]; requireTenant?: boolean }) {
-  const { loading, session, profile } = useAuth();
+  const { loading, session, profile, mfaRequired } = useAuth();
   const { t } = useLanguage();
   const loc = useLocation();
 
@@ -20,6 +20,12 @@ export function RequireAuth({ children, roles, requireTenant = true }: { childre
     return <div className="flex h-screen items-center justify-center"><div className="animate-pulse text-gray-400">{t('common.loading')}</div></div>;
   }
   if (!session) return <Navigate to="/login" state={{ from: loc.pathname }} replace />;
+
+  // Step-up authentication: block access to anything until the AAL2 (2FA) challenge is completed
+  if (mfaRequired && loc.pathname !== '/mfa-challenge') {
+    return <Navigate to="/mfa-challenge" state={{ from: loc.pathname }} replace />;
+  }
+
   if (!profile) return <div className="flex h-screen items-center justify-center text-gray-400">{t('common.profileLoading')}</div>;
 
   // Super admin email whitelist enforcement: if role is super_admin but email not whitelisted, downgrade
@@ -41,15 +47,26 @@ export function RequireAuth({ children, roles, requireTenant = true }: { childre
   return <>{children}</>;
 }
 
-// If already signed in, send to dashboard/admin/super-admin
+// If already signed in, send to dashboard/admin/super-admin (or the pending MFA challenge)
 export function PublicOnly({ children }: { children: ReactNode }) {
-  const { loading, session, profile } = useAuth();
+  const { loading, session, profile, mfaRequired } = useAuth();
   const { t } = useLanguage();
   if (loading) return <div className="flex h-screen items-center justify-center text-gray-400">{t('common.loading')}</div>;
+  if (session && mfaRequired) return <Navigate to="/mfa-challenge" replace />;
   if (session && profile) {
     const canAccessSuperAdmin = isAuthorizedSuperAdmin(profile.role, profile.email);
     const target = canAccessSuperAdmin ? '/super-admin' : profile.tenant_id ? '/dashboard' : '/onboarding';
     return <Navigate to={target} replace />;
   }
+  return <>{children}</>;
+}
+
+// Guards the /mfa-challenge route itself: requires a session, and only makes sense while a step-up is pending
+export function RequireMfaPending({ children }: { children: ReactNode }) {
+  const { loading, session, mfaRequired } = useAuth();
+  const { t } = useLanguage();
+  if (loading) return <div className="flex h-screen items-center justify-center text-gray-400">{t('common.loading')}</div>;
+  if (!session) return <Navigate to="/login" replace />;
+  if (!mfaRequired) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }
