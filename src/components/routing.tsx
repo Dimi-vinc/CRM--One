@@ -3,16 +3,28 @@ import { type ReactNode } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { SUPER_ADMIN_EMAILS } from '../lib/constants';
-import type { Role } from '../lib/types';
+import type { Role, Tenant } from '../lib/types';
 
 // Check if a user is an authorized super admin (role + email whitelist)
 function isAuthorizedSuperAdmin(role: Role | undefined, email: string | undefined): boolean {
   return role === 'super_admin' && SUPER_ADMIN_EMAILS.includes((email || '').toLowerCase());
 }
 
+// A tenant is locked out (must pay to continue) once its trial has ended and it has no active
+// paid subscription. Super admins never hit this (checked separately by callers).
+function isPaymentRequired(tenant: Tenant | null): boolean {
+  if (!tenant) return false;
+  if (tenant.status === 'active') return false;
+  if (!tenant.trial_ends_at) return false;
+  return new Date(tenant.trial_ends_at).getTime() < Date.now();
+}
+
+// Routes still reachable while payment is required, so the tenant can actually pay / manage their account.
+const PAYWALL_ALLOWED_PATHS = new Set(['/billing', '/security']);
+
 // Redirect to /login if no session. Optionally restrict to roles.
 export function RequireAuth({ children, roles, requireTenant = true }: { children: ReactNode; roles?: Role[]; requireTenant?: boolean }) {
-  const { loading, session, profile, mfaRequired } = useAuth();
+  const { loading, session, profile, tenant, mfaRequired } = useAuth();
   const { t } = useLanguage();
   const loc = useLocation();
 
@@ -42,6 +54,12 @@ export function RequireAuth({ children, roles, requireTenant = true }: { childre
   // super_admin may bypass tenant requirement
   if (requireTenant && !canAccessSuperAdmin && !profile.tenant_id) {
     return <Navigate to="/onboarding" replace />;
+  }
+
+  // Paywall: trial ended + no active subscription = locked out except for /billing (and /security,
+  // so 2FA/password management stay reachable). Super admins are never locked out.
+  if (!canAccessSuperAdmin && isPaymentRequired(tenant) && !PAYWALL_ALLOWED_PATHS.has(loc.pathname)) {
+    return <Navigate to="/billing" replace />;
   }
 
   return <>{children}</>;

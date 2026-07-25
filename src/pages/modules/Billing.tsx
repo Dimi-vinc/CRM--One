@@ -10,7 +10,7 @@ import type { Subscription } from '../../lib/types';
 
 export function Billing() {
   const { tenant, profile } = useAuth();
-  const [, setSub] = useState<Subscription | null>(null);
+  const [sub, setSub] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -26,6 +26,7 @@ export function Billing() {
 
   const trialLeft = tenant?.trial_ends_at ? daysUntil(tenant.trial_ends_at) : null;
   const currentPlan = PLAN_BY_ID[tenant?.plan_id || 'starter'];
+  const paymentRequired = tenant?.status !== 'active' && trialLeft !== null && trialLeft < 0;
 
   const checkout = async (planId: 'starter' | 'pro' | 'premium' | 'entreprise') => {
     if (!tenant || !profile) return;
@@ -82,6 +83,21 @@ export function Billing() {
 
       {note && <div className="mb-4 flex items-start gap-2 rounded-lg bg-mint-50 p-3 text-sm text-mint-800"><Check size={16} className="mt-0.5" />{note}</div>}
       {error && <div className="mb-4 flex items-start gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700"><AlertCircle size={16} className="mt-0.5" />{error}</div>}
+      {paymentRequired && (
+        <div className="mb-4 flex items-start gap-2 rounded-lg bg-red-50 p-4 text-sm text-red-800">
+          <AlertCircle size={18} className="mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="font-semibold">Votre essai gratuit est terminé.</p>
+            <p className="mt-0.5">L'accès aux autres modules est suspendu jusqu'à la souscription d'un plan. Choisissez un forfait ci-dessous pour réactiver votre compte immédiatement.</p>
+          </div>
+        </div>
+      )}
+      {sub && sub.status && sub.status !== 'active' && !paymentRequired && (
+        <div className="mb-4 flex items-start gap-2 rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
+          <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
+          <span>Statut de votre abonnement : <b>{sub.status}</b>.</span>
+        </div>
+      )}
 
       {/* Current plan card */}
       <Card edge="orange" className="mb-6 p-6">
