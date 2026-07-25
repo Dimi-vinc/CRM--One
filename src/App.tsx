@@ -1,6 +1,6 @@
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import { RequireAuth, PublicOnly } from './components/routing';
+import { RequireAuth, PublicOnly, RequireMfaPending } from './components/routing';
 import { CookieBanner } from './components/CookieBanner';
 import { AppShell } from './components/AppShell';
 import { SuperAdminShell } from './components/SuperAdminShell';
@@ -8,6 +8,7 @@ import { SuperAdminShell } from './components/SuperAdminShell';
 import { Landing } from './pages/Landing';
 import { Pricing } from './pages/Pricing';
 import { Login } from './pages/Login';
+import { MfaChallenge } from './pages/MfaChallenge';
 import { Signup } from './pages/Signup';
 import { Onboarding } from './pages/Onboarding';
 
@@ -55,6 +56,7 @@ export default function App() {
           <Route path="/about" element={<LegalPage type="about" />} />
           <Route path="/contact" element={<LegalPage type="contact" />} />
           <Route path="/login" element={<PublicOnly><Login /></PublicOnly>} />
+          <Route path="/mfa-challenge" element={<RequireMfaPending><MfaChallenge /></RequireMfaPending>} />
           <Route path="/signup" element={<PublicOnly><Signup /></PublicOnly>} />
           <Route path="/onboarding" element={<RequireAuth requireTenant={false}><Onboarding /></RequireAuth>} />
 
