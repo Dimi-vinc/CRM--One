@@ -22,7 +22,7 @@ export function Button({ variant = 'primary', size = 'md', className, children, 
 }
 
 // ---- Card ----
-export function Card({ className, children, edge }: { className?: string; children: ReactNode; edge?: ColorKey }) {
+export function Card({ className, children, edge }: { className?: string; children?: ReactNode; edge?: ColorKey }) {
   return (
     <div className={classNames('card', edge && 'card-edge', edge && COLOR_RAMPS[edge].border, className)}>
       {children}

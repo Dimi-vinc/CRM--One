@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Download, FileBarChart, Filter } from 'lucide-react';
+import { Download, Filter } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { PageHeader, Card, Button, Select, Badge } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
-import { formatMoney, formatDate, downloadCsv, COLOR_RAMPS } from '../../lib/utils';
-import { COUNTRIES, COUNTRY_BY_CODE } from '../../lib/constants';
+import { formatMoney, formatDate, downloadCsv } from '../../lib/utils';
+import { COUNTRIES } from '../../lib/constants';
 import type { Deal } from '../../lib/types';
 
 export function Reports() {

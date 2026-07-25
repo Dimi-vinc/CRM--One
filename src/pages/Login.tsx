@@ -3,16 +3,18 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, AlertCircle } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { LanguageSelector } from '../components/LanguageSelector';
-import { Button, Input } from '../components/ui';
+import { Button } from '../components/ui';
 import { supabase } from '../lib/supabase';
 import { PLATFORM_NAME } from '../lib/constants';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 
 export function Login() {
   const { t } = useLanguage();
+  const { refresh } = useAuth();
   const nav = useNavigate();
   const loc = useLocation();
-  const from = (loc.state as any)?.from || '/dashboard';
+  const from = (loc.state as { from?: string } | null)?.from || '/dashboard';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,9 +24,11 @@ export function Login() {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
-    if (error) { setError(error.message); return; }
+    if (signInErr) { setError(signInErr.message); return; }
+    // RequireAuth / PublicOnly will redirect to /mfa-challenge automatically if 2FA is enabled on this account
+    await refresh();
     nav(from, { replace: true });
   };
 

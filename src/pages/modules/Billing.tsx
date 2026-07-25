@@ -1,17 +1,16 @@
 import { useEffect, useState } from 'react';
 import { CreditCard, Check, AlertCircle, Loader2, Crown } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { PageHeader, Card, Button, Badge, Skeleton } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
 import { PLANS, PLAN_BY_ID, formatMoney } from '../../lib/constants';
-import { daysUntil, formatDate, convertToUsd } from '../../lib/utils';
+import { daysUntil, formatDate } from '../../lib/utils';
 import { startCheckout, getPaymentProvider } from '../../lib/payments';
 import type { Subscription } from '../../lib/types';
 
 export function Billing() {
   const { tenant, profile } = useAuth();
-  const [sub, setSub] = useState<Subscription | null>(null);
+  const [, setSub] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);

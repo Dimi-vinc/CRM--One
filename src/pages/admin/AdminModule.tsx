@@ -3,8 +3,8 @@ import { UsersRound, Plus, Trash2, Mail, Shield, Edit2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { PageHeader, Card, Button, Modal, Input, Select, Badge, Avatar, EmptyState } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
-import { MODULES, type ModuleKey } from '../../lib/constants';
-import { formatDate, classNames } from '../../lib/utils';
+import { type ModuleKey } from '../../lib/constants';
+import { formatDate } from '../../lib/utils';
 import type { Profile, CustomRole, TenantInvitation } from '../../lib/types';
 
 const PERMISSIONS = ['view', 'create', 'edit', 'delete'] as const;
@@ -13,7 +13,7 @@ type Perm = typeof PERMISSIONS[number];
 const PERMISSIONABLE_MODULES: ModuleKey[] = ['dashboard','pipeline','contacts','companies','activities','tasks','calendar','forecast','reports','documents','automations','billing'];
 
 export function AdminModule() {
-  const { tenant, profile } = useAuth();
+  const { tenant } = useAuth();
   const [tab, setTab] = useState<'team' | 'roles' | 'invitations'>('team');
   const [members, setMembers] = useState<Profile[]>([]);
   const [roles, setRoles] = useState<CustomRole[]>([]);

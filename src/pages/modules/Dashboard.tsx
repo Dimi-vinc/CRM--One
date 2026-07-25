@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { TrendingUp, Users, Building2, Trophy, Target, Clock, ArrowRight } from 'lucide-react';
+import { TrendingUp, Users, Trophy, Target, Clock, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { PageHeader, Card, Button, Badge, Skeleton } from '../../components/ui';

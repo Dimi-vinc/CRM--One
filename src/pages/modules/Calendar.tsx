@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { PageHeader, Card, Button, Badge } from '../../components/ui';
+import { PageHeader, Card, Button } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
 import { formatMoney } from '../../lib/utils';
 import type { Deal, Activity, Task } from '../../lib/types';

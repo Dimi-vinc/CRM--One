@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { TrendingUp, Target, Trophy } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { PageHeader, Card, Button, Skeleton } from '../../components/ui';
+import { PageHeader, Card, Skeleton } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
 import { formatMoney, COLOR_RAMPS } from '../../lib/utils';
 import { DEAL_STAGES } from '../../lib/constants';

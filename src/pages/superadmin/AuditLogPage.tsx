@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Shield, Search } from 'lucide-react';
-import { PageHeader, Card, Badge, Select } from '../../components/ui';
+import { PageHeader, Card, Select } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
 import { formatDateTime } from '../../lib/utils';
 import type { AuditLog } from '../../lib/types';

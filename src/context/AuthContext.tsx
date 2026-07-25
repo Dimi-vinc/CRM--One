@@ -10,6 +10,7 @@ interface AuthState {
   user: User | null;
   profile: Profile | null;
   tenant: Tenant | null;
+  mfaRequired: boolean;
   refresh: () => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -20,6 +21,7 @@ const AuthContext = createContext<AuthState>({
   user: null,
   profile: null,
   tenant: null,
+  mfaRequired: false,
   refresh: async () => {},
   signOut: async () => {},
 });
@@ -29,8 +31,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [tenant, setTenant] = useState<Tenant | null>(null);
+  const [mfaRequired, setMfaRequired] = useState(false);
   const profileRef = useRef<Profile | null>(null);
   useEffect(() => { profileRef.current = profile; }, [profile]);
+
+  const checkMfa = async () => {
+    const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    setMfaRequired(!!data && data.nextLevel === 'aal2' && data.nextLevel !== data.currentLevel);
+  };
 
   const loadProfile = async (uid: string) => {
     const { data, error } = await supabase
@@ -67,6 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data } = await supabase.auth.getSession();
     setSession(data.session);
     if (data.session?.user) await loadProfile(data.session.user.id);
+    await checkMfa();
     setLoading(false);
   };
 
@@ -82,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           await loadProfile(data.session.user.id);
         }
       }
+      await checkMfa();
       setLoading(false);
     })();
 
@@ -90,6 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(sess);
         if (sess?.user) await loadProfile(sess.user.id);
         else { setProfile(null); setTenant(null); }
+        await checkMfa();
         setLoading(false);
       })();
     });
@@ -102,11 +113,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null);
     setProfile(null);
     setTenant(null);
+    setMfaRequired(false);
   };
 
   const value = useMemo<AuthState>(() => ({
-    loading, session, user: session?.user ?? null, profile, tenant, refresh, signOut,
-  }), [loading, session, profile, tenant, refresh, signOut]);
+    loading, session, user: session?.user ?? null, profile, tenant, mfaRequired, refresh, signOut,
+  }), [loading, session, profile, tenant, mfaRequired, refresh, signOut]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

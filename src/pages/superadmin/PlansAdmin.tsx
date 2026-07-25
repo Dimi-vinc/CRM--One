@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Edit2, Plus, Power } from 'lucide-react';
-import { PageHeader, Card, Button, Badge, Modal, Input, Textarea } from '../../components/ui';
+import { Edit2, Power } from 'lucide-react';
+import { PageHeader, Card, Button, Badge, Modal, Input } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
-import { PLANS, formatMoney } from '../../lib/constants';
+import { formatMoney } from '../../lib/constants';
 import type { Plan } from '../../lib/types';
 
 export function PlansAdmin() {

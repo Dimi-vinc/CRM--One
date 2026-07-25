@@ -1,29 +1,33 @@
 import { useEffect, useState } from 'react';
-import { Plus, Zap, Trash2, Power, Pencil } from 'lucide-react';
+import { Plus, Zap, Trash2, Power, Pencil, ScrollText, CheckCircle2, XCircle, MinusCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { PageHeader, Card, Button, Modal, Input, Select, Badge, EmptyState } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
-import type { Automation } from '../../lib/types';
+import { timeAgo } from '../../lib/utils';
+import type { Automation, AutomationRun } from '../../lib/types';
 
+// Only triggers/actions that are actually wired to a real DB trigger + edge function execution
+// (see supabase/migrations/*_automations_engine.sql and supabase/functions/automations-*).
+// Nothing here is decorative: every option a user can pick actually does something.
 const TRIGGERS = [
   { value: 'deal_created', fr: 'Deal créé', en: 'Deal created' },
   { value: 'deal_won', fr: 'Deal gagné', en: 'Deal won' },
   { value: 'contact_added', fr: 'Contact ajouté', en: 'Contact added' },
   { value: 'task_overdue', fr: 'Tâche en retard', en: 'Task overdue' },
   { value: 'activity_done', fr: 'Activité terminée', en: 'Activity completed' },
-  { value: 'invoice_paid', fr: 'Facture payée', en: 'Invoice paid' },
-  { value: 'ticket_opened', fr: 'Ticket ouvert', en: 'Ticket opened' },
 ];
 
 const ACTIONS = [
-  { value: 'send_email', fr: 'Envoyer email', en: 'Send email' },
-  { value: 'create_task', fr: 'Créer tâche', en: 'Create task' },
-  { value: 'notify_team', fr: 'Notifier l\'équipe', en: 'Notify team' },
-  { value: 'update_deal', fr: 'Mettre à jour le deal', en: 'Update deal' },
-  { value: 'create_activity', fr: 'Créer activité', en: 'Create activity' },
-  { value: 'send_whatsapp', fr: 'Envoyer WhatsApp', en: 'Send WhatsApp' },
+  { value: 'send_email', fr: 'Envoyer un email', en: 'Send email' },
+  { value: 'create_task', fr: 'Créer une tâche', en: 'Create task' },
+  { value: 'notify_team', fr: "Notifier l'équipe", en: 'Notify team' },
+  { value: 'create_activity', fr: 'Créer une activité', en: 'Create activity' },
 ];
+
+const STATUS_ICON = { success: CheckCircle2, error: XCircle, skipped: MinusCircle };
+const STATUS_COLOR = { success: 'green', error: 'red', skipped: 'gray' } as const;
+const STATUS_TEXT_CLASS = { success: 'text-green-500', error: 'text-red-500', skipped: 'text-gray-400' } as const;
 
 export function Automations() {
   const { tenant } = useAuth();
@@ -34,6 +38,8 @@ export function Automations() {
   const [editing, setEditing] = useState<Automation | null>(null);
   const [form, setForm] = useState({ name: '', trigger: TRIGGERS[0].value, action: ACTIONS[0].value, description: '' });
   const [saving, setSaving] = useState(false);
+  const [runs, setRuns] = useState<AutomationRun[]>([]);
+  const [logOpen, setLogOpen] = useState(false);
 
   const load = async () => {
     if (!tenant) return;
@@ -43,7 +49,12 @@ export function Automations() {
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, [tenant]);
+  const loadRuns = async () => {
+    const { data } = await supabase.from('automation_runs').select('*').order('created_at', { ascending: false }).limit(50);
+    setRuns(data || []);
+  };
+
+  useEffect(() => { load(); loadRuns(); }, [tenant]);
 
   const openCreate = () => {
     setEditing(null);
@@ -87,13 +98,19 @@ export function Automations() {
   };
 
   const tr = (arr: typeof TRIGGERS, v: string) => arr.find(x => x.value === v)?.[lang] || v;
+  const automationName = (id: string | null) => items.find(a => a.id === id)?.name || (lang === 'fr' ? 'Automatisation supprimée' : 'Deleted automation');
 
   return (
     <div>
       <PageHeader
         title={t('mod.automations')}
-        subtitle={lang === 'fr' ? 'Déclencheurs et actions sans code' : 'No-code triggers and actions'}
-        actions={<Button onClick={openCreate}><Plus size={16} /> {lang === 'fr' ? 'Nouvelle automatisation' : 'New automation'}</Button>}
+        subtitle={lang === 'fr' ? 'Déclencheurs et actions sans code — réellement exécutés en arrière-plan' : 'No-code triggers and actions — actually executed in the background'}
+        actions={(
+          <>
+            <Button variant="secondary" onClick={() => setLogOpen(true)}><ScrollText size={16} /> {lang === 'fr' ? "Journal d'exécution" : 'Execution log'}</Button>
+            <Button onClick={openCreate}><Plus size={16} /> {lang === 'fr' ? 'Nouvelle automatisation' : 'New automation'}</Button>
+          </>
+        )}
       />
 
       {loading ? (
@@ -136,7 +153,7 @@ export function Automations() {
         </div>
       )}
 
-      <Modal open={modal} onClose={() => setModal(false)} title={editing ? (lang === 'fr' ? 'Modifier l\'automatisation' : 'Edit automation') : (lang === 'fr' ? 'Nouvelle automatisation' : 'New automation')}>
+      <Modal open={modal} onClose={() => setModal(false)} title={editing ? (lang === 'fr' ? "Modifier l'automatisation" : 'Edit automation') : (lang === 'fr' ? 'Nouvelle automatisation' : 'New automation')}>
         <div className="space-y-3">
           <Input
             label={lang === 'fr' ? 'Nom' : 'Name'}
@@ -169,6 +186,36 @@ export function Automations() {
             <Button onClick={save} disabled={saving || !form.name.trim()}>{saving ? t('common.loading') : editing ? t('common.save') : t('common.create')}</Button>
           </div>
         </div>
+      </Modal>
+
+      <Modal open={logOpen} onClose={() => setLogOpen(false)} title={lang === 'fr' ? "Journal d'exécution" : 'Execution log'} size="lg">
+        {runs.length === 0 ? (
+          <p className="py-6 text-center text-sm text-gray-500">
+            {lang === 'fr'
+              ? "Aucune exécution pour l'instant. Ce journal se remplit dès qu'un déclencheur se produit (deal créé, contact ajouté…)."
+              : 'No executions yet. This log fills up as soon as a trigger occurs.'}
+          </p>
+        ) : (
+          <div className="max-h-[60vh] space-y-2 overflow-y-auto">
+            {runs.map(r => {
+              const Icon = STATUS_ICON[r.status];
+              return (
+                <div key={r.id} className="flex items-start gap-3 rounded-lg border border-gray-100 p-3">
+                  <Icon size={16} className={`mt-0.5 flex-shrink-0 ${STATUS_TEXT_CLASS[r.status]}`} />
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-medium text-gray-900">{automationName(r.automation_id)}</p>
+                      <span className="text-xs text-gray-400">{timeAgo(r.created_at)}</span>
+                    </div>
+                    <p className="text-xs text-gray-500">{tr(TRIGGERS, r.trigger)} → {r.action ? tr(ACTIONS, r.action) : '—'}</p>
+                    {r.detail && <p className="mt-1 text-xs text-gray-600">{r.detail}</p>}
+                  </div>
+                  <Badge color={STATUS_COLOR[r.status]}>{r.status}</Badge>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </Modal>
     </div>
   );

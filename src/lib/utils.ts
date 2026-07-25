@@ -68,7 +68,8 @@ export function downloadCsv(filename: string, rows: (string | number)[][]): void
     return s;
   };
   const csv = rows.map(r => r.map(escape).join(',')).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  // Prepend UTF-8 BOM so Excel correctly detects encoding and displays accented characters
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;

@@ -196,7 +196,19 @@ export interface Automation {
   name: string;
   trigger: string;
   action: string;
+  description?: string;
   is_active: boolean;
+  created_at: string;
+}
+
+export interface AutomationRun {
+  id: string;
+  tenant_id: string;
+  automation_id: string | null;
+  trigger: string;
+  action: string | null;
+  status: 'success' | 'error' | 'skipped';
+  detail: string | null;
   created_at: string;
 }
 

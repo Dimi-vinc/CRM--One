@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Plus, GripVertical, Trash2, Search } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { PageHeader, Card, Button, Modal, Input, Select, Badge, EmptyState } from '../../components/ui';
+import { PageHeader, Card, Button, Modal, Input, Select } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
 import { DEAL_STAGES, CURRENCIES, formatMoney, COLOR_RAMPS, type ColorKey } from '../../lib/constants';
 import type { Deal, Contact, Company } from '../../lib/types';
@@ -77,6 +77,11 @@ export function Pipeline() {
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher un deal…" className="input pl-9" />
       </div>
 
+      {loading ? (
+        <div className="grid gap-3 lg:grid-cols-6">
+          {DEAL_STAGES.map(stage => <Card key={stage.id} className="h-40 animate-pulse bg-gray-50" />)}
+        </div>
+      ) : (
       <div className="grid gap-3 overflow-x-auto pb-4 lg:grid-cols-6">
         {DEAL_STAGES.map(stage => {
           const r = COLOR_RAMPS[(stage.color as ColorKey)] || COLOR_RAMPS.gray;
@@ -117,6 +122,7 @@ export function Pipeline() {
           );
         })}
       </div>
+      )}
 
       <Modal open={modal} onClose={() => setModal(false)} title="Nouveau deal">
         <div className="space-y-3">

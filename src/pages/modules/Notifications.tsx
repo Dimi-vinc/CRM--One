@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Bell, Check, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { PageHeader, Card, Button, EmptyState, Badge } from '../../components/ui';
+import { PageHeader, Card, Button, EmptyState } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
 import { timeAgo } from '../../lib/utils';
 import type { NotificationRow } from '../../lib/types';
