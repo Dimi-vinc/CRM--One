@@ -15,7 +15,7 @@ export type ModuleKey =
   | 'dashboard' | 'pipeline' | 'contacts' | 'companies' | 'activities'
   | 'tasks' | 'calendar' | 'forecast' | 'reports' | 'import_export'
   | 'billing' | 'notifications' | 'security' | 'documents' | 'automations'
-  | 'team' | 'super_admin' | 'admin';
+  | 'super_admin' | 'admin';
 
 export interface ModuleDef {
   key: ModuleKey;
@@ -41,7 +41,6 @@ export const MODULES: ModuleDef[] = [
   { key: 'notifications', label: 'Notifications', icon: 'Bell', group: 'system' },
   { key: 'security', label: 'Sécurité', icon: 'ShieldCheck', group: 'system' },
   { key: 'billing', label: 'Facturation', icon: 'CreditCard', minPlan: 'premium', group: 'system' },
-  { key: 'team', label: 'Équipe & Rôles', icon: 'UsersRound', minPlan: 'pro', group: 'admin' },
   { key: 'admin', label: 'Espace Admin', icon: 'Settings', group: 'admin' },
   { key: 'super_admin', label: 'Super Admin', icon: 'Crown', group: 'admin' },
 ];
@@ -73,26 +72,26 @@ export const PLANS: PlanDef[] = [
     id: 'starter', name: 'Starter', price: 9, priceAnnual: 7, currency: 'USD',
     maxUsers: 2, maxDeals: 100, trialDays: 7,
     features: ['Pipeline', 'Contacts', 'Companies', 'Tâches', 'Calendrier', 'Notifications', 'Sécurité'],
-    modules: ['dashboard','pipeline','contacts','companies','tasks','calendar','notifications','security'],
+    modules: ['dashboard','pipeline','contacts','companies','tasks','calendar','notifications','security','admin'],
   },
   {
     id: 'pro', name: 'Pro', price: 29, priceAnnual: 24, currency: 'USD',
     maxUsers: 5, maxDeals: 0, trialDays: 7, customRoles: true,
     features: ['Tout Starter +', 'Forecast', 'Rapports avancés', 'Automatisations de base', 'Rôles personnalisés', 'Activités'],
-    modules: ['dashboard','pipeline','contacts','companies','activities','tasks','calendar','forecast','reports','automations','notifications','security','team'],
+    modules: ['dashboard','pipeline','contacts','companies','activities','tasks','calendar','forecast','reports','automations','notifications','security','admin'],
   },
   {
     id: 'premium', name: 'Premium', price: 69, priceAnnual: 57, currency: 'USD',
     maxUsers: 15, maxDeals: 0, trialDays: 7, customRoles: true, multiCurrency: true, mobileMoney: true, api: true,
     features: ['Tout Pro +', 'Automatisations avancées', 'Documents', 'Multi-devise & Mobile Money', 'API', 'Import/Export', 'Facturation'],
-    modules: ['dashboard','pipeline','contacts','companies','activities','tasks','calendar','forecast','reports','import_export','automations','documents','notifications','security','team','billing'],
+    modules: ['dashboard','pipeline','contacts','companies','activities','tasks','calendar','forecast','reports','import_export','automations','documents','notifications','security','admin','billing'],
     highlight: true,
   },
   {
     id: 'entreprise', name: 'Entreprise', price: 159, priceAnnual: 132, currency: 'USD',
     maxUsers: 0, maxDeals: 0, trialDays: 7, customRoles: true, multiCurrency: true, mobileMoney: true, api: true, whiteLabel: true, webhooks: true, prioritySupport: true, sla: true,
     features: ['Tout Premium +', 'Support prioritaire', 'Marque blanche partielle', 'Webhooks/API complète', 'SLA', 'Utilisateurs illimités'],
-    modules: ['dashboard','pipeline','contacts','companies','activities','tasks','calendar','forecast','reports','import_export','automations','documents','notifications','security','team','billing'],
+    modules: ['dashboard','pipeline','contacts','companies','activities','tasks','calendar','forecast','reports','import_export','automations','documents','notifications','security','admin','billing'],
   },
 ];
 

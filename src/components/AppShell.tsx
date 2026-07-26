@@ -41,8 +41,12 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const visibleModules: ModuleDef[] = useMemo(() => {
     if (isSuperAdmin) return MODULES.filter(m => m.key === 'super_admin' || m.key === 'dashboard');
-    return MODULES.filter(m => m.key !== 'super_admin' && m.key !== 'admin');
-  }, [isSuperAdmin]);
+    return MODULES.filter(m => {
+      if (m.key === 'super_admin') return false;
+      if (m.key === 'admin') return profile?.role === 'admin'; // Espace Admin: tenant admins only
+      return true;
+    });
+  }, [isSuperAdmin, profile?.role]);
 
   // Super Admin entry: visible in sidebar only for super_admin role
   const showSuperAdmin = isSuperAdmin;
