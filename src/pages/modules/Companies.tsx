@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
-import { Plus, Search, Trash2, Edit2, Building2 } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Plus, Search, Trash2, Edit2, Building2, Copy } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { PageHeader, Card, Button, Modal, Input, Select, Badge, EmptyState } from '../../components/ui';
+import { DuplicatesModal } from '../../components/DuplicatesModal';
 import { supabase } from '../../lib/supabase';
 import { COUNTRIES } from '../../lib/constants';
+import { findCompanyDuplicates } from '../../lib/dedup';
 import type { Company } from '../../lib/types';
 
 const INDUSTRIES = ['Technologie','Finance','Retail',' Santé','Éducation','Logistique','Énergie','Agriculture','Télécom','Autre'];
@@ -13,6 +15,7 @@ export function Companies() {
   const [items, setItems] = useState<Company[]>([]);
   const [search, setSearch] = useState('');
   const [modal, setModal] = useState(false);
+  const [dupModal, setDupModal] = useState(false);
   const [editing, setEditing] = useState<Company | null>(null);
   const [form, setForm] = useState({ name: '', industry: '', website: '', email: '', phone: '', country_code: tenant?.country_code || 'CM', city: '' });
 
@@ -23,7 +26,31 @@ export function Companies() {
   };
   useEffect(() => { load(); }, [tenant]);
 
+  const duplicateGroups = useMemo(() => findCompanyDuplicates(items), [items]);
   const filtered = items.filter(c => `${c.name} ${c.industry || ''} ${c.city || ''}`.toLowerCase().includes(search.toLowerCase()));
+
+  const mergeCompanies = async (primaryId: string, duplicateIds: string[]) => {
+    const primary = items.find(c => c.id === primaryId);
+    const dups = items.filter(c => duplicateIds.includes(c.id));
+    if (!primary) return;
+
+    const merged: Partial<Company> = {};
+    (['industry', 'website', 'email', 'phone', 'city', 'country_code'] as const).forEach(field => {
+      if (!primary[field]) {
+        const donor = dups.find(d => d[field]);
+        if (donor) merged[field] = donor[field] as never;
+      }
+    });
+    if (Object.keys(merged).length > 0) {
+      await supabase.from('companies').update(merged).eq('id', primaryId);
+    }
+    await Promise.all([
+      supabase.from('contacts').update({ company_id: primaryId }).in('company_id', duplicateIds),
+      supabase.from('deals').update({ company_id: primaryId }).in('company_id', duplicateIds),
+    ]);
+    await supabase.from('companies').delete().in('id', duplicateIds);
+    await load();
+  };
 
   const save = async () => {
     if (!tenant || !form.name.trim()) return;
@@ -52,7 +79,16 @@ export function Companies() {
   return (
     <div>
       <PageHeader title="Entreprises" subtitle={`${items.length} entreprise${items.length > 1 ? 's' : ''}`}
-        actions={<Button onClick={() => { setEditing(null); setForm({ name: '', industry: '', website: '', email: '', phone: '', country_code: tenant?.country_code || 'CM', city: '' }); setModal(true); }}><Plus size={16} /> Nouvelle entreprise</Button>} />
+        actions={(
+          <>
+            {duplicateGroups.length > 0 && (
+              <Button variant="secondary" onClick={() => setDupModal(true)}>
+                <Copy size={16} /> {duplicateGroups.length} doublon{duplicateGroups.length > 1 ? 's' : ''}
+              </Button>
+            )}
+            <Button onClick={() => { setEditing(null); setForm({ name: '', industry: '', website: '', email: '', phone: '', country_code: tenant?.country_code || 'CM', city: '' }); setModal(true); }}><Plus size={16} /> Nouvelle entreprise</Button>
+          </>
+        )} />
 
       <div className="mb-4 relative max-w-md">
         <Search size={16} className="absolute left-3 top-3 text-gray-400" />
@@ -116,6 +152,15 @@ export function Companies() {
           </div>
         </div>
       </Modal>
+
+      <DuplicatesModal
+        open={dupModal}
+        onClose={() => setDupModal(false)}
+        groups={duplicateGroups}
+        renderLabel={c => c.name}
+        renderDetail={c => c.website || c.email || '—'}
+        onMerge={mergeCompanies}
+      />
     </div>
   );
 }

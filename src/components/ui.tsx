@@ -65,9 +65,9 @@ export function Textarea({ label, className, id, ...rest }: TextareaProps) {
 }
 
 // ---- Badge ----
-export function Badge({ children, color = 'gray', className }: { children: ReactNode; color?: ColorKey; className?: string }) {
+export function Badge({ children, color = 'gray', className, title }: { children: ReactNode; color?: ColorKey; className?: string; title?: string }) {
   const c = COLOR_RAMPS[color];
-  return <span className={classNames('badge', c.bg, c.text, className)}>{children}</span>;
+  return <span title={title} className={classNames('badge', c.bg, c.text, className)}>{children}</span>;
 }
 
 // ---- Avatar ----

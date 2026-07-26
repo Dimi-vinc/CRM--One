@@ -1,33 +1,76 @@
-import { useEffect, useState } from 'react';
-import { Plus, Search, Trash2, Edit2, Building2 } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Plus, Search, Trash2, Edit2, Building2, ArrowUpDown, Copy } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { PageHeader, Card, Button, Modal, Input, Select, Avatar, EmptyState } from '../../components/ui';
+import { PageHeader, Card, Button, Modal, Input, Select, Avatar, Badge, EmptyState } from '../../components/ui';
+import { DuplicatesModal } from '../../components/DuplicatesModal';
 import { supabase } from '../../lib/supabase';
 import { COUNTRIES } from '../../lib/constants';
+import { computeLeadScore, BAND_LABEL, BAND_COLOR } from '../../lib/leadScoring';
+import { findContactDuplicates } from '../../lib/dedup';
 import type { Contact, Company } from '../../lib/types';
 
 export function Contacts() {
   const { tenant } = useAuth();
   const [items, setItems] = useState<Contact[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [contactsWithActivity, setContactsWithActivity] = useState<Set<string>>(new Set());
+  const [contactsWithDeal, setContactsWithDeal] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState('');
+  const [sortByScore, setSortByScore] = useState(false);
   const [modal, setModal] = useState(false);
+  const [dupModal, setDupModal] = useState(false);
   const [editing, setEditing] = useState<Contact | null>(null);
   const [form, setForm] = useState({ first_name: '', last_name: '', email: '', phone: '', company_id: '', country_code: tenant?.country_code || 'CM', city: '' });
 
   const load = async () => {
     if (!tenant) return;
-    const [c, co] = await Promise.all([
+    const [c, co, act, deals] = await Promise.all([
       supabase.from('contacts').select('*').order('created_at', { ascending: false }),
       supabase.from('companies').select('*'),
+      supabase.from('activities').select('contact_id').not('contact_id', 'is', null),
+      supabase.from('deals').select('contact_id').not('contact_id', 'is', null),
     ]);
     setItems(c.data || []);
     setCompanies(co.data || []);
+    setContactsWithActivity(new Set((act.data || []).map((a: { contact_id: string }) => a.contact_id)));
+    setContactsWithDeal(new Set((deals.data || []).map((d: { contact_id: string }) => d.contact_id)));
   };
   useEffect(() => { load(); }, [tenant]);
 
-  const filtered = items.filter(c => `${c.first_name} ${c.last_name || ''} ${c.email || ''}`.toLowerCase().includes(search.toLowerCase()));
+  const scored = useMemo(
+    () => items.map(c => ({ contact: c, score: computeLeadScore(c, contactsWithActivity.has(c.id), contactsWithDeal.has(c.id)) })),
+    [items, contactsWithActivity, contactsWithDeal]
+  );
+  const duplicateGroups = useMemo(() => findContactDuplicates(items), [items]);
+
+  const filtered = scored
+    .filter(({ contact: c }) => `${c.first_name} ${c.last_name || ''} ${c.email || ''}`.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => sortByScore ? b.score.score - a.score.score : 0);
   const companyName = (id?: string | null) => companies.find(c => c.id === id)?.name;
+
+  const mergeContacts = async (primaryId: string, duplicateIds: string[]) => {
+    const primary = items.find(c => c.id === primaryId);
+    const dups = items.filter(c => duplicateIds.includes(c.id));
+    if (!primary) return;
+
+    // Fill any blank fields on the primary from the duplicates before discarding them
+    const merged: Partial<Contact> = {};
+    (['email', 'phone', 'company_id', 'city', 'country_code'] as const).forEach(field => {
+      if (!primary[field]) {
+        const donor = dups.find(d => d[field]);
+        if (donor) merged[field] = donor[field] as never;
+      }
+    });
+    if (Object.keys(merged).length > 0) {
+      await supabase.from('contacts').update(merged).eq('id', primaryId);
+    }
+    await Promise.all([
+      supabase.from('deals').update({ contact_id: primaryId }).in('contact_id', duplicateIds),
+      supabase.from('activities').update({ contact_id: primaryId }).in('contact_id', duplicateIds),
+    ]);
+    await supabase.from('contacts').delete().in('id', duplicateIds);
+    await load();
+  };
 
   const save = async () => {
     if (!tenant || !form.first_name.trim()) return;
@@ -56,11 +99,28 @@ export function Contacts() {
   return (
     <div>
       <PageHeader title="Contacts" subtitle={`${items.length} contact${items.length > 1 ? 's' : ''}`}
-        actions={<Button onClick={() => { setEditing(null); setForm({ first_name: '', last_name: '', email: '', phone: '', company_id: '', country_code: tenant?.country_code || 'CM', city: '' }); setModal(true); }}><Plus size={16} /> Nouveau contact</Button>} />
+        actions={(
+          <>
+            {duplicateGroups.length > 0 && (
+              <Button variant="secondary" onClick={() => setDupModal(true)}>
+                <Copy size={16} /> {duplicateGroups.length} doublon{duplicateGroups.length > 1 ? 's' : ''}
+              </Button>
+            )}
+            <Button onClick={() => { setEditing(null); setForm({ first_name: '', last_name: '', email: '', phone: '', company_id: '', country_code: tenant?.country_code || 'CM', city: '' }); setModal(true); }}><Plus size={16} /> Nouveau contact</Button>
+          </>
+        )} />
 
-      <div className="mb-4 relative max-w-md">
-        <Search size={16} className="absolute left-3 top-3 text-gray-400" />
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher…" className="input pl-9" />
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <div className="relative max-w-md flex-1">
+          <Search size={16} className="absolute left-3 top-3 text-gray-400" />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher…" className="input pl-9" />
+        </div>
+        <button
+          onClick={() => setSortByScore(s => !s)}
+          className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm ${sortByScore ? 'border-coral-300 bg-coral-50 text-coral-700' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}
+        >
+          <ArrowUpDown size={14} /> Trier par score
+        </button>
       </div>
 
       {items.length === 0 ? (
@@ -70,17 +130,22 @@ export function Contacts() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
               <tr>
-                <th className="px-4 py-3">Nom</th><th className="px-4 py-3">Email</th><th className="px-4 py-3">Téléphone</th><th className="px-4 py-3">Entreprise</th><th className="px-4 py-3">Pays</th><th className="px-4 py-3"></th>
+                <th className="px-4 py-3">Nom</th><th className="px-4 py-3">Score</th><th className="px-4 py-3">Email</th><th className="px-4 py-3">Téléphone</th><th className="px-4 py-3">Entreprise</th><th className="px-4 py-3">Pays</th><th className="px-4 py-3"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {filtered.map(c => (
+              {filtered.map(({ contact: c, score }) => (
                 <tr key={c.id} className="hover:bg-gray-50/60">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <Avatar name={`${c.first_name} ${c.last_name || ''}`} size={32} />
                       <span className="font-medium text-gray-900">{c.first_name} {c.last_name}</span>
                     </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <Badge color={BAND_COLOR[score.band]} title={score.reasons.join(' · ') || 'Aucun signal d\'engagement pour le moment'}>
+                      {score.score} · {BAND_LABEL[score.band]}
+                    </Badge>
                   </td>
                   <td className="px-4 py-3 text-gray-600">{c.email || '—'}</td>
                   <td className="px-4 py-3 text-gray-600">{c.phone || '—'}</td>
@@ -123,6 +188,15 @@ export function Contacts() {
           </div>
         </div>
       </Modal>
+
+      <DuplicatesModal
+        open={dupModal}
+        onClose={() => setDupModal(false)}
+        groups={duplicateGroups}
+        renderLabel={c => `${c.first_name} ${c.last_name || ''}`}
+        renderDetail={c => c.email || c.phone || '—'}
+        onMerge={mergeContacts}
+      />
     </div>
   );
 }
