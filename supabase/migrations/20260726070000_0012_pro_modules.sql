@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS public.invoice_items (
   position int NOT NULL DEFAULT 0
 );
 
--- ========== CAMPAGNES EMAIL (r\u00e9utilise Resend, d\u00e9j\u00e0 branch\u00e9 pour les automatisations) ==========
+-- ========== CAMPAGNES EMAIL (réutilise Resend, déjà branché pour les automatisations) ==========
 CREATE TABLE IF NOT EXISTS public.email_campaigns (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id uuid NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
