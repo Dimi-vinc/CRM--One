@@ -34,6 +34,13 @@ const Notifications = lazy(() => import('./pages/modules/Notifications').then(m 
 const Security = lazy(() => import('./pages/modules/Security').then(m => ({ default: m.Security })));
 const Billing = lazy(() => import('./pages/modules/Billing').then(m => ({ default: m.Billing })));
 const AdminModule = lazy(() => import('./pages/admin/AdminModule').then(m => ({ default: m.AdminModule })));
+const Tickets = lazy(() => import('./pages/modules/Tickets').then(m => ({ default: m.Tickets })));
+const QuotesInvoices = lazy(() => import('./pages/modules/QuotesInvoices').then(m => ({ default: m.QuotesInvoices })));
+const Campaigns = lazy(() => import('./pages/modules/Campaigns').then(m => ({ default: m.Campaigns })));
+const KnowledgeBase = lazy(() => import('./pages/modules/KnowledgeBase').then(m => ({ default: m.KnowledgeBase })));
+const Privacy = lazy(() => import('./pages/modules/Privacy').then(m => ({ default: m.Privacy })));
+const Territories = lazy(() => import('./pages/modules/Territories').then(m => ({ default: m.Territories })));
+const PublicKnowledgeBase = lazy(() => import('./pages/PublicKnowledgeBase').then(m => ({ default: m.PublicKnowledgeBase })));
 
 const SuperAdminDashboard = lazy(() => import('./pages/superadmin/SuperAdminDashboard').then(m => ({ default: m.SuperAdminDashboard })));
 const TenantsAdmin = lazy(() => import('./pages/superadmin/TenantsAdmin').then(m => ({ default: m.TenantsAdmin })));
@@ -69,6 +76,7 @@ export default function App() {
             <Route path="/cgu" element={<LegalPage type="cgu" />} />
             <Route path="/about" element={<LegalPage type="about" />} />
             <Route path="/contact" element={<LegalPage type="contact" />} />
+            <Route path="/help/:tenantId" element={<PublicKnowledgeBase />} />
             <Route path="/login" element={<PublicOnly><Login /></PublicOnly>} />
             <Route path="/mfa-challenge" element={<RequireMfaPending><MfaChallenge /></RequireMfaPending>} />
             <Route path="/signup" element={<PublicOnly><Signup /></PublicOnly>} />
@@ -87,6 +95,12 @@ export default function App() {
             <Route path="/import_export" element={<RequireAuth><Shell><ImportExport /></Shell></RequireAuth>} />
             <Route path="/documents" element={<RequireAuth><Shell><Documents /></Shell></RequireAuth>} />
             <Route path="/automations" element={<RequireAuth><Shell><Automations /></Shell></RequireAuth>} />
+            <Route path="/tickets" element={<RequireAuth><Shell><Tickets /></Shell></RequireAuth>} />
+            <Route path="/quotes-invoices" element={<RequireAuth><Shell><QuotesInvoices /></Shell></RequireAuth>} />
+            <Route path="/campaigns" element={<RequireAuth><Shell><Campaigns /></Shell></RequireAuth>} />
+            <Route path="/knowledge-base" element={<RequireAuth><Shell><KnowledgeBase /></Shell></RequireAuth>} />
+            <Route path="/data-privacy" element={<RequireAuth><Shell><Privacy /></Shell></RequireAuth>} />
+            <Route path="/territories" element={<RequireAuth><Shell><Territories /></Shell></RequireAuth>} />
             <Route path="/notifications" element={<RequireAuth><Shell><Notifications /></Shell></RequireAuth>} />
             <Route path="/security" element={<RequireAuth><Shell><Security /></Shell></RequireAuth>} />
             <Route path="/billing" element={<RequireAuth><Shell><Billing /></Shell></RequireAuth>} />

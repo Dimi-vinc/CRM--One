@@ -15,6 +15,7 @@ export type ModuleKey =
   | 'dashboard' | 'pipeline' | 'contacts' | 'companies' | 'activities'
   | 'tasks' | 'calendar' | 'forecast' | 'reports' | 'import_export'
   | 'billing' | 'notifications' | 'security' | 'documents' | 'automations'
+  | 'tickets' | 'quotes_invoices' | 'campaigns' | 'knowledge_base' | 'privacy' | 'territories'
   | 'super_admin' | 'admin';
 
 export interface ModuleDef {
@@ -38,8 +39,14 @@ export const MODULES: ModuleDef[] = [
   { key: 'import_export', label: 'Import/Export', icon: 'ArrowDownUp', minPlan: 'premium', group: 'insights' },
   { key: 'documents', label: 'Documents', icon: 'FileText', minPlan: 'premium', group: 'crm' },
   { key: 'automations', label: 'Automatisations', icon: 'Zap', minPlan: 'pro', group: 'system' },
+  { key: 'tickets', label: 'Support client', icon: 'LifeBuoy', group: 'crm' },
+  { key: 'quotes_invoices', label: 'Devis & Factures', icon: 'FileText', minPlan: 'pro', group: 'crm' },
+  { key: 'campaigns', label: 'Campagnes email', icon: 'Mail', minPlan: 'premium', group: 'insights' },
+  { key: 'knowledge_base', label: 'Base de connaissances', icon: 'BookOpen', minPlan: 'premium', group: 'crm' },
+  { key: 'territories', label: 'Territoires & Quotas', icon: 'Map', minPlan: 'pro', group: 'insights' },
   { key: 'notifications', label: 'Notifications', icon: 'Bell', group: 'system' },
   { key: 'security', label: 'Sécurité', icon: 'ShieldCheck', group: 'system' },
+  { key: 'privacy', label: 'Confidentialité', icon: 'Fingerprint', group: 'system' },
   { key: 'billing', label: 'Facturation', icon: 'CreditCard', minPlan: 'premium', group: 'system' },
   { key: 'admin', label: 'Espace Admin', icon: 'Settings', group: 'admin' },
   { key: 'super_admin', label: 'Super Admin', icon: 'Crown', group: 'admin' },
@@ -71,27 +78,27 @@ export const PLANS: PlanDef[] = [
   {
     id: 'starter', name: 'Starter', price: 9, priceAnnual: 7, currency: 'USD',
     maxUsers: 2, maxDeals: 100, trialDays: 7,
-    features: ['Pipeline', 'Contacts', 'Companies', 'Tâches', 'Calendrier', 'Notifications', 'Sécurité'],
-    modules: ['dashboard','pipeline','contacts','companies','tasks','calendar','notifications','security','admin'],
+    features: ['Pipeline', 'Contacts', 'Companies', 'Tâches', 'Calendrier', 'Support client', 'Confidentialité RGPD', 'Sécurité'],
+    modules: ['dashboard','pipeline','contacts','companies','tasks','calendar','notifications','security','privacy','admin','tickets'],
   },
   {
     id: 'pro', name: 'Pro', price: 29, priceAnnual: 24, currency: 'USD',
     maxUsers: 5, maxDeals: 0, trialDays: 7, customRoles: true,
-    features: ['Tout Starter +', 'Forecast', 'Rapports avancés', 'Automatisations de base', 'Rôles personnalisés', 'Activités'],
-    modules: ['dashboard','pipeline','contacts','companies','activities','tasks','calendar','forecast','reports','automations','notifications','security','admin'],
+    features: ['Tout Starter +', 'Forecast', 'Rapports avancés', 'Automatisations', 'Devis & Factures', 'Territoires & Quotas', 'Rôles personnalisés', 'Activités'],
+    modules: ['dashboard','pipeline','contacts','companies','activities','tasks','calendar','forecast','reports','automations','notifications','security','privacy','admin','tickets','quotes_invoices','territories'],
   },
   {
     id: 'premium', name: 'Premium', price: 69, priceAnnual: 57, currency: 'USD',
     maxUsers: 15, maxDeals: 0, trialDays: 7, customRoles: true, multiCurrency: true, mobileMoney: true, api: true,
-    features: ['Tout Pro +', 'Automatisations avancées', 'Documents', 'Multi-devise & Mobile Money', 'API', 'Import/Export', 'Facturation'],
-    modules: ['dashboard','pipeline','contacts','companies','activities','tasks','calendar','forecast','reports','import_export','automations','documents','notifications','security','admin','billing'],
+    features: ['Tout Pro +', 'Documents', 'Campagnes email', 'Base de connaissances', 'Multi-devise & Mobile Money', 'API', 'Import/Export', 'Facturation'],
+    modules: ['dashboard','pipeline','contacts','companies','activities','tasks','calendar','forecast','reports','import_export','automations','documents','notifications','security','privacy','admin','tickets','quotes_invoices','territories','campaigns','knowledge_base','billing'],
     highlight: true,
   },
   {
     id: 'entreprise', name: 'Entreprise', price: 159, priceAnnual: 132, currency: 'USD',
     maxUsers: 0, maxDeals: 0, trialDays: 7, customRoles: true, multiCurrency: true, mobileMoney: true, api: true, whiteLabel: true, webhooks: true, prioritySupport: true, sla: true,
     features: ['Tout Premium +', 'Support prioritaire', 'Marque blanche partielle', 'Webhooks/API complète', 'SLA', 'Utilisateurs illimités'],
-    modules: ['dashboard','pipeline','contacts','companies','activities','tasks','calendar','forecast','reports','import_export','automations','documents','notifications','security','admin','billing'],
+    modules: ['dashboard','pipeline','contacts','companies','activities','tasks','calendar','forecast','reports','import_export','automations','documents','notifications','security','privacy','admin','tickets','quotes_invoices','territories','campaigns','knowledge_base','billing'],
   },
 ];
 

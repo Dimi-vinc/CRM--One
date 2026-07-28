@@ -22,9 +22,9 @@ export function Button({ variant = 'primary', size = 'md', className, children, 
 }
 
 // ---- Card ----
-export function Card({ className, children, edge }: { className?: string; children?: ReactNode; edge?: ColorKey }) {
+export function Card({ className, children, edge, onClick }: { className?: string; children?: ReactNode; edge?: ColorKey; onClick?: () => void }) {
   return (
-    <div className={classNames('card', edge && 'card-edge', edge && COLOR_RAMPS[edge].border, className)}>
+    <div onClick={onClick} className={classNames('card', edge && 'card-edge', edge && COLOR_RAMPS[edge].border, className)}>
       {children}
     </div>
   );

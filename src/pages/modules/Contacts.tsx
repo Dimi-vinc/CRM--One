@@ -20,7 +20,7 @@ export function Contacts() {
   const [modal, setModal] = useState(false);
   const [dupModal, setDupModal] = useState(false);
   const [editing, setEditing] = useState<Contact | null>(null);
-  const [form, setForm] = useState({ first_name: '', last_name: '', email: '', phone: '', company_id: '', country_code: tenant?.country_code || 'CM', city: '' });
+  const [form, setForm] = useState({ first_name: '', last_name: '', email: '', phone: '', company_id: '', country_code: tenant?.country_code || 'CM', city: '', marketing_consent: false });
 
   const load = async () => {
     if (!tenant) return;
@@ -74,20 +74,21 @@ export function Contacts() {
 
   const save = async () => {
     if (!tenant || !form.first_name.trim()) return;
+    const payload = { ...form, company_id: form.company_id || null, consent_updated_at: new Date().toISOString() };
     if (editing) {
-      const { data } = await supabase.from('contacts').update({ ...form, company_id: form.company_id || null }).eq('id', editing.id).select().single();
+      const { data } = await supabase.from('contacts').update(payload).eq('id', editing.id).select().single();
       if (data) setItems(prev => prev.map(c => c.id === editing.id ? data : c));
     } else {
-      const { data } = await supabase.from('contacts').insert({ ...form, tenant_id: tenant.id, company_id: form.company_id || null }).select().single();
+      const { data } = await supabase.from('contacts').insert({ ...payload, tenant_id: tenant.id }).select().single();
       if (data) setItems(prev => [data, ...prev]);
     }
     setModal(false); setEditing(null);
-    setForm({ first_name: '', last_name: '', email: '', phone: '', company_id: '', country_code: tenant.country_code, city: '' });
+    setForm({ first_name: '', last_name: '', email: '', phone: '', company_id: '', country_code: tenant.country_code, city: '', marketing_consent: false });
   };
 
   const edit = (c: Contact) => {
     setEditing(c);
-    setForm({ first_name: c.first_name, last_name: c.last_name || '', email: c.email || '', phone: c.phone || '', company_id: c.company_id || '', country_code: c.country_code || 'CM', city: c.city || '' });
+    setForm({ first_name: c.first_name, last_name: c.last_name || '', email: c.email || '', phone: c.phone || '', company_id: c.company_id || '', country_code: c.country_code || 'CM', city: c.city || '', marketing_consent: c.marketing_consent || false });
     setModal(true);
   };
 
@@ -106,7 +107,7 @@ export function Contacts() {
                 <Copy size={16} /> {duplicateGroups.length} doublon{duplicateGroups.length > 1 ? 's' : ''}
               </Button>
             )}
-            <Button onClick={() => { setEditing(null); setForm({ first_name: '', last_name: '', email: '', phone: '', company_id: '', country_code: tenant?.country_code || 'CM', city: '' }); setModal(true); }}><Plus size={16} /> Nouveau contact</Button>
+            <Button onClick={() => { setEditing(null); setForm({ first_name: '', last_name: '', email: '', phone: '', company_id: '', country_code: tenant?.country_code || 'CM', city: '', marketing_consent: false }); setModal(true); }}><Plus size={16} /> Nouveau contact</Button>
           </>
         )} />
 
@@ -182,6 +183,10 @@ export function Contacts() {
             </Select>
           </div>
           <Input label="Ville" value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} />
+          <label className="flex items-center gap-2 text-sm text-gray-700">
+            <input type="checkbox" checked={form.marketing_consent} onChange={e => setForm({ ...form, marketing_consent: e.target.checked })} />
+            Consentement marketing (autorise l'envoi de campagnes email — RGPD)
+          </label>
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="secondary" onClick={() => setModal(false)}>Annuler</Button>
             <Button onClick={save}>{editing ? 'Enregistrer' : 'Créer'}</Button>

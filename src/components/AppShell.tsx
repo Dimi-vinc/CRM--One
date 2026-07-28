@@ -191,8 +191,15 @@ function groupLabel(g: string, t: (k: string) => string) {
   return { crm: t('group.crm'), insights: t('group.insights'), system: t('group.system'), admin: t('group.admin') }[g] || g;
 }
 
+const ROUTE_OVERRIDES: Partial<Record<ModuleKey, string>> = {
+  dashboard: '/dashboard',
+  privacy: '/data-privacy', // avoid collision with the public /privacy legal policy page
+  quotes_invoices: '/quotes-invoices',
+  knowledge_base: '/knowledge-base',
+};
+
 function routeFor(key: ModuleKey): string {
-  return key === 'dashboard' ? '/dashboard' : `/${key}`;
+  return ROUTE_OVERRIDES[key] || `/${key}`;
 }
 
 function upgradePlanFor(key: ModuleKey): 'starter' | 'pro' | 'premium' | 'entreprise' {

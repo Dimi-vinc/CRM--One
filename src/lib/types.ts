@@ -123,6 +123,8 @@ export interface Contact {
   country_code?: string | null;
   city?: string | null;
   owner_id?: string | null;
+  marketing_consent?: boolean;
+  consent_updated_at?: string | null;
   created_at: string;
 }
 
@@ -219,5 +221,138 @@ export interface NotificationRow {
   title: string;
   body?: string | null;
   read: boolean;
+  created_at: string;
+}
+
+// ---- Tickets ----
+export type TicketStatus = 'open' | 'pending' | 'resolved' | 'closed';
+export type TicketPriority = 'low' | 'medium' | 'high' | 'urgent';
+
+export interface Ticket {
+  id: string;
+  tenant_id: string;
+  contact_id: string | null;
+  company_id: string | null;
+  subject: string;
+  description: string | null;
+  status: TicketStatus;
+  priority: TicketPriority;
+  assigned_to: string | null;
+  sla_due_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TicketComment {
+  id: string;
+  tenant_id: string;
+  ticket_id: string;
+  author_id: string | null;
+  body: string;
+  is_internal: boolean;
+  created_at: string;
+}
+
+// ---- Devis & Factures ----
+export type QuoteStatus = 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired';
+export type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
+
+export interface LineItem {
+  id: string;
+  tenant_id: string;
+  description: string;
+  quantity: number;
+  unit_price: number;
+  tax_rate: number;
+  position: number;
+}
+
+export interface Quote {
+  id: string;
+  tenant_id: string;
+  quote_number: string;
+  contact_id: string | null;
+  company_id: string | null;
+  deal_id: string | null;
+  status: QuoteStatus;
+  currency_code: string;
+  valid_until: string | null;
+  notes: string | null;
+  created_at: string;
+}
+export interface QuoteItem extends LineItem { quote_id: string; }
+
+export interface Invoice {
+  id: string;
+  tenant_id: string;
+  invoice_number: string;
+  contact_id: string | null;
+  company_id: string | null;
+  quote_id: string | null;
+  status: InvoiceStatus;
+  currency_code: string;
+  issued_date: string;
+  due_date: string | null;
+  notes: string | null;
+  created_at: string;
+}
+export interface InvoiceItem extends LineItem { invoice_id: string; }
+
+// ---- Campagnes email ----
+export type CampaignStatus = 'draft' | 'sending' | 'sent';
+
+export interface EmailCampaign {
+  id: string;
+  tenant_id: string;
+  name: string;
+  subject: string;
+  body_html: string;
+  status: CampaignStatus;
+  segment_country_code: string | null;
+  segment_min_score: number | null;
+  sent_at: string | null;
+  created_at: string;
+}
+
+export interface EmailCampaignRecipient {
+  id: string;
+  tenant_id: string;
+  campaign_id: string;
+  contact_id: string;
+  status: 'pending' | 'sent' | 'failed' | 'skipped_no_consent';
+  error: string | null;
+  sent_at: string | null;
+}
+
+// ---- Base de connaissances ----
+export interface KbArticle {
+  id: string;
+  tenant_id: string;
+  title: string;
+  slug: string;
+  content: string;
+  category: string | null;
+  is_public: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// ---- Territoires & quotas ----
+export interface SalesTerritory {
+  id: string;
+  tenant_id: string;
+  name: string;
+  country_codes: string[];
+  owner_id: string | null;
+  created_at: string;
+}
+
+export interface SalesQuota {
+  id: string;
+  tenant_id: string;
+  user_id: string;
+  period: string;
+  target_amount: number;
+  currency_code: string;
   created_at: string;
 }
