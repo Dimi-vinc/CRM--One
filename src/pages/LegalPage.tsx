@@ -65,7 +65,7 @@ export function LegalPage({ type }: { type: 'privacy' | 'terms' | 'cgu' | 'about
       title: t('footer.about'),
       body: (
         <>
-          <p className="text-gray-600">{PLATFORM_NAME} is a multi-tenant SaaS CRM platform designed specifically for the African market. Built by {PLATFORM_VENDOR}, it combines modern CRM capabilities with pan-African realities: multi-currency support, Mobile Money integration, and strict data isolation.</p>
+          <p className="text-gray-600">{PLATFORM_NAME} is an international multi-tenant SaaS CRM platform. Built by {PLATFORM_VENDOR}, it combines modern CRM capabilities with global business realities: multi-currency support, Mobile Money integration where it matters, and strict data isolation.</p>
           <h3 className="mt-6 text-lg font-semibold text-gray-900">Our Mission</h3>
           <p className="mt-2 text-gray-600">To empower African businesses with enterprise-grade sales tools, accessible from any device, in the currencies and languages of the continent.</p>
           <h3 className="mt-6 text-lg font-semibold text-gray-900">Key Differentiators</h3>

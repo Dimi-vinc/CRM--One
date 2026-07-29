@@ -77,7 +77,7 @@ export function Login() {
           <h2 className="text-3xl font-bold text-gray-900">{t('landing.heroTitle1')} <span className="text-coral-600">{t('landing.heroTitle2')}</span></h2>
           <p className="mt-4 text-gray-600">{t('landing.heroSubtitle')}</p>
           <div className="mt-8 grid grid-cols-2 gap-3">
-            {[['XOF','FCFA'],['XAF','FCFA'],['NGN','₦'],['KES','KSh'],['GHS','₵'],['ZAR','R']].map(([c,s]) => (
+            {[['USD','$'],['EUR','€'],['GBP','£'],['AED','د.إ'],['XOF','FCFA'],['NGN','₦']].map(([c,s]) => (
               <div key={c} className="card p-3 text-center"><p className="text-xs text-gray-500">{c}</p><p className="font-bold text-gray-900">{s}</p></div>
             ))}
           </div>

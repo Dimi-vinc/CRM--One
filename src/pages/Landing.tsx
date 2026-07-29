@@ -187,8 +187,16 @@ export function Landing() {
             <p className="mt-3 text-gray-600">{t('landing.pricingSubtitle')}</p>
           </div>
           <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-            {PLANS.map(plan => (
-              <div key={plan.id} className={`card p-6 flex flex-col ${plan.highlight ? 'ring-2 ring-blue-500 border-blue-300' : ''}`}>
+            {PLANS.map((plan, i) => (
+              <motion.div
+                key={plan.id}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-60px' }}
+                transition={{ duration: 0.4, delay: i * 0.08, ease: 'easeOut' }}
+                whileHover={{ y: -6 }}
+                className={`card p-6 flex flex-col ${plan.highlight ? 'ring-2 ring-blue-500 border-blue-300' : ''}`}
+              >
                 {plan.highlight && <div className="mb-2 inline-flex w-fit rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800">{t('common.popular')}</div>}
                 <h3 className="text-lg font-bold text-gray-900">{plan.name}</h3>
                 <p className="mt-2"><span className="text-3xl font-bold text-gray-900">{formatMoney(plan.price, plan.currency)}</span><span className="text-sm text-gray-500">{t('common.perMonth')}</span></p>
@@ -196,7 +204,7 @@ export function Landing() {
                   {plan.features.map(f => <li key={f} className="flex gap-2"><CheckCircle2 size={16} className="mt-0.5 flex-shrink-0 text-blue-600" />{f}</li>)}
                 </ul>
                 <Link to="/signup" className={`mt-6 ${plan.highlight ? 'btn-primary-landing' : 'btn-secondary-landing'}`}>{t('landing.tryFree')}</Link>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -209,17 +217,24 @@ export function Landing() {
         </div>
         <div className="mt-10 grid gap-5 md:grid-cols-3">
           {[
-            { q: 'Nous avons doublé notre taux de closing en 3 mois.', a: 'Aminata D.', r: 'Directrice commerciale, Abidjan' },
-            { q: 'Enfin un CRM qui parle XOF et Mobile Money.', a: 'Kwame O.', r: 'CEO, Accra' },
-            { q: 'L\'isolation multi-tenant nous a convaincus.', a: 'Fatima Z.', r: 'COO, Casablanca' },
+            { q: 'Nous avons doublé notre taux de closing en 3 mois.', a: 'Sarah M.', r: 'Sales Director, Dubaï' },
+            { q: 'Enfin un CRM qui parle nos devises et notre marché.', a: 'Kwame O.', r: 'CEO, Accra' },
+            { q: 'L\'isolation multi-tenant nous a convaincus.', a: 'Julien R.', r: 'COO, Paris' },
           ].map((t, i) => (
-            <div key={i} className="card p-6">
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-60px' }}
+              transition={{ duration: 0.4, delay: i * 0.1, ease: 'easeOut' }}
+              className="card p-6"
+            >
               <p className="text-sm text-gray-700">"{t.q}"</p>
               <div className="mt-4 flex items-center gap-3">
                 <div className="h-9 w-9 rounded-full bg-sky-100 text-blue-700 flex items-center justify-center text-sm font-semibold">{t.a[0]}</div>
                 <div><p className="text-sm font-medium text-gray-900">{t.a}</p><p className="text-xs text-gray-500">{t.r}</p></div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </section>
@@ -229,14 +244,21 @@ export function Landing() {
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <h2 className="text-center text-3xl font-bold text-gray-900">{t('landing.faqTitle')}</h2>
           <div className="mt-10 space-y-3">
-            {FAQ_ITEMS.map(item => (
-              <details key={item.q} className="card group p-5">
+            {FAQ_ITEMS.map((item, i) => (
+              <motion.details
+                key={item.q}
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.35, delay: i * 0.05, ease: 'easeOut' }}
+                className="card group p-5"
+              >
                 <summary className="flex cursor-pointer items-center justify-between text-sm font-medium text-gray-900">
                   {item.q}
                   <span className="text-blue-500 group-open:rotate-45 transition">+</span>
                 </summary>
                 <p className="mt-3 text-sm text-gray-600">{item.a}</p>
-              </details>
+              </motion.details>
             ))}
           </div>
         </div>
