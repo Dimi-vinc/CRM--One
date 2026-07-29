@@ -22,6 +22,7 @@ export interface Profile {
   id: string;
   email: string;
   full_name?: string | null;
+  phone?: string | null;
   tenant_id?: string | null;
   role: Role;
   role_id?: string | null;

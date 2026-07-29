@@ -24,7 +24,7 @@ const corsHeaders = {
 const PLATFORM_NAME = Deno.env.get("PLATFORM_NAME") || "CRM-One";
 // Implemented actions only. Anything else (e.g. a future 'update_deal') is logged as skipped
 // rather than silently doing nothing, so the execution log stays honest.
-const IMPLEMENTED_ACTIONS = new Set(["send_email", "create_task", "notify_team", "create_activity"]);
+const IMPLEMENTED_ACTIONS = new Set(["send_email", "create_task", "notify_team", "create_activity", "send_whatsapp"]);
 
 interface Automation {
   id: string;
@@ -146,11 +146,53 @@ async function runAutomation(
         if (error) return { status: "error", detail: error.message };
         return { status: "success", detail: "Activité créée." };
       }
+      case "send_whatsapp": {
+        const numbers = await resolveTenantAdminPhones(supabase, automation.tenant_id);
+        if (numbers.length === 0) return { status: "error", detail: "Aucun administrateur avec un numéro WhatsApp renseigné (Paramètres)." };
+        const text = `[${PLATFORM_NAME}] ${automation.name}\n${automation.description || describeEvent(trigger, payload)}`;
+        const results = await Promise.allSettled(numbers.map(n => sendWhatsApp(n, text)));
+        const failed = results.filter(r => r.status === "rejected");
+        if (failed.length === results.length) {
+          return { status: "error", detail: (failed[0] as PromiseRejectedResult).reason?.message || "Échec de l'envoi WhatsApp." };
+        }
+        return { status: "success", detail: `WhatsApp envoyé à ${results.length - failed.length}/${results.length} administrateur(s).` };
+      }
       default:
         return { status: "skipped", detail: "Action inconnue." };
     }
   } catch (err) {
     return { status: "error", detail: err?.message || "Erreur inconnue" };
+  }
+}
+
+// deno-lint-ignore no-explicit-any
+async function resolveTenantAdminPhones(supabase: any, tenantId: string): Promise<string[]> {
+  const { data } = await supabase
+    .from("profiles")
+    .select("phone, role")
+    .eq("tenant_id", tenantId)
+    .in("role", ["admin", "super_admin"]);
+  return (data || []).map((p: { phone?: string }) => p.phone).filter(Boolean) as string[];
+}
+
+async function sendWhatsApp(to: string, body: string): Promise<void> {
+  const sid = Deno.env.get("TWILIO_ACCOUNT_SID");
+  const token = Deno.env.get("TWILIO_AUTH_TOKEN");
+  const from = Deno.env.get("TWILIO_WHATSAPP_FROM"); // e.g. "whatsapp:+14155238886"
+  if (!sid || !token || !from) throw new Error("Twilio non configuré (TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN / TWILIO_WHATSAPP_FROM manquants).");
+
+  const toFormatted = to.startsWith("whatsapp:") ? to : `whatsapp:${to}`;
+  const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
+    method: "POST",
+    headers: {
+      Authorization: `Basic ${btoa(`${sid}:${token}`)}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({ From: from, To: toFormatted, Body: body }),
+  });
+  if (!res.ok) {
+    const errBody = await res.text();
+    throw new Error(`Twilio a refusé l'envoi (${res.status}): ${errBody}`);
   }
 }
 

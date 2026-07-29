@@ -23,6 +23,7 @@ const ACTIONS = [
   { value: 'create_task', fr: 'Créer une tâche', en: 'Create task' },
   { value: 'notify_team', fr: "Notifier l'équipe", en: 'Notify team' },
   { value: 'create_activity', fr: 'Créer une activité', en: 'Create activity' },
+  { value: 'send_whatsapp', fr: 'Envoyer un WhatsApp', en: 'Send WhatsApp' },
 ];
 
 const STATUS_ICON = { success: CheckCircle2, error: XCircle, skipped: MinusCircle };

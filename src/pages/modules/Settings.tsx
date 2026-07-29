@@ -12,6 +12,7 @@ export function Settings() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [fullName, setFullName] = useState(profile?.full_name || '');
+  const [phone, setPhone] = useState(profile?.phone || '');
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileSaved, setProfileSaved] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -29,7 +30,7 @@ export function Settings() {
   const saveProfile = async () => {
     if (!profile || !fullName.trim()) return;
     setSavingProfile(true);
-    const { error } = await supabase.from('profiles').update({ full_name: fullName.trim() }).eq('id', profile.id);
+    const { error } = await supabase.from('profiles').update({ full_name: fullName.trim(), phone: phone.trim() || null }).eq('id', profile.id);
     setSavingProfile(false);
     if (!error) {
       setProfileSaved(true);
@@ -107,6 +108,7 @@ export function Settings() {
 
           <div className="mt-4 space-y-3">
             <Input label="Nom complet" value={fullName} onChange={e => setFullName(e.target.value)} />
+            <Input label="Téléphone (WhatsApp)" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+237600000000" hint="Format international avec indicatif (+237, +33, +971…). Utilisé pour les notifications WhatsApp." />
             <Input label="Email" value={profile?.email || ''} disabled />
             <p className="text-[11px] text-gray-400">L'email ne peut pas être modifié ici. La langue se change via le sélecteur en haut à droite.</p>
           </div>
