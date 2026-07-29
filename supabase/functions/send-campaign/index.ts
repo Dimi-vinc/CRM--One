@@ -75,7 +75,7 @@ Deno.serve(async (req: Request) => {
 
     const apiKey = Deno.env.get("RESEND_API_KEY");
     const from = Deno.env.get("RESEND_FROM_EMAIL") || "onboarding@resend.dev";
-    const platformName = Deno.env.get("PLATFORM_NAME") || "LiAfrik One";
+    const platformName = Deno.env.get("PLATFORM_NAME") || "CRM-One";
 
     let sent = 0, failed = 0;
     for (const contact of recipients) {

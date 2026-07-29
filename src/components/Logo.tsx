@@ -22,7 +22,7 @@ export function Logo({ size = 'md', light = false, className }: LogoProps) {
         s.h,
         className,
       )}
-      aria-label="LiAfrik One"
+      aria-label="CRM-One"
     >
       <span
         className={classNames(
@@ -32,7 +32,7 @@ export function Logo({ size = 'md', light = false, className }: LogoProps) {
         )}
         style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif' }}
       >
-        LiAfrik
+        CRM
       </span>
       <span
         className={classNames(
@@ -41,7 +41,7 @@ export function Logo({ size = 'md', light = false, className }: LogoProps) {
         )}
         style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif' }}
       >
-        One
+        -One
       </span>
     </div>
   );

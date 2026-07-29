@@ -24,7 +24,7 @@ export function SuperAdminShell({ children }: { children: ReactNode }) {
   const nav = useNavigate();
   const [open, setOpen] = useState(false);
 
-  useEffect(() => { document.title = 'Super Admin · LiAfrik One'; }, []);
+  useEffect(() => { document.title = 'Super Admin · CRM-One'; }, []);
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
@@ -34,7 +34,7 @@ export function SuperAdminShell({ children }: { children: ReactNode }) {
           <button onClick={() => setOpen(false)} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 lg:hidden"><X size={18} /></button>
         </div>
         <div className="px-3 pb-2">
-          <div className="rounded-xl bg-coral-50 px-3 py-2 text-xs"><p className="font-semibold text-coral-700">Super Admin</p><p className="text-coral-600/80">LIYHA GROUP</p></div>
+          <div className="rounded-xl bg-coral-50 px-3 py-2 text-xs"><p className="font-semibold text-coral-700">Super Admin</p><p className="text-coral-600/80">LiAfrik — Dubaï & Yaoundé</p></div>
         </div>
         <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-2">
           {NAV.map(n => (
@@ -53,7 +53,7 @@ export function SuperAdminShell({ children }: { children: ReactNode }) {
         <header className="flex h-16 items-center justify-between border-b border-gray-100 bg-white px-4 sm:px-6">
           <div className="flex items-center gap-3">
             <button onClick={() => setOpen(true)} className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 lg:hidden"><Menu size={18} /></button>
-            <h1 className="text-sm font-semibold text-gray-900">Espace Super Admin · LIYHA GROUP</h1>
+            <h1 className="text-sm font-semibold text-gray-900">Espace Super Admin · LiAfrik — Dubaï & Yaoundé</h1>
           </div>
           <div className="flex items-center gap-2"><LanguageSelector /><Avatar name={profile?.full_name || profile?.email} size={32} color="orange" /><span className="hidden text-sm text-gray-600 sm:inline">{profile?.email}</span></div>
         </header>

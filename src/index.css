@@ -33,6 +33,13 @@
   .btn-danger {
     @apply btn bg-red-500 text-white hover:bg-red-600;
   }
+  /* Landing-page-only variants (PayPal-style blue) — the rest of the app keeps its coral brand. */
+  .btn-primary-landing {
+    @apply btn bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 shadow-sm hover:shadow;
+  }
+  .btn-secondary-landing {
+    @apply btn bg-white text-blue-700 border border-blue-200 hover:bg-blue-50;
+  }
   .input {
     @apply w-full rounded-lg border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 outline-none transition focus:border-coral-400 focus:ring-2 focus:ring-coral-100;
   }

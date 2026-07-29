@@ -15,9 +15,9 @@ export function Calendar() {
     if (!tenant) return;
     (async () => {
       const [d, a, t] = await Promise.all([
-        supabase.from('deals').select('*'),
-        supabase.from('activities').select('*'),
-        supabase.from('tasks').select('*'),
+        supabase.from('deals').select('*').limit(3000),
+        supabase.from('activities').select('*').limit(3000),
+        supabase.from('tasks').select('*').limit(3000),
       ]);
       const ev: { date: string; label: string; color: string; amount?: string }[] = [];
       (d.data as Deal[] || []).forEach(x => x.expected_close_date && ev.push({ date: x.expected_close_date, label: x.title, color: 'coral', amount: formatMoney(x.amount, x.currency_code) }));

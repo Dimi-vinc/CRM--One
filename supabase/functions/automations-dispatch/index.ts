@@ -10,7 +10,7 @@
 //   AUTOMATION_DISPATCH_SECRET — must match automation_config.dispatch_secret (see migration).
 //   SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY — auto-provided by Supabase.
 //   RESEND_FROM_EMAIL (optional) — verified sender address; defaults to onboarding@resend.dev
-//   PLATFORM_NAME (optional) — used in email subjects/signatures; defaults to "LiAfrik One"
+//   PLATFORM_NAME (optional) — used in email subjects/signatures; defaults to "CRM-One"
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
@@ -21,7 +21,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
-const PLATFORM_NAME = Deno.env.get("PLATFORM_NAME") || "LiAfrik One";
+const PLATFORM_NAME = Deno.env.get("PLATFORM_NAME") || "CRM-One";
 // Implemented actions only. Anything else (e.g. a future 'update_deal') is logged as skipped
 // rather than silently doing nothing, so the execution log stays honest.
 const IMPLEMENTED_ACTIONS = new Set(["send_email", "create_task", "notify_team", "create_activity"]);

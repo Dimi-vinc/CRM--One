@@ -44,7 +44,7 @@ export function Automations() {
   const load = async () => {
     if (!tenant) return;
     setLoading(true);
-    const { data } = await supabase.from('automations').select('*').order('created_at', { ascending: false });
+    const { data } = await supabase.from('automations').select('*').order('created_at', { ascending: false }).limit(500);
     setItems(data || []);
     setLoading(false);
   };

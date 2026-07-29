@@ -15,7 +15,7 @@ export function Forecast() {
   useEffect(() => {
     if (!tenant) return;
     (async () => {
-      const { data } = await supabase.from('deals').select('*');
+      const { data } = await supabase.from('deals').select('*').limit(5000);
       setDeals(data || []); setLoading(false);
     })();
   }, [tenant]);

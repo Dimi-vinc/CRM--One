@@ -12,6 +12,7 @@ import type { Contact, Company } from '../../lib/types';
 export function Contacts() {
   const { tenant } = useAuth();
   const [items, setItems] = useState<Contact[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [contactsWithActivity, setContactsWithActivity] = useState<Set<string>>(new Set());
   const [contactsWithDeal, setContactsWithDeal] = useState<Set<string>>(new Set());
@@ -22,15 +23,22 @@ export function Contacts() {
   const [editing, setEditing] = useState<Contact | null>(null);
   const [form, setForm] = useState({ first_name: '', last_name: '', email: '', phone: '', company_id: '', country_code: tenant?.country_code || 'CM', city: '', marketing_consent: false });
 
+  // Safety cap: the search/sort/dedup UX below runs client-side over the loaded set, which
+  // is instant and simple for realistic tenant sizes but would not scale to hundreds of
+  // thousands of rows. Rather than silently truncating, we show an explicit notice past this
+  // cap and recommend using Import/Export or contacting support for bulk operations.
+  const LOAD_CAP = 2000;
+
   const load = async () => {
     if (!tenant) return;
     const [c, co, act, deals] = await Promise.all([
-      supabase.from('contacts').select('*').order('created_at', { ascending: false }),
+      supabase.from('contacts').select('*', { count: 'exact' }).order('created_at', { ascending: false }).range(0, LOAD_CAP - 1),
       supabase.from('companies').select('*'),
       supabase.from('activities').select('contact_id').not('contact_id', 'is', null),
       supabase.from('deals').select('contact_id').not('contact_id', 'is', null),
     ]);
     setItems(c.data || []);
+    setTotalCount(c.count ?? (c.data || []).length);
     setCompanies(co.data || []);
     setContactsWithActivity(new Set((act.data || []).map((a: { contact_id: string }) => a.contact_id)));
     setContactsWithDeal(new Set((deals.data || []).map((d: { contact_id: string }) => d.contact_id)));
@@ -110,6 +118,12 @@ export function Contacts() {
             <Button onClick={() => { setEditing(null); setForm({ first_name: '', last_name: '', email: '', phone: '', company_id: '', country_code: tenant?.country_code || 'CM', city: '', marketing_consent: false }); setModal(true); }}><Plus size={16} /> Nouveau contact</Button>
           </>
         )} />
+
+      {totalCount > LOAD_CAP && (
+        <div className="mb-4 rounded-lg bg-amber-50 p-3 text-xs text-amber-800">
+          Affichage limité aux {LOAD_CAP} contacts les plus récents sur {totalCount} au total. Utilisez Import/Export pour les opérations en masse sur l'ensemble de la base.
+        </div>
+      )}
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <div className="relative max-w-md flex-1">

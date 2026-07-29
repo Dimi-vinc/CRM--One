@@ -95,7 +95,7 @@ Deno.serve(async (req: Request) => {
         {
           price_data: {
             currency: chargeCurrency,
-            product_data: { name: `LiAfrik One — Plan ${planId}` },
+            product_data: { name: `CRM-One — Plan ${planId}` },
             unit_amount: finalAmount,
             recurring: { interval: "month" },
           },

@@ -103,7 +103,7 @@ export function Signup() {
               <li key={item} className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-coral-500" />{item}</li>
             ))}
           </ul>
-          <p className="mt-8 text-sm text-gray-500">LIYHA GROUP — {t('footer.locations')}</p>
+          <p className="mt-8 text-sm text-gray-500">LiAfrik — Dubaï & Yaoundé — {t('footer.locations')}</p>
         </div>
       </div>
     </div>

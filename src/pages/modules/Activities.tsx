@@ -18,7 +18,7 @@ export function Activities() {
   const load = async () => {
     if (!tenant) return;
     const [a, c] = await Promise.all([
-      supabase.from('activities').select('*').order('due_at', { ascending: true }),
+      supabase.from('activities').select('*').order('due_at', { ascending: true }).limit(3000),
       supabase.from('contacts').select('*'),
     ]);
     setItems(a.data || []); setContacts(c.data || []);

@@ -13,16 +13,20 @@ const INDUSTRIES = ['Technologie','Finance','Retail',' Santé','Éducation','Log
 export function Companies() {
   const { tenant } = useAuth();
   const [items, setItems] = useState<Company[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [search, setSearch] = useState('');
   const [modal, setModal] = useState(false);
   const [dupModal, setDupModal] = useState(false);
   const [editing, setEditing] = useState<Company | null>(null);
   const [form, setForm] = useState({ name: '', industry: '', website: '', email: '', phone: '', country_code: tenant?.country_code || 'CM', city: '' });
 
+  const LOAD_CAP = 2000;
+
   const load = async () => {
     if (!tenant) return;
-    const { data } = await supabase.from('companies').select('*').order('created_at', { ascending: false });
+    const { data, count } = await supabase.from('companies').select('*', { count: 'exact' }).order('created_at', { ascending: false }).range(0, LOAD_CAP - 1);
     setItems(data || []);
+    setTotalCount(count ?? (data || []).length);
   };
   useEffect(() => { load(); }, [tenant]);
 
@@ -89,6 +93,12 @@ export function Companies() {
             <Button onClick={() => { setEditing(null); setForm({ name: '', industry: '', website: '', email: '', phone: '', country_code: tenant?.country_code || 'CM', city: '' }); setModal(true); }}><Plus size={16} /> Nouvelle entreprise</Button>
           </>
         )} />
+
+      {totalCount > LOAD_CAP && (
+        <div className="mb-4 rounded-lg bg-amber-50 p-3 text-xs text-amber-800">
+          Affichage limité aux {LOAD_CAP} entreprises les plus récentes sur {totalCount} au total. Utilisez Import/Export pour les opérations en masse.
+        </div>
+      )}
 
       <div className="mb-4 relative max-w-md">
         <Search size={16} className="absolute left-3 top-3 text-gray-400" />

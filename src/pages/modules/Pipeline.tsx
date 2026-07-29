@@ -21,7 +21,7 @@ export function Pipeline() {
     if (!tenant) return;
     setLoading(true);
     const [d, c, co] = await Promise.all([
-      supabase.from('deals').select('*').order('created_at', { ascending: false }),
+      supabase.from('deals').select('*').order('created_at', { ascending: false }).limit(3000),
       supabase.from('contacts').select('*'),
       supabase.from('companies').select('*'),
     ]);

@@ -1,7 +1,7 @@
 // Platform-wide constants: brand, modules, plans, African countries, currencies, mobile money.
 
-export const PLATFORM_NAME = 'LiAfrik One';
-export const PLATFORM_VENDOR = 'LIYHA GROUP';
+export const PLATFORM_NAME = 'CRM-One';
+export const PLATFORM_VENDOR = 'LiAfrik — Dubaï & Yaoundé';
 export const PLATFORM_TAGLINE = 'Le CRM SaaS pensé pour conquérir le marché africain.';
 
 // Super Admin email whitelist — only these emails can access the Super Admin module
@@ -15,7 +15,7 @@ export type ModuleKey =
   | 'dashboard' | 'pipeline' | 'contacts' | 'companies' | 'activities'
   | 'tasks' | 'calendar' | 'forecast' | 'reports' | 'import_export'
   | 'billing' | 'notifications' | 'security' | 'documents' | 'automations'
-  | 'tickets' | 'quotes_invoices' | 'campaigns' | 'knowledge_base' | 'privacy' | 'territories'
+  | 'tickets' | 'quotes_invoices' | 'campaigns' | 'knowledge_base' | 'privacy' | 'territories' | 'settings'
   | 'super_admin' | 'admin';
 
 export interface ModuleDef {
@@ -48,6 +48,7 @@ export const MODULES: ModuleDef[] = [
   { key: 'security', label: 'Sécurité', icon: 'ShieldCheck', group: 'system' },
   { key: 'privacy', label: 'Confidentialité', icon: 'Fingerprint', group: 'system' },
   { key: 'billing', label: 'Facturation', icon: 'CreditCard', minPlan: 'premium', group: 'system' },
+  { key: 'settings', label: 'Paramètres', icon: 'UserCog', group: 'admin' },
   { key: 'admin', label: 'Espace Admin', icon: 'Settings', group: 'admin' },
   { key: 'super_admin', label: 'Super Admin', icon: 'Crown', group: 'admin' },
 ];
@@ -79,26 +80,26 @@ export const PLANS: PlanDef[] = [
     id: 'starter', name: 'Starter', price: 9, priceAnnual: 7, currency: 'USD',
     maxUsers: 2, maxDeals: 100, trialDays: 7,
     features: ['Pipeline', 'Contacts', 'Companies', 'Tâches', 'Calendrier', 'Support client', 'Confidentialité RGPD', 'Sécurité'],
-    modules: ['dashboard','pipeline','contacts','companies','tasks','calendar','notifications','security','privacy','admin','tickets'],
+    modules: ['dashboard','pipeline','contacts','companies','tasks','calendar','notifications','security','privacy','settings','admin','tickets'],
   },
   {
     id: 'pro', name: 'Pro', price: 29, priceAnnual: 24, currency: 'USD',
     maxUsers: 5, maxDeals: 0, trialDays: 7, customRoles: true,
     features: ['Tout Starter +', 'Forecast', 'Rapports avancés', 'Automatisations', 'Devis & Factures', 'Territoires & Quotas', 'Rôles personnalisés', 'Activités'],
-    modules: ['dashboard','pipeline','contacts','companies','activities','tasks','calendar','forecast','reports','automations','notifications','security','privacy','admin','tickets','quotes_invoices','territories'],
+    modules: ['dashboard','pipeline','contacts','companies','activities','tasks','calendar','forecast','reports','automations','notifications','security','privacy','settings','admin','tickets','quotes_invoices','territories'],
   },
   {
     id: 'premium', name: 'Premium', price: 69, priceAnnual: 57, currency: 'USD',
     maxUsers: 15, maxDeals: 0, trialDays: 7, customRoles: true, multiCurrency: true, mobileMoney: true, api: true,
     features: ['Tout Pro +', 'Documents', 'Campagnes email', 'Base de connaissances', 'Multi-devise & Mobile Money', 'API', 'Import/Export', 'Facturation'],
-    modules: ['dashboard','pipeline','contacts','companies','activities','tasks','calendar','forecast','reports','import_export','automations','documents','notifications','security','privacy','admin','tickets','quotes_invoices','territories','campaigns','knowledge_base','billing'],
+    modules: ['dashboard','pipeline','contacts','companies','activities','tasks','calendar','forecast','reports','import_export','automations','documents','notifications','security','privacy','settings','admin','tickets','quotes_invoices','territories','campaigns','knowledge_base','billing'],
     highlight: true,
   },
   {
     id: 'entreprise', name: 'Entreprise', price: 159, priceAnnual: 132, currency: 'USD',
     maxUsers: 0, maxDeals: 0, trialDays: 7, customRoles: true, multiCurrency: true, mobileMoney: true, api: true, whiteLabel: true, webhooks: true, prioritySupport: true, sla: true,
     features: ['Tout Premium +', 'Support prioritaire', 'Marque blanche partielle', 'Webhooks/API complète', 'SLA', 'Utilisateurs illimités'],
-    modules: ['dashboard','pipeline','contacts','companies','activities','tasks','calendar','forecast','reports','import_export','automations','documents','notifications','security','privacy','admin','tickets','quotes_invoices','territories','campaigns','knowledge_base','billing'],
+    modules: ['dashboard','pipeline','contacts','companies','activities','tasks','calendar','forecast','reports','import_export','automations','documents','notifications','security','privacy','settings','admin','tickets','quotes_invoices','territories','campaigns','knowledge_base','billing'],
   },
 ];
 
@@ -179,7 +180,7 @@ export const COUNTRIES: CountryDef[] = [
   { code: 'EH', name: 'Sahara occidental', dial: '+212', currency: 'MAD', timezone: 'Africa/El_Aaiun', mobileMoney: [], regions: ['Laâyoune','Dakhla'] },
   { code: 'ZM', name: 'Zambie', dial: '+260', currency: 'ZMW', timezone: 'Africa/Lusaka', mobileMoney: ['Airtel Money','MTN Mobile Money'], regions: ['Lusaka','Kitwe','Ndola','Kabwe'] },
   { code: 'ZW', name: 'Zimbabwe', dial: '+263', currency: 'ZWL', timezone: 'Africa/Harare', mobileMoney: ['EcoCash','OneMoney'], regions: ['Harare','Bulawayo','Mutare','Gweru'] },
-  // International (Dubaï / LIYHA GROUP)
+  // International (LiAfrik — Dubaï & Yaoundé)
   { code: 'AE', name: 'Émirats Arabes Unis', dial: '+971', currency: 'AED', timezone: 'Asia/Dubai', mobileMoney: [], regions: ['Dubaï','Abu Dhabi','Sharjah'] },
   { code: 'FR', name: 'France', dial: '+33', currency: 'EUR', timezone: 'Europe/Paris', mobileMoney: [], regions: ['Paris','Lyon','Marseille','Bordeaux'] },
   { code: 'US', name: 'États-Unis', dial: '+1', currency: 'USD', timezone: 'America/New_York', mobileMoney: [], regions: ['New York','Californie','Texas'] },

@@ -13,7 +13,7 @@ export function Documents() {
 
   const load = async () => {
     if (!tenant) return;
-    const { data } = await supabase.from('documents').select('*').order('created_at', { ascending: false });
+    const { data } = await supabase.from('documents').select('*').order('created_at', { ascending: false }).limit(2000);
     setItems(data || []);
   };
   useEffect(() => { load(); }, [tenant]);

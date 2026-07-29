@@ -40,11 +40,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [tenant, profile?.id]);
 
   const visibleModules: ModuleDef[] = useMemo(() => {
-    if (isSuperAdmin) return MODULES.filter(m => m.key === 'super_admin' || m.key === 'dashboard');
+    if (isSuperAdmin) return MODULES.filter(m => m.key === 'dashboard');
     return MODULES.filter(m => {
       if (m.key === 'super_admin') return false;
-      if (m.key === 'admin') return profile?.role === 'admin'; // Espace Admin: tenant admins only
-      return true;
+      if (m.key === 'admin') return profile?.role === 'admin'; // Espace Admin (équipe/rôles) : tenant admins only
+      return true; // Paramètres (settings) and everything else: visible to all tenant members
     });
   }, [isSuperAdmin, profile?.role]);
 

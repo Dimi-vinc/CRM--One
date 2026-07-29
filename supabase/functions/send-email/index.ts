@@ -14,7 +14,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
-const PLATFORM_NAME = Deno.env.get("PLATFORM_NAME") || "LiAfrik One";
+const PLATFORM_NAME = Deno.env.get("PLATFORM_NAME") || "CRM-One";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 200, headers: corsHeaders });

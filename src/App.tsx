@@ -32,6 +32,7 @@ const Documents = lazy(() => import('./pages/modules/Documents').then(m => ({ de
 const Automations = lazy(() => import('./pages/modules/Automations').then(m => ({ default: m.Automations })));
 const Notifications = lazy(() => import('./pages/modules/Notifications').then(m => ({ default: m.Notifications })));
 const Security = lazy(() => import('./pages/modules/Security').then(m => ({ default: m.Security })));
+const Settings = lazy(() => import('./pages/modules/Settings').then(m => ({ default: m.Settings })));
 const Billing = lazy(() => import('./pages/modules/Billing').then(m => ({ default: m.Billing })));
 const AdminModule = lazy(() => import('./pages/admin/AdminModule').then(m => ({ default: m.AdminModule })));
 const Tickets = lazy(() => import('./pages/modules/Tickets').then(m => ({ default: m.Tickets })));
@@ -103,6 +104,7 @@ export default function App() {
             <Route path="/territories" element={<RequireAuth><Shell><Territories /></Shell></RequireAuth>} />
             <Route path="/notifications" element={<RequireAuth><Shell><Notifications /></Shell></RequireAuth>} />
             <Route path="/security" element={<RequireAuth><Shell><Security /></Shell></RequireAuth>} />
+            <Route path="/settings" element={<RequireAuth><Shell><Settings /></Shell></RequireAuth>} />
             <Route path="/billing" element={<RequireAuth><Shell><Billing /></Shell></RequireAuth>} />
             <Route path="/admin" element={<RequireAuth roles={['admin']}><Shell><AdminModule /></Shell></RequireAuth>} />
 

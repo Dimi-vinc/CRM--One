@@ -7,7 +7,7 @@ import { Button, Input, Select } from '../components/ui';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { COUNTRIES, COUNTRY_BY_CODE, CURRENCIES, PLANS, PLAN_BY_ID, formatMoney, PLATFORM_NAME } from '../lib/constants';
+import { COUNTRIES, COUNTRY_BY_CODE, CURRENCIES, PLANS, PLAN_BY_ID, formatMoney, PLATFORM_NAME, PLATFORM_VENDOR } from '../lib/constants';
 
 const STEPS = ['onboarding.location', 'onboarding.currency', 'onboarding.plan', 'onboarding.comCode'] as const;
 
@@ -213,7 +213,7 @@ export function Onboarding() {
             )}
           </div>
         </div>
-        <p className="mt-6 text-center text-xs text-gray-400">{PLATFORM_NAME} · LIYHA GROUP</p>
+        <p className="mt-6 text-center text-xs text-gray-400">{PLATFORM_NAME} · {PLATFORM_VENDOR}</p>
       </div>
     </div>
   );

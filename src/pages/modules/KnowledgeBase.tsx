@@ -19,7 +19,7 @@ export function KnowledgeBase() {
   const load = async () => {
     if (!tenant) return;
     setLoading(true);
-    const { data } = await supabase.from('kb_articles').select('*').order('updated_at', { ascending: false });
+    const { data } = await supabase.from('kb_articles').select('*').order('updated_at', { ascending: false }).limit(1000);
     setItems(data || []);
     setLoading(false);
   };
