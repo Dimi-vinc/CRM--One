@@ -166,7 +166,7 @@ export function Security() {
               <p className="text-sm text-gray-500">Modifiez-le régulièrement.</p>
             </div>
           </div>
-          <Button className="mt-4 w-full" variant="secondary" onClick={() => supabase.auth.resetPasswordForEmail(profile?.email || '')}>
+          <Button className="mt-4 w-full" variant="secondary" onClick={() => supabase.auth.resetPasswordForEmail(profile?.email || '', { redirectTo: `${window.location.origin}${window.location.pathname}#/reset-password` })}>
             Réinitialiser par email
           </Button>
         </Card>

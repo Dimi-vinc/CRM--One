@@ -13,6 +13,8 @@ import { Landing } from './pages/Landing';
 // actually navigate to instead of the whole app in one ~1.2MB bundle.
 const Pricing = lazy(() => import('./pages/Pricing').then(m => ({ default: m.Pricing })));
 const Login = lazy(() => import('./pages/Login').then(m => ({ default: m.Login })));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword').then(m => ({ default: m.ForgotPassword })));
+const ResetPassword = lazy(() => import('./pages/ResetPassword').then(m => ({ default: m.ResetPassword })));
 const MfaChallenge = lazy(() => import('./pages/MfaChallenge').then(m => ({ default: m.MfaChallenge })));
 const Signup = lazy(() => import('./pages/Signup').then(m => ({ default: m.Signup })));
 const Onboarding = lazy(() => import('./pages/Onboarding').then(m => ({ default: m.Onboarding })));
@@ -50,6 +52,7 @@ const CommercialCodes = lazy(() => import('./pages/superadmin/CommercialCodes').
 const Tracking = lazy(() => import('./pages/superadmin/Tracking').then(m => ({ default: m.Tracking })));
 const AuditLogPage = lazy(() => import('./pages/superadmin/AuditLogPage').then(m => ({ default: m.AuditLogPage })));
 const Announcements = lazy(() => import('./pages/superadmin/Announcements').then(m => ({ default: m.Announcements })));
+const SuperAdminTeam = lazy(() => import('./pages/superadmin/SuperAdminTeam').then(m => ({ default: m.SuperAdminTeam })));
 
 function Shell({ children }: { children: React.ReactNode }) {
   return <AppShell>{children}</AppShell>;
@@ -79,6 +82,8 @@ export default function App() {
             <Route path="/contact" element={<LegalPage type="contact" />} />
             <Route path="/help/:tenantId" element={<PublicKnowledgeBase />} />
             <Route path="/login" element={<PublicOnly><Login /></PublicOnly>} />
+            <Route path="/forgot-password" element={<PublicOnly><ForgotPassword /></PublicOnly>} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/mfa-challenge" element={<RequireMfaPending><MfaChallenge /></RequireMfaPending>} />
             <Route path="/signup" element={<PublicOnly><Signup /></PublicOnly>} />
             <Route path="/onboarding" element={<RequireAuth requireTenant={false}><Onboarding /></RequireAuth>} />
@@ -116,6 +121,7 @@ export default function App() {
             <Route path="/super-admin/tracking" element={<RequireAuth roles={['super_admin']}><SuperAdminShell><Tracking /></SuperAdminShell></RequireAuth>} />
             <Route path="/super-admin/audit" element={<RequireAuth roles={['super_admin']}><SuperAdminShell><AuditLogPage /></SuperAdminShell></RequireAuth>} />
             <Route path="/super-admin/announcements" element={<RequireAuth roles={['super_admin']}><SuperAdminShell><Announcements /></SuperAdminShell></RequireAuth>} />
+            <Route path="/super-admin/team" element={<RequireAuth roles={['super_admin']}><SuperAdminShell><SuperAdminTeam /></SuperAdminShell></RequireAuth>} />
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

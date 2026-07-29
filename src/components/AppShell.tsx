@@ -4,7 +4,7 @@ import * as Icons from 'lucide-react';
 import { ChevronDown, LogOut, Settings, Crown, Menu, X, Bell, Search, Building2 } from 'lucide-react';
 import { Logo } from './Logo';
 import { useAuth } from '../context/AuthContext';
-import { MODULES, type ModuleDef, planIncludes, type ModuleKey, PLAN_BY_ID, SUPER_ADMIN_EMAILS } from '../lib/constants';
+import { MODULES, type ModuleDef, planIncludes, type ModuleKey, PLAN_BY_ID } from '../lib/constants';
 import { classNames, daysUntil } from '../lib/utils';
 import { Avatar } from './ui';
 import { supabase } from '../lib/supabase';
@@ -27,7 +27,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const planId = tenant?.plan_id || 'starter';
   const trialDaysLeft = tenant?.trial_ends_at ? daysUntil(tenant.trial_ends_at) : null;
-  const isSuperAdmin = profile?.role === 'super_admin' && SUPER_ADMIN_EMAILS.includes(profile?.email?.toLowerCase() || '');
+  const isSuperAdmin = profile?.role === 'super_admin';
 
   useEffect(() => {
     if (!tenant) return;

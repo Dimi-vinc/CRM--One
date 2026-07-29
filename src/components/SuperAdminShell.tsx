@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Building2, CreditCard, Ticket, Trophy, ScrollText, Megaphone, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Building2, CreditCard, Ticket, Trophy, ScrollText, Megaphone, ShieldCheck, LogOut, Menu, X } from 'lucide-react';
 import { Logo } from './Logo';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -16,6 +16,7 @@ const NAV = [
   { to: '/super-admin/tracking', label: 'Tracking', icon: Trophy },
   { to: '/super-admin/audit', label: 'Journal d\'audit', icon: ScrollText },
   { to: '/super-admin/announcements', label: 'Annonces', icon: Megaphone },
+  { to: '/super-admin/team', label: 'Équipe Super Admin', icon: ShieldCheck },
 ];
 
 export function SuperAdminShell({ children }: { children: ReactNode }) {

@@ -34,7 +34,7 @@ export function Signup() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-mint-50/30 lg:grid lg:grid-cols-2">
+    <div className="flex min-h-screen flex-col bg-blue-50/30 lg:grid lg:grid-cols-2">
       <div className="flex flex-1 items-center justify-center px-4 py-12">
         <div className="w-full max-w-sm">
           <div className="flex items-center justify-between">
@@ -82,17 +82,17 @@ export function Signup() {
               {loading ? t('common.loading') : t('auth.signupBtn')}
             </Button>
             <p className="text-center text-xs text-gray-400">
-              {t('auth.or')} <Link to="/cgu" className="hover:text-coral-600">{t('footer.cgu')}</Link> · <Link to="/privacy" className="hover:text-coral-600">{t('footer.privacy')}</Link>
+              {t('auth.or')} <Link to="/cgu" className="hover:text-blue-700">{t('footer.cgu')}</Link> · <Link to="/privacy" className="hover:text-blue-700">{t('footer.privacy')}</Link>
             </p>
           </form>
           <p className="mt-6 text-center text-sm text-gray-500">
-            {t('auth.haveAccount')} <Link to="/login" className="font-medium text-coral-600 hover:underline">{t('auth.signin')}</Link>
+            {t('auth.haveAccount')} <Link to="/login" className="font-medium text-blue-700 hover:underline">{t('auth.signin')}</Link>
           </p>
         </div>
       </div>
-      <div className="hidden bg-gradient-to-br from-coral-50 via-mint-50 to-mint-100 lg:flex lg:items-center lg:justify-center lg:p-12">
+      <div className="hidden bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 lg:flex lg:items-center lg:justify-center lg:p-12">
         <div className="max-w-md">
-          <h2 className="text-3xl font-bold text-gray-900">{t('landing.heroTitle1')} <span className="text-coral-600">{t('landing.heroTitle2')}</span></h2>
+          <h2 className="text-3xl font-bold text-gray-900">{t('landing.heroTitle1')} <span className="text-blue-700">{t('landing.heroTitle2')}</span></h2>
           <ul className="mt-6 space-y-3 text-gray-700">
             {[
               t('landing.feature1.title'),
@@ -100,7 +100,7 @@ export function Signup() {
               t('landing.feature6.title'),
               t('landing.feature3.title'),
             ].map(item => (
-              <li key={item} className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-coral-500" />{item}</li>
+              <li key={item} className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-blue-600" />{item}</li>
             ))}
           </ul>
           <p className="mt-8 text-sm text-gray-500">LiAfrik — Dubaï & Yaoundé — {t('footer.locations')}</p>

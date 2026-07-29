@@ -52,11 +52,11 @@ export function MfaChallenge() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-mint-50/30 px-4">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-blue-50/30 px-4">
       <div className="w-full max-w-sm">
         <div className="flex justify-center"><Logo size="lg" /></div>
         <div className="mt-8 flex items-center justify-center gap-2">
-          <ShieldCheck size={22} className="text-mint-600" />
+          <ShieldCheck size={22} className="text-blue-600" />
           <h1 className="text-2xl font-bold text-gray-900">Vérification en 2 étapes</h1>
         </div>
         <p className="mt-1 text-center text-sm text-gray-500">Entrez le code à 6 chiffres de votre application d'authentification.</p>

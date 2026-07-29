@@ -33,7 +33,7 @@ export function Login() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-mint-50/30 lg:grid lg:grid-cols-2">
+    <div className="flex min-h-screen flex-col bg-blue-50/30 lg:grid lg:grid-cols-2">
       <div className="flex flex-1 items-center justify-center px-4 py-12">
         <div className="w-full max-w-sm">
           <div className="flex items-center justify-between">
@@ -56,6 +56,7 @@ export function Login() {
                 <Lock size={16} className="absolute left-3 top-3.5 text-gray-400" />
                 <input type="password" required value={password} onChange={e => setPassword(e.target.value)} className="input pl-9" placeholder="••••••••" />
               </div>
+              <Link to="/forgot-password" className="mt-1.5 inline-block text-xs font-medium text-blue-700 hover:underline">Mot de passe oublié ?</Link>
             </div>
             {error && (
               <div className="flex items-start gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
@@ -68,13 +69,13 @@ export function Login() {
             </Button>
           </form>
           <p className="mt-6 text-center text-sm text-gray-500">
-            {t('auth.noAccount')} <Link to="/signup" className="font-medium text-coral-600 hover:underline">{t('auth.createAccount')}</Link>
+            {t('auth.noAccount')} <Link to="/signup" className="font-medium text-blue-700 hover:underline">{t('auth.createAccount')}</Link>
           </p>
         </div>
       </div>
-      <div className="hidden bg-gradient-to-br from-mint-100 via-mint-50 to-coral-50 lg:flex lg:items-center lg:justify-center lg:p-12">
+      <div className="hidden bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 lg:flex lg:items-center lg:justify-center lg:p-12">
         <div className="max-w-md">
-          <h2 className="text-3xl font-bold text-gray-900">{t('landing.heroTitle1')} <span className="text-coral-600">{t('landing.heroTitle2')}</span></h2>
+          <h2 className="text-3xl font-bold text-gray-900">{t('landing.heroTitle1')} <span className="text-blue-700">{t('landing.heroTitle2')}</span></h2>
           <p className="mt-4 text-gray-600">{t('landing.heroSubtitle')}</p>
           <div className="mt-8 grid grid-cols-2 gap-3">
             {[['USD','$'],['EUR','€'],['GBP','£'],['AED','د.إ'],['XOF','FCFA'],['NGN','₦']].map(([c,s]) => (
