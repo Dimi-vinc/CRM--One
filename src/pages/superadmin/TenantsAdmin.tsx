@@ -49,6 +49,7 @@ export function TenantsAdmin() {
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher…" className="input pl-9" />
       </div>
       <Card className="overflow-hidden">
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500"><tr><th className="px-4 py-3">Entreprise</th><th className="px-4 py-3">Pays</th><th className="px-4 py-3">Plan</th><th className="px-4 py-3">Statut</th><th className="px-4 py-3">Créé</th><th className="px-4 py-3"></th></tr></thead>
           <tbody className="divide-y divide-gray-50">
@@ -70,6 +71,7 @@ export function TenantsAdmin() {
             ))}
           </tbody>
         </table>
+        </div>
       </Card>
 
       <Modal open={!!edit} onClose={() => setEdit(null)} title="Modifier le tenant">

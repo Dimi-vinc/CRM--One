@@ -142,6 +142,7 @@ export function Contacts() {
         <Card className="p-8"><EmptyState icon={Building2} title="Aucun contact" description="Ajoutez votre premier contact pour démarrer." action={<Button onClick={() => setModal(true)}><Plus size={16} /> Ajouter</Button>} /></Card>
       ) : (
         <Card className="overflow-hidden">
+          <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
               <tr>
@@ -176,6 +177,7 @@ export function Contacts() {
               ))}
             </tbody>
           </table>
+          </div>
         </Card>
       )}
 

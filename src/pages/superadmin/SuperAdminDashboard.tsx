@@ -114,6 +114,7 @@ export function SuperAdminDashboard() {
 
       <Card className="mt-6 overflow-hidden">
         <div className="border-b border-gray-100 px-5 py-3"><h3 className="text-sm font-semibold text-gray-900">{t('sa.recentTenants')}</h3></div>
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500"><tr><th className="px-4 py-2.5">{t('sa.company')}</th><th className="px-4 py-2.5">{t('common.country')}</th><th className="px-4 py-2.5">{t('common.plan')}</th><th className="px-4 py-2.5">{t('common.status')}</th><th className="px-4 py-2.5">{t('common.created')}</th></tr></thead>
           <tbody className="divide-y divide-gray-50">
@@ -128,6 +129,7 @@ export function SuperAdminDashboard() {
             ))}
           </tbody>
         </table>
+        </div>
       </Card>
     </div>
   );

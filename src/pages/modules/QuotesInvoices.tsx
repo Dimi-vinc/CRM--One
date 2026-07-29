@@ -255,12 +255,12 @@ export function QuotesInvoices() {
             <p className="label mb-1">Lignes</p>
             <div className="space-y-2">
               {form.lines.map((it, idx) => (
-                <div key={idx} className="grid grid-cols-12 gap-2">
-                  <input className="input col-span-5" placeholder="Description" value={it.description} onChange={e => updateLine(idx, { description: e.target.value })} />
-                  <input className="input col-span-2" type="number" min={0} placeholder="Qté" value={it.quantity} onChange={e => updateLine(idx, { quantity: Number(e.target.value) })} />
-                  <input className="input col-span-2" type="number" min={0} placeholder="Prix unit." value={it.unit_price} onChange={e => updateLine(idx, { unit_price: Number(e.target.value) })} />
-                  <input className="input col-span-2" type="number" min={0} placeholder="Taxe %" value={it.tax_rate} onChange={e => updateLine(idx, { tax_rate: Number(e.target.value) })} />
-                  <button className="col-span-1 text-gray-400 hover:text-red-600" onClick={() => setForm(f => ({ ...f, lines: f.lines.filter((_, i) => i !== idx) }))}><Trash2 size={16} /></button>
+                <div key={idx} className="grid grid-cols-2 gap-2 sm:grid-cols-12">
+                  <input className="input col-span-2 sm:col-span-5" placeholder="Description" value={it.description} onChange={e => updateLine(idx, { description: e.target.value })} />
+                  <input className="input col-span-1 sm:col-span-2" type="number" min={0} placeholder="Qté" value={it.quantity} onChange={e => updateLine(idx, { quantity: Number(e.target.value) })} />
+                  <input className="input col-span-1 sm:col-span-2" type="number" min={0} placeholder="Prix unit." value={it.unit_price} onChange={e => updateLine(idx, { unit_price: Number(e.target.value) })} />
+                  <input className="input col-span-1 sm:col-span-2" type="number" min={0} placeholder="Taxe %" value={it.tax_rate} onChange={e => updateLine(idx, { tax_rate: Number(e.target.value) })} />
+                  <button className="col-span-1 sm:col-span-1 flex items-center justify-center text-gray-400 hover:text-red-600" onClick={() => setForm(f => ({ ...f, lines: f.lines.filter((_, i) => i !== idx) }))}><Trash2 size={16} /></button>
                 </div>
               ))}
             </div>

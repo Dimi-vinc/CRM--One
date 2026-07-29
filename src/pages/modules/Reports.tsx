@@ -58,6 +58,7 @@ export function Reports() {
 
       <Card className="mt-6 overflow-hidden">
         <div className="border-b border-gray-100 px-5 py-3"><h3 className="text-sm font-semibold text-gray-900">Détail des deals</h3></div>
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
             <tr><th className="px-4 py-2.5">Titre</th><th className="px-4 py-2.5">Montant</th><th className="px-4 py-2.5">Étape</th><th className="px-4 py-2.5">Échéance</th></tr>
@@ -74,6 +75,7 @@ export function Reports() {
             {filtered.length === 0 && <tr><td colSpan={4} className="px-4 py-8 text-center text-gray-400">Aucun deal</td></tr>}
           </tbody>
         </table>
+        </div>
       </Card>
     </div>
   );

@@ -55,6 +55,7 @@ export function CommercialCodes() {
         <Card className="p-8"><EmptyState icon={Ticket} title="Aucun code commercial" description="Créez un code pour chaque commercial afin de tracer ses ventes." action={<Button onClick={() => setModal(true)}>Créer</Button>} /></Card>
       ) : (
         <Card className="overflow-hidden">
+          <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500"><tr><th className="px-4 py-3">Code</th><th className="px-4 py-3">Label</th><th className="px-4 py-3">Email</th><th className="px-4 py-3">Pays</th><th className="px-4 py-3">Statut</th><th className="px-4 py-3">Créé</th><th className="px-4 py-3"></th></tr></thead>
             <tbody className="divide-y divide-gray-50">
@@ -71,6 +72,7 @@ export function CommercialCodes() {
               ))}
             </tbody>
           </table>
+          </div>
         </Card>
       )}
 

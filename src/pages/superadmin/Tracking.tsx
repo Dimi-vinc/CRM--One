@@ -62,6 +62,7 @@ export function Tracking() {
 
       <Card className="overflow-hidden">
         <div className="border-b border-gray-100 px-5 py-3 flex items-center gap-2"><Trophy size={16} className="text-coral-500" /><h3 className="text-sm font-semibold text-gray-900">Classement</h3></div>
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500"><tr><th className="px-4 py-2.5">#</th><th className="px-4 py-2.5">Commercial</th><th className="px-4 py-2.5">Code</th><th className="px-4 py-2.5">Pays</th><th className="px-4 py-2.5">Ventes</th><th className="px-4 py-2.5">Total USD</th></tr></thead>
           <tbody className="divide-y divide-gray-50">
@@ -78,6 +79,7 @@ export function Tracking() {
             {filtered.length === 0 && <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400">Aucune vente tracée. Créez des codes commerciaux et invitez des clients à les utiliser à l'inscription.</td></tr>}
           </tbody>
         </table>
+        </div>
       </Card>
     </div>
   );
