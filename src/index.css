@@ -2,6 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Glacial Indifference — SIL OFL licensed, self-hosted (see public/fonts/LICENSE.txt).
+   Only two real weights exist for this typeface: Regular (400) and Bold (700) — there is no
+   genuine Medium weight, so headings/accents use Bold rather than a fabricated in-between. */
+@font-face {
+  font-family: 'Glacial Indifference';
+  src: url('/fonts/GlacialIndifference-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Glacial Indifference';
+  src: url('/fonts/GlacialIndifference-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @layer base {
   html, body, #root { height: 100%; }
   body {

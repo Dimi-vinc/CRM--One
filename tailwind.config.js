@@ -45,7 +45,21 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+        sans: ['Glacial Indifference', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+      },
+      // Glacial Indifference only ships 2 real weights (Regular 400 / Bold 700). Every Tailwind
+      // weight utility is mapped to one of these two so the browser never has to synthesize a
+      // fake weight it doesn't have a real file for (which looks inconsistent/unprofessional).
+      fontWeight: {
+        thin: '400',
+        extralight: '400',
+        light: '400',
+        normal: '400',
+        medium: '700',
+        semibold: '700',
+        bold: '700',
+        extrabold: '700',
+        black: '700',
       },
       boxShadow: {
         card: '0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)',

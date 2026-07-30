@@ -5,14 +5,17 @@
 -- collègue depuis l'app malgré l'intention du mécanisme).
 
 DROP POLICY IF EXISTS "read_super_admin_emails" ON public.super_admin_emails;
+DROP POLICY IF EXISTS "super_admin_emails_select" ON public.super_admin_emails;
 CREATE POLICY "super_admin_emails_select" ON public.super_admin_emails
   FOR SELECT TO authenticated
   USING (public.is_super_admin());
 
+DROP POLICY IF EXISTS "super_admin_emails_insert" ON public.super_admin_emails;
 CREATE POLICY "super_admin_emails_insert" ON public.super_admin_emails
   FOR INSERT TO authenticated
   WITH CHECK (public.is_super_admin());
 
+DROP POLICY IF EXISTS "super_admin_emails_delete" ON public.super_admin_emails;
 CREATE POLICY "super_admin_emails_delete" ON public.super_admin_emails
   FOR DELETE TO authenticated
   USING (public.is_super_admin());

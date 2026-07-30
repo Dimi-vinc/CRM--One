@@ -109,6 +109,8 @@ CREATE TRIGGER trg_prevent_tenant_billing_bypass
 DROP POLICY IF EXISTS "subscriptions_update_own" ON public.subscriptions;
 DROP POLICY IF EXISTS "subscriptions_delete_own" ON public.subscriptions;
 DROP POLICY IF EXISTS "subscriptions_modify_own" ON public.subscriptions;
+DROP POLICY IF EXISTS "subscriptions_update_super_admin_only" ON public.subscriptions;
+DROP POLICY IF EXISTS "subscriptions_delete_super_admin_only" ON public.subscriptions;
 CREATE POLICY "subscriptions_update_super_admin_only" ON public.subscriptions
   FOR UPDATE TO authenticated
   USING (public.is_super_admin())
