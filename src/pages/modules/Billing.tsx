@@ -66,12 +66,23 @@ export function Billing() {
     const params = new URLSearchParams(window.location.search);
     const status = params.get('status');
     if (status === 'success') {
-      const plan = params.get('plan');
-      setNote(`Paiement réussi. Votre plan ${plan || ''} est actif.`);
-      // update tenant plan + subscription status (best-effort; Stripe webhook would normally do this)
-      if (tenant && plan) {
-        supabase.from('tenants').update({ plan_id: plan, status: 'active' }).eq('id', tenant.id).then(() => window.location.reload());
-      }
+      // The actual plan activation happens server-side via the payment provider's webhook
+      // (stripe-webhook / flutterwave-webhook), which is the only trustworthy source of truth
+      // for "was this really paid". We never set plan_id/status from a client-side URL param —
+      // that was a full billing-bypass vulnerability (anyone could type this URL and get any
+      // plan for free). We just poll briefly for the webhook to land, then refresh.
+      setNote('Paiement en cours de confirmation…');
+      let attempts = 0;
+      const poll = setInterval(async () => {
+        attempts++;
+        const { data } = await supabase.from('tenants').select('status').eq('id', tenant?.id).maybeSingle();
+        if (data?.status === 'active' || attempts >= 10) {
+          clearInterval(poll);
+          if (data?.status === 'active') { setNote('Paiement confirmé, votre plan est actif.'); window.location.reload(); }
+          else setNote("Paiement reçu par le fournisseur, en attente de confirmation finale. Actualisez la page dans une minute si le plan ne se met pas à jour.");
+        }
+      }, 2000);
+      return () => clearInterval(poll);
     } else if (status === 'cancel') {
       setError('Paiement annulé. Vous pouvez réessayer à tout moment.');
     }

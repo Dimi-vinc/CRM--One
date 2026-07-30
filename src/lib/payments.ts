@@ -100,15 +100,48 @@ const stripeProvider: PaymentProvider = {
   },
 };
 
-// ---- Flutterwave placeholder (same interface, ready to wire) ----
+// ---- Flutterwave provider (via Supabase edge function) ----
 const flutterwaveProvider: PaymentProvider = {
   code: 'flutterwave',
   label: 'Flutterwave',
-  async createCheckoutSession(): Promise<CheckoutResult> {
-    return { ok: false, provider: 'flutterwave', error: 'Flutterwave non configuré — Stripe actif' };
+  async createCheckoutSession(req: CheckoutRequest): Promise<CheckoutResult> {
+    const plan = PLAN_BY_ID[req.planId];
+    if (!plan) return { ok: false, provider: 'flutterwave', error: 'Plan inconnu' };
+    try {
+      const fnUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/flutterwave-checkout`;
+      const { data: sessionData } = await supabase.auth.getSession();
+      const res = await fetch(fnUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${sessionData.session?.access_token || ''}`,
+          apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({
+          planId: req.planId,
+          currency: req.currency,
+          tenantId: req.tenantId,
+          email: req.email,
+          successUrl: req.successUrl,
+        }),
+      });
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        return { ok: false, provider: 'flutterwave', error: errBody.error || `Erreur ${res.status}` };
+      }
+      const data = await res.json();
+      if (!data?.url) return { ok: false, provider: 'flutterwave', error: 'Réponse invalide' };
+      return { ok: true, provider: 'flutterwave', url: data.url };
+    } catch (e: any) {
+      return { ok: false, provider: 'flutterwave', error: e?.message || 'Échec réseau' };
+    }
   },
   async createPortalSession(): Promise<CheckoutResult> {
-    return { ok: false, provider: 'flutterwave', error: 'Flutterwave non configuré' };
+    // Flutterwave has no self-service billing portal equivalent to Stripe's — subscription
+    // management (cancel/upgrade) currently has to be handled by contacting support, or the
+    // tenant simply lets the period lapse (no auto-recycling charge is made without a follow-up
+    // Payment Plans integration).
+    return { ok: false, provider: 'flutterwave', error: "Flutterwave ne propose pas de portail self-service. Contactez le support pour gérer votre abonnement." };
   },
 };
 
