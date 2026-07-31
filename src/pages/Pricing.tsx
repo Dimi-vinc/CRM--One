@@ -19,8 +19,8 @@ export function Pricing() {
           <div className="flex items-center gap-2">
             <LanguageSelector />
             <Link to="/" className="btn-ghost"><ArrowLeft size={16} /> {lang === 'fr' ? 'Accueil' : 'Home'}</Link>
-            <Link to="/login" className="btn-secondary">{t('nav.login')}</Link>
-            <Link to="/signup" className="btn-primary">{t('nav.signup')}</Link>
+            <Link to="/login" className="btn-secondary-landing">{t('nav.login')}</Link>
+            <Link to="/signup" className="btn-primary-landing">{t('nav.signup')}</Link>
           </div>
         </div>
       </header>
@@ -52,8 +52,8 @@ export function Pricing() {
           {PLANS.map(plan => {
             const price = annual ? plan.priceAnnual : plan.price;
             return (
-              <div key={plan.id} className={`card flex flex-col p-6 ${plan.highlight ? 'ring-2 ring-coral-400 border-coral-300' : ''}`}>
-                {plan.highlight && <div className="mb-2 inline-flex w-fit rounded-full bg-coral-100 px-2.5 py-0.5 text-xs font-semibold text-coral-700">{t('common.popular')}</div>}
+              <div key={plan.id} className={`card flex flex-col p-6 ${plan.highlight ? 'ring-2 ring-blue-500 border-blue-300' : ''}`}>
+                {plan.highlight && <div className="mb-2 inline-flex w-fit rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800">{t('common.popular')}</div>}
                 <h3 className="text-lg font-bold text-gray-900">{plan.name}</h3>
                 <p className="mt-3">
                   <span className="text-3xl font-bold text-gray-900">{formatMoney(price, plan.currency)}</span>
@@ -77,7 +77,7 @@ export function Pricing() {
                     </li>
                   ))}
                 </ul>
-                <Link to="/signup" className={`mt-6 ${plan.highlight ? 'btn-primary' : 'btn-secondary'}`}>
+                <Link to="/signup" className={`mt-6 ${plan.highlight ? 'btn-primary-landing' : 'btn-secondary-landing'}`}>
                   {t('landing.tryFree')}
                 </Link>
                 <p className="mt-2 text-center text-xs text-gray-400">{lang === 'fr' ? '7 jours d\'essai · Sans carte' : '7-day trial · No card'}</p>
@@ -128,7 +128,7 @@ export function Pricing() {
         </div>
       </section>
 
-      <Footer onManageCookies={() => window.__liafrikOpenCookies?.()} />
+      <Footer onManageCookies={() => window.__crmOneOpenCookies?.()} />
     </div>
   );
 }

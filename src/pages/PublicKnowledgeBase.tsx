@@ -32,13 +32,13 @@ export function PublicKnowledgeBase() {
     <div className="min-h-screen bg-gray-50 px-4 py-10">
       <div className="mx-auto max-w-3xl">
         <div className="mb-6 flex items-center gap-2">
-          <BookOpen size={24} className="text-coral-600" />
+          <BookOpen size={24} className="text-blue-700" />
           <h1 className="text-2xl font-bold text-gray-900">Centre d'aide</h1>
         </div>
 
         {selected ? (
           <div className="rounded-xl bg-white p-6 shadow-card">
-            <button onClick={() => setSelected(null)} className="mb-4 text-sm text-coral-600 hover:underline">← Retour</button>
+            <button onClick={() => setSelected(null)} className="mb-4 text-sm text-blue-700 hover:underline">← Retour</button>
             <h2 className="text-xl font-bold text-gray-900">{selected.title}</h2>
             <div className="mt-4 whitespace-pre-wrap text-sm text-gray-700">{selected.content}</div>
           </div>

@@ -106,7 +106,7 @@ export function Onboarding() {
         <div className="mt-8 flex items-center gap-2">
           {STEPS.map((s, i) => (
             <div key={s} className="flex flex-1 items-center gap-2">
-              <div className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${i < step ? 'bg-mint-500 text-white' : i === step ? 'bg-coral-500 text-white' : 'bg-gray-100 text-gray-400'}`}>
+              <div className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${i < step ? 'bg-mint-500 text-white' : i === step ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-400'}`}>
                 {i < step ? <CheckCircle2 size={14} /> : i + 1}
               </div>
               <span className={`hidden text-xs sm:inline ${i === step ? 'font-medium text-gray-900' : 'text-gray-500'}`}>{t(s)}</span>
@@ -118,7 +118,7 @@ export function Onboarding() {
         <div className="mt-8 card p-6 sm:p-8">
           {step === 0 && (
             <div className="space-y-4">
-              <div className="flex items-center gap-2"><MapPin className="text-coral-500" size={20} /><h2 className="text-lg font-bold text-gray-900">{t('onboarding.location')}</h2></div>
+              <div className="flex items-center gap-2"><MapPin className="text-blue-600" size={20} /><h2 className="text-lg font-bold text-gray-900">{t('onboarding.location')}</h2></div>
               <Input label={t('onboarding.companyName')} value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="Acme SARL" />
               <Select label={t('onboarding.country')} value={country} onChange={e => onCountryChange(e.target.value)} hint="54 pays africains + pays internationaux">
                 {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
@@ -135,18 +135,18 @@ export function Onboarding() {
 
           {step === 1 && (
             <div className="space-y-4">
-              <div className="flex items-center gap-2"><Coins className="text-coral-500" size={20} /><h2 className="text-lg font-bold text-gray-900">{t('onboarding.chooseCurrency')}</h2></div>
+              <div className="flex items-center gap-2"><Coins className="text-blue-600" size={20} /><h2 className="text-lg font-bold text-gray-900">{t('onboarding.chooseCurrency')}</h2></div>
               <p className="text-sm text-gray-500">{t('onboarding.currencyHint')}</p>
               <Select label={t('common.currency')} value={currency} onChange={e => setCurrency(e.target.value)}>
                 {CURRENCIES.map(c => <option key={c.code} value={c.code}>{c.code} — {c.name} ({c.symbol})</option>)}
               </Select>
-              <p className="rounded-lg bg-coral-50 p-3 text-xs text-coral-700">{t('onboarding.recommended')} : <b>{countryDef?.currency}</b></p>
+              <p className="rounded-lg bg-blue-50 p-3 text-xs text-blue-800">{t('onboarding.recommended')} : <b>{countryDef?.currency}</b></p>
             </div>
           )}
 
           {step === 2 && (
             <div className="space-y-4">
-              <div className="flex items-center gap-2"><CreditCard className="text-coral-500" size={20} /><h2 className="text-lg font-bold text-gray-900">{t('onboarding.choosePlan')}</h2></div>
+              <div className="flex items-center gap-2"><CreditCard className="text-blue-600" size={20} /><h2 className="text-lg font-bold text-gray-900">{t('onboarding.choosePlan')}</h2></div>
               <p className="text-sm text-gray-500">{t('onboarding.planHint')}</p>
               {/* Billing cycle toggle */}
               <div className="inline-flex items-center gap-3 rounded-full bg-gray-100 p-1">
@@ -162,10 +162,10 @@ export function Onboarding() {
                 {PLANS.map(p => {
                   const price = billingCycle === 'annual' ? p.priceAnnual : p.price;
                   return (
-                    <button key={p.id} onClick={() => setPlanId(p.id)} className={`text-left rounded-xl border p-4 transition ${planId === p.id ? 'border-coral-400 ring-2 ring-coral-100 bg-coral-50/40' : 'border-gray-200 hover:border-gray-300'}`}>
+                    <button key={p.id} onClick={() => setPlanId(p.id)} className={`text-left rounded-xl border p-4 transition ${planId === p.id ? 'border-blue-400 ring-2 ring-blue-100 bg-blue-50/40' : 'border-gray-200 hover:border-gray-300'}`}>
                       <div className="flex items-center justify-between">
                         <h3 className="font-semibold text-gray-900">{p.name}</h3>
-                        {p.highlight && <span className="rounded-full bg-coral-100 px-2 py-0.5 text-[10px] font-semibold text-coral-700">{t('common.popular')}</span>}
+                        {p.highlight && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-800">{t('common.popular')}</span>}
                       </div>
                       <p className="mt-1 text-lg font-bold text-gray-900">{formatMoney(price, p.currency)}<span className="text-xs font-normal text-gray-500">{t('common.perMonth')}</span></p>
                       <p className="mt-1 text-xs text-gray-500">{p.maxUsers === 0 ? t('common.unlimited') : `${t('common.upTo')} ${p.maxUsers}`} {t('common.users')}</p>
@@ -178,7 +178,7 @@ export function Onboarding() {
 
           {step === 3 && (
             <div className="space-y-4">
-              <div className="flex items-center gap-2"><Gift className="text-coral-500" size={20} /><h2 className="text-lg font-bold text-gray-900">{t('onboarding.comCodeTitle')}</h2></div>
+              <div className="flex items-center gap-2"><Gift className="text-blue-600" size={20} /><h2 className="text-lg font-bold text-gray-900">{t('onboarding.comCodeTitle')}</h2></div>
               <Input
                 label={`${t('onboarding.comCode')} (${t('common.optional')})`}
                 value={commercialCode}
@@ -207,9 +207,9 @@ export function Onboarding() {
           <div className="mt-6 flex items-center justify-between">
             <Button variant="ghost" onClick={prev} disabled={step === 0 || submitting}><ArrowLeft size={16} /> {t('onboarding.back')}</Button>
             {step < STEPS.length - 1 ? (
-              <Button onClick={next} disabled={!canNext()}>{t('onboarding.continue')} <ArrowRight size={16} /></Button>
+              <Button onClick={next} disabled={!canNext()} className="btn-primary-landing">{t('onboarding.continue')} <ArrowRight size={16} /></Button>
             ) : (
-              <Button onClick={finish} disabled={submitting}>{submitting ? t('onboarding.configuring') : t('onboarding.startTrial')}</Button>
+              <Button onClick={finish} disabled={submitting} className="btn-primary-landing">{submitting ? t('onboarding.configuring') : t('onboarding.startTrial')}</Button>
             )}
           </div>
         </div>

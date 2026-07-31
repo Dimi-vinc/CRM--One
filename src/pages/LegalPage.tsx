@@ -22,7 +22,7 @@ export function LegalPage({ type }: { type: 'privacy' | 'terms' | 'cgu' | 'about
           <h3 className="mt-6 text-lg font-semibold text-gray-900">4. Third-Party Services</h3>
           <p className="mt-2 text-gray-600">We use Supabase for database and authentication, and Stripe for payment processing. These providers comply with GDPR and industry security standards.</p>
           <h3 className="mt-6 text-lg font-semibold text-gray-900">5. Your Rights</h3>
-          <p className="mt-2 text-gray-600">You may request data export, correction, or deletion at any time by contacting <a href="mailto:cs@liafrik.com" className="text-coral-600 hover:underline">cs@liafrik.com</a>.</p>
+          <p className="mt-2 text-gray-600">You may request data export, correction, or deletion at any time by contacting <a href="mailto:cs@liafrik.com" className="text-blue-700 hover:underline">cs@liafrik.com</a>.</p>
         </>
       ),
     },
@@ -85,11 +85,11 @@ export function LegalPage({ type }: { type: 'privacy' | 'terms' | 'cgu' | 'about
       body: (
         <>
           <div className="space-y-4">
-            <div className="flex items-start gap-3"><Building2 size={20} className="mt-0.5 text-coral-500" /><div><p className="font-medium text-gray-900">{PLATFORM_VENDOR}</p><p className="text-gray-600">Dubaï, Émirats Arabes Unis · Yaoundé/Soa, Cameroun</p></div></div>
-            <div className="flex items-start gap-3"><Mail size={20} className="mt-0.5 text-coral-500" /><div><p className="font-medium text-gray-900">Support</p><a href="mailto:support@liafrik.com" className="text-coral-600 hover:underline">support@liafrik.com</a></div></div>
-            <div className="flex items-start gap-3"><Mail size={20} className="mt-0.5 text-coral-500" /><div><p className="font-medium text-gray-900">Service client</p><a href="mailto:cs@liafrik.com" className="text-coral-600 hover:underline">cs@liafrik.com</a></div></div>
-            <div className="flex items-start gap-3"><Phone size={20} className="mt-0.5 text-coral-500" /><div><p className="font-medium text-gray-900">Phone</p><p className="text-gray-600">+971 · +237</p></div></div>
-            <div className="flex items-start gap-3"><MapPin size={20} className="mt-0.5 text-coral-500" /><div><p className="font-medium text-gray-900">Offices</p><p className="text-gray-600">Dubaï · Yaoundé/Soa</p></div></div>
+            <div className="flex items-start gap-3"><Building2 size={20} className="mt-0.5 text-blue-600" /><div><p className="font-medium text-gray-900">{PLATFORM_VENDOR}</p><p className="text-gray-600">Dubaï, Émirats Arabes Unis · Yaoundé/Soa, Cameroun</p></div></div>
+            <div className="flex items-start gap-3"><Mail size={20} className="mt-0.5 text-blue-600" /><div><p className="font-medium text-gray-900">Support</p><a href="mailto:support@liafrik.com" className="text-blue-700 hover:underline">support@liafrik.com</a></div></div>
+            <div className="flex items-start gap-3"><Mail size={20} className="mt-0.5 text-blue-600" /><div><p className="font-medium text-gray-900">Service client</p><a href="mailto:cs@liafrik.com" className="text-blue-700 hover:underline">cs@liafrik.com</a></div></div>
+            <div className="flex items-start gap-3"><Phone size={20} className="mt-0.5 text-blue-600" /><div><p className="font-medium text-gray-900">Phone</p><p className="text-gray-600">+971 · +237</p></div></div>
+            <div className="flex items-start gap-3"><MapPin size={20} className="mt-0.5 text-blue-600" /><div><p className="font-medium text-gray-900">Offices</p><p className="text-gray-600">Dubaï · Yaoundé/Soa</p></div></div>
           </div>
         </>
       ),
@@ -102,7 +102,7 @@ export function LegalPage({ type }: { type: 'privacy' | 'terms' | 'cgu' | 'about
       <header className="sticky top-0 z-30 border-b border-gray-100 bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3.5 sm:px-6">
           <Link to="/"><Logo /></Link>
-          <Link to="/" className="text-sm font-medium text-gray-600 hover:text-coral-600">← {t('nav.features') === 'Features' ? 'Home' : 'Accueil'}</Link>
+          <Link to="/" className="text-sm font-medium text-gray-600 hover:text-blue-700">← {t('nav.features') === 'Features' ? 'Home' : 'Accueil'}</Link>
         </div>
       </header>
       <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">

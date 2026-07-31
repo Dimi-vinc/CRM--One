@@ -264,7 +264,7 @@ export function Landing() {
         </div>
       </section>
 
-      <Footer onManageCookies={() => window.__liafrikOpenCookies?.()} />
+      <Footer onManageCookies={() => window.__crmOneOpenCookies?.()} />
     </div>
   );
 }
