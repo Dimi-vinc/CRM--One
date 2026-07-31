@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { BookOpen, Search } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { SupportChatWidget } from '../components/SupportChatWidget';
 import type { KbArticle } from '../lib/types';
 
 export function PublicKnowledgeBase() {
@@ -70,6 +71,7 @@ export function PublicKnowledgeBase() {
           </>
         )}
       </div>
+      {tenantId && <SupportChatWidget tenantId={tenantId} />}
     </div>
   );
 }

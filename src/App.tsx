@@ -3,7 +3,6 @@ import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { RequireAuth, PublicOnly, RequireMfaPending } from './components/routing';
 import { CookieBanner } from './components/CookieBanner';
-import { CursorTrail } from './components/CursorTrail';
 import { AppShell } from './components/AppShell';
 import { SuperAdminShell } from './components/SuperAdminShell';
 
@@ -129,7 +128,6 @@ export default function App() {
         </Suspense>
         <CookieBanner />
       </HashRouter>
-      <CursorTrail />
     </AuthProvider>
   );
 }
