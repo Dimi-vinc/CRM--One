@@ -6,6 +6,7 @@ import { Logo } from './Logo';
 import { useAuth } from '../context/AuthContext';
 import { MODULES, type ModuleDef, planIncludes, type ModuleKey, PLAN_BY_ID } from '../lib/constants';
 import { classNames, daysUntil } from '../lib/utils';
+import { hasModuleAccess } from '../lib/permissions';
 import { Avatar } from './ui';
 import { supabase } from '../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
@@ -17,7 +18,7 @@ function LucIcon({ name, size = 18 }: { name: string; size?: number }) {
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { profile, tenant, signOut } = useAuth();
+  const { profile, tenant, permissions, signOut } = useAuth();
   const { t } = useLanguage();
   const nav = useNavigate();
   const [openSidebar, setOpenSidebar] = useState(false);
@@ -39,14 +40,21 @@ export function AppShell({ children }: { children: ReactNode }) {
     })();
   }, [tenant, profile?.id]);
 
+  // Modules that are personal/universal — always visible regardless of a custom role's granted
+  // business-module permissions (they don't touch tenant data access).
+  const ALWAYS_VISIBLE: ModuleKey[] = ['dashboard', 'settings', 'security', 'privacy', 'notifications'];
+
   const visibleModules: ModuleDef[] = useMemo(() => {
     if (isSuperAdmin) return MODULES.filter(m => m.key === 'dashboard');
     return MODULES.filter(m => {
       if (m.key === 'super_admin') return false;
       if (m.key === 'admin') return profile?.role === 'admin'; // Espace Admin (équipe/rôles) : tenant admins only
-      return true; // Paramètres (settings) and everything else: visible to all tenant members
+      if (ALWAYS_VISIBLE.includes(m.key)) return true;
+      // Real enforcement: a 'custom' role user only sees modules their assigned role grants
+      // 'view' on. admin/super_admin already returned true above or are handled elsewhere.
+      return hasModuleAccess(profile, permissions, m.key, 'view');
     });
-  }, [isSuperAdmin, profile?.role]);
+  }, [isSuperAdmin, profile, permissions]);
 
   // Super Admin entry: visible in sidebar only for super_admin role
   const showSuperAdmin = isSuperAdmin;

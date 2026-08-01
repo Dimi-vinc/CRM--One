@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
-import { SUPER_ADMIN_EMAILS } from '../lib/constants';
 import type { Profile, Tenant } from '../lib/types';
 
 interface AuthState {
@@ -11,6 +10,10 @@ interface AuthState {
   profile: Profile | null;
   tenant: Tenant | null;
   mfaRequired: boolean;
+  // Module-level access permissions for the current user's custom role, if any (null for
+  // admin/super_admin, who always have full access; also null while a 'custom' role user's
+  // permissions haven't loaded yet, or if they have no role assigned — treated as no access).
+  permissions: Record<string, string[]> | null;
   refresh: () => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -22,6 +25,7 @@ const AuthContext = createContext<AuthState>({
   profile: null,
   tenant: null,
   mfaRequired: false,
+  permissions: null,
   refresh: async () => {},
   signOut: async () => {},
 });
@@ -31,6 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [tenant, setTenant] = useState<Tenant | null>(null);
+  const [permissions, setPermissions] = useState<Record<string, string[]> | null>(null);
   const [mfaRequired, setMfaRequired] = useState(false);
   const profileRef = useRef<Profile | null>(null);
   useEffect(() => { profileRef.current = profile; }, [profile]);
@@ -51,23 +56,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error('profile load error', error);
       setProfile(null);
       setTenant(null);
+      setPermissions(null);
       return;
     }
     setProfile(data as Profile | null);
-    // Enforce super admin email whitelist: only whitelisted emails keep super_admin role
-    if (data && data.role === 'super_admin' && !SUPER_ADMIN_EMAILS.includes(data.email?.toLowerCase() || '')) {
-      // Downgrade non-whitelisted super_admin to admin
-      await supabase.from('profiles').update({ role: 'admin' }).eq('id', uid);
-      data.role = 'admin';
-      setProfile(data as Profile | null);
-    } else {
-      setProfile(data as Profile | null);
-    }
     if (data?.tenant_id) {
       const { data: t } = await supabase.from('tenants').select('*').eq('id', data.tenant_id).maybeSingle();
       setTenant(t as Tenant | null);
     } else {
       setTenant(null);
+    }
+    // admin/super_admin always have full access — no restriction lookup needed. A 'custom' role
+    // user's actual access comes from their assigned role's permissions map; if none is assigned,
+    // they get no module access at all (fail closed, not fail open).
+    if (data?.role === 'custom' && data?.role_id) {
+      const { data: roleRow } = await supabase.from('roles').select('permissions').eq('id', data.role_id).maybeSingle();
+      setPermissions((roleRow?.permissions as Record<string, string[]>) || {});
+    } else {
+      setPermissions(null);
     }
   };
 
@@ -113,12 +119,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null);
     setProfile(null);
     setTenant(null);
+    setPermissions(null);
     setMfaRequired(false);
   };
 
   const value = useMemo<AuthState>(() => ({
-    loading, session, user: session?.user ?? null, profile, tenant, mfaRequired, refresh, signOut,
-  }), [loading, session, profile, tenant, mfaRequired, refresh, signOut]);
+    loading, session, user: session?.user ?? null, profile, tenant, mfaRequired, permissions, refresh, signOut,
+  }), [loading, session, profile, tenant, mfaRequired, permissions, refresh, signOut]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

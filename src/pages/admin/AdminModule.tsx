@@ -10,7 +10,7 @@ import type { Profile, CustomRole, TenantInvitation } from '../../lib/types';
 const PERMISSIONS = ['view', 'create', 'edit', 'delete'] as const;
 type Perm = typeof PERMISSIONS[number];
 
-const PERMISSIONABLE_MODULES: ModuleKey[] = ['dashboard','pipeline','contacts','companies','activities','tasks','calendar','forecast','reports','documents','automations','billing'];
+const PERMISSIONABLE_MODULES: ModuleKey[] = ['dashboard','pipeline','contacts','companies','activities','tasks','calendar','forecast','reports','documents','automations','tickets','quotes_invoices','campaigns','knowledge_base','territories','billing'];
 
 export function AdminModule() {
   const { tenant } = useAuth();

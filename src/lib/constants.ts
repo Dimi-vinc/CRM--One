@@ -2,15 +2,6 @@
 
 export const PLATFORM_NAME = 'CRM-One';
 export const PLATFORM_VENDOR = 'LiAfrik — Dubaï & Yaoundé';
-export const PLATFORM_TAGLINE = 'Le CRM SaaS pensé pour conquérir le marché africain.';
-
-// Super Admin email whitelist — only these emails can access the Super Admin module
-export const SUPER_ADMIN_EMAILS = [
-  'vincentnogue2@gmail.com',
-  'vincentnogue@yahoo.com',
-  'webdxb1@gmail.com',
-];
-
 export type ModuleKey =
   | 'dashboard' | 'pipeline' | 'contacts' | 'companies' | 'activities'
   | 'tasks' | 'calendar' | 'forecast' | 'reports' | 'import_export'

@@ -90,27 +90,27 @@ export default function App() {
 
             {/* App (tenant users) */}
             <Route path="/dashboard" element={<RequireAuth><Shell><Dashboard /></Shell></RequireAuth>} />
-            <Route path="/pipeline" element={<RequireAuth><Shell><Pipeline /></Shell></RequireAuth>} />
-            <Route path="/contacts" element={<RequireAuth><Shell><Contacts /></Shell></RequireAuth>} />
-            <Route path="/companies" element={<RequireAuth><Shell><Companies /></Shell></RequireAuth>} />
-            <Route path="/activities" element={<RequireAuth><Shell><Activities /></Shell></RequireAuth>} />
-            <Route path="/tasks" element={<RequireAuth><Shell><Tasks /></Shell></RequireAuth>} />
-            <Route path="/calendar" element={<RequireAuth><Shell><Calendar /></Shell></RequireAuth>} />
-            <Route path="/forecast" element={<RequireAuth><Shell><Forecast /></Shell></RequireAuth>} />
-            <Route path="/reports" element={<RequireAuth><Shell><Reports /></Shell></RequireAuth>} />
-            <Route path="/import_export" element={<RequireAuth><Shell><ImportExport /></Shell></RequireAuth>} />
-            <Route path="/documents" element={<RequireAuth><Shell><Documents /></Shell></RequireAuth>} />
-            <Route path="/automations" element={<RequireAuth><Shell><Automations /></Shell></RequireAuth>} />
-            <Route path="/tickets" element={<RequireAuth><Shell><Tickets /></Shell></RequireAuth>} />
-            <Route path="/quotes-invoices" element={<RequireAuth><Shell><QuotesInvoices /></Shell></RequireAuth>} />
-            <Route path="/campaigns" element={<RequireAuth><Shell><Campaigns /></Shell></RequireAuth>} />
-            <Route path="/knowledge-base" element={<RequireAuth><Shell><KnowledgeBase /></Shell></RequireAuth>} />
+            <Route path="/pipeline" element={<RequireAuth moduleKey="pipeline"><Shell><Pipeline /></Shell></RequireAuth>} />
+            <Route path="/contacts" element={<RequireAuth moduleKey="contacts"><Shell><Contacts /></Shell></RequireAuth>} />
+            <Route path="/companies" element={<RequireAuth moduleKey="companies"><Shell><Companies /></Shell></RequireAuth>} />
+            <Route path="/activities" element={<RequireAuth moduleKey="activities"><Shell><Activities /></Shell></RequireAuth>} />
+            <Route path="/tasks" element={<RequireAuth moduleKey="tasks"><Shell><Tasks /></Shell></RequireAuth>} />
+            <Route path="/calendar" element={<RequireAuth moduleKey="calendar"><Shell><Calendar /></Shell></RequireAuth>} />
+            <Route path="/forecast" element={<RequireAuth moduleKey="forecast"><Shell><Forecast /></Shell></RequireAuth>} />
+            <Route path="/reports" element={<RequireAuth moduleKey="reports"><Shell><Reports /></Shell></RequireAuth>} />
+            <Route path="/import_export" element={<RequireAuth moduleKey="import_export"><Shell><ImportExport /></Shell></RequireAuth>} />
+            <Route path="/documents" element={<RequireAuth moduleKey="documents"><Shell><Documents /></Shell></RequireAuth>} />
+            <Route path="/automations" element={<RequireAuth moduleKey="automations"><Shell><Automations /></Shell></RequireAuth>} />
+            <Route path="/tickets" element={<RequireAuth moduleKey="tickets"><Shell><Tickets /></Shell></RequireAuth>} />
+            <Route path="/quotes-invoices" element={<RequireAuth moduleKey="quotes_invoices"><Shell><QuotesInvoices /></Shell></RequireAuth>} />
+            <Route path="/campaigns" element={<RequireAuth moduleKey="campaigns"><Shell><Campaigns /></Shell></RequireAuth>} />
+            <Route path="/knowledge-base" element={<RequireAuth moduleKey="knowledge_base"><Shell><KnowledgeBase /></Shell></RequireAuth>} />
             <Route path="/data-privacy" element={<RequireAuth><Shell><Privacy /></Shell></RequireAuth>} />
-            <Route path="/territories" element={<RequireAuth><Shell><Territories /></Shell></RequireAuth>} />
+            <Route path="/territories" element={<RequireAuth moduleKey="territories"><Shell><Territories /></Shell></RequireAuth>} />
             <Route path="/notifications" element={<RequireAuth><Shell><Notifications /></Shell></RequireAuth>} />
             <Route path="/security" element={<RequireAuth><Shell><Security /></Shell></RequireAuth>} />
             <Route path="/settings" element={<RequireAuth><Shell><Settings /></Shell></RequireAuth>} />
-            <Route path="/billing" element={<RequireAuth><Shell><Billing /></Shell></RequireAuth>} />
+            <Route path="/billing" element={<RequireAuth moduleKey="billing"><Shell><Billing /></Shell></RequireAuth>} />
             <Route path="/admin" element={<RequireAuth roles={['admin']}><Shell><AdminModule /></Shell></RequireAuth>} />
 
             {/* Super Admin (isolated) */}

@@ -2,6 +2,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { type ReactNode } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { hasModuleAccess } from '../lib/permissions';
 import type { Role, Tenant } from '../lib/types';
 
 // The security boundary lives in the database (RLS + the anti-privilege-escalation trigger on
@@ -25,9 +26,11 @@ function isPaymentRequired(tenant: Tenant | null): boolean {
 // Routes still reachable while payment is required, so the tenant can actually pay / manage their account.
 const PAYWALL_ALLOWED_PATHS = new Set(['/billing', '/security']);
 
-// Redirect to /login if no session. Optionally restrict to roles.
-export function RequireAuth({ children, roles, requireTenant = true }: { children: ReactNode; roles?: Role[]; requireTenant?: boolean }) {
-  const { loading, session, profile, tenant, mfaRequired } = useAuth();
+// Redirect to /login if no session. Optionally restrict to roles, and/or to a specific module
+// permission (real enforcement for custom roles — direct URL access is blocked exactly like the
+// sidebar link is hidden, not just cosmetically).
+export function RequireAuth({ children, roles, requireTenant = true, moduleKey }: { children: ReactNode; roles?: Role[]; requireTenant?: boolean; moduleKey?: string }) {
+  const { loading, session, profile, tenant, permissions, mfaRequired } = useAuth();
   const { t } = useLanguage();
   const loc = useLocation();
 
@@ -57,6 +60,13 @@ export function RequireAuth({ children, roles, requireTenant = true }: { childre
   // super_admin may bypass tenant requirement
   if (requireTenant && !canAccessSuperAdmin && !profile.tenant_id) {
     return <Navigate to="/onboarding" replace />;
+  }
+
+  // Real module-level access control: a 'custom' role user without 'view' on this module is
+  // redirected away, regardless of whether they found the URL by typing it directly — hiding
+  // the sidebar link alone would not be real security.
+  if (moduleKey && profile.role === 'custom' && !hasModuleAccess(profile, permissions, moduleKey, 'view')) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   // Paywall: trial ended + no active subscription = locked out except for /billing (and /security,
