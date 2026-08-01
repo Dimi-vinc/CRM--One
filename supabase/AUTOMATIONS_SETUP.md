@@ -66,7 +66,17 @@ on conflict (id) do update set
 événement ligne par ligne). Dans le Dashboard Supabase → **Edge Functions** →
 `automations-cron` → **Schedule**, planifiez-la toutes les 15 minutes (`*/15 * * * *`).
 
-## Vérifier que ça fonctionne
+## Séquences multi-étapes (nouveau)
+
+Une automatisation peut maintenant avoir plusieurs étapes ordonnées avec des délais entre
+elles (ex: email immédiat → attendre 2 jours → créer une tâche → attendre 3 jours → notifier
+l'équipe). Rien à configurer en plus côté secrets — `automations-cron` (déjà planifiée toutes les
+15 min) traite désormais aussi la file d'attente des étapes différées en plus des tâches en
+retard.
+
+Nouvelle action : **"Email au contact"** — écrit directement au contact déclencheur (pas à
+l'équipe), respecte son consentement marketing (RGPD) : si le contact n'a pas donné son
+consentement, l'étape est journalisée comme "ignorée" plutôt que d'envoyer sans autorisation.
 
 1. Créez une automatisation : déclencheur "Contact ajouté" → action "Notifier l'équipe".
 2. Ajoutez un contact.
