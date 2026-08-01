@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Building2, CheckCircle2, Globe2, Phone, Mail, Linkedin, Twitter, Facebook } from 'lucide-react';
+import { Building2, CheckCircle2, Globe2, Phone, Mail } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { LanguageSelector } from '../components/LanguageSelector';
 import { PLATFORM_NAME, PLATFORM_VENDOR, FAQ_ITEMS, PLANS } from '../lib/constants';
@@ -18,11 +18,6 @@ export function Footer({ onManageCookies }: { onManageCookies?: () => void }) {
             <p className="mt-3 max-w-xs text-sm text-gray-500">
               {t('footer.tagline')} {PLATFORM_VENDOR}.
             </p>
-            <div className="mt-4 flex gap-3">
-              <a href="#" className="rounded-lg bg-gray-100 p-2 text-gray-500 hover:bg-blue-50 hover:text-blue-700"><Linkedin size={16} /></a>
-              <a href="#" className="rounded-lg bg-gray-100 p-2 text-gray-500 hover:bg-blue-50 hover:text-blue-700"><Twitter size={16} /></a>
-              <a href="#" className="rounded-lg bg-gray-100 p-2 text-gray-500 hover:bg-blue-50 hover:text-blue-700"><Facebook size={16} /></a>
-            </div>
           </div>
           <div>
             <h4 className="text-sm font-semibold text-gray-900">{t('footer.product')}</h4>
