@@ -204,6 +204,7 @@ const ROUTE_OVERRIDES: Partial<Record<ModuleKey, string>> = {
   privacy: '/data-privacy', // avoid collision with the public /privacy legal policy page
   quotes_invoices: '/quotes-invoices',
   knowledge_base: '/knowledge-base',
+  web_forms: '/web-forms',
 };
 
 function routeFor(key: ModuleKey): string {

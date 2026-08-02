@@ -338,6 +338,36 @@ export interface KbArticle {
   updated_at: string;
 }
 
+// ---- Formulaires web ----
+export type WebFormFieldType = 'text' | 'email' | 'phone' | 'textarea' | 'consent';
+export interface WebFormField {
+  key: string;
+  label: string;
+  type: WebFormFieldType;
+  required?: boolean;
+}
+
+export interface WebForm {
+  id: string;
+  tenant_id: string;
+  name: string;
+  fields: WebFormField[];
+  success_message: string;
+  redirect_url: string | null;
+  is_active: boolean;
+  submission_count: number;
+  created_at: string;
+}
+
+export interface WebFormSubmission {
+  id: string;
+  tenant_id: string;
+  form_id: string;
+  contact_id: string | null;
+  data: Record<string, string | boolean>;
+  created_at: string;
+}
+
 // ---- Territoires & quotas ----
 export interface SalesTerritory {
   id: string;

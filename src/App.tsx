@@ -40,10 +40,12 @@ const AdminModule = lazy(() => import('./pages/admin/AdminModule').then(m => ({ 
 const Tickets = lazy(() => import('./pages/modules/Tickets').then(m => ({ default: m.Tickets })));
 const QuotesInvoices = lazy(() => import('./pages/modules/QuotesInvoices').then(m => ({ default: m.QuotesInvoices })));
 const Campaigns = lazy(() => import('./pages/modules/Campaigns').then(m => ({ default: m.Campaigns })));
+const WebForms = lazy(() => import('./pages/modules/WebForms').then(m => ({ default: m.WebForms })));
 const KnowledgeBase = lazy(() => import('./pages/modules/KnowledgeBase').then(m => ({ default: m.KnowledgeBase })));
 const Privacy = lazy(() => import('./pages/modules/Privacy').then(m => ({ default: m.Privacy })));
 const Territories = lazy(() => import('./pages/modules/Territories').then(m => ({ default: m.Territories })));
 const PublicKnowledgeBase = lazy(() => import('./pages/PublicKnowledgeBase').then(m => ({ default: m.PublicKnowledgeBase })));
+const PublicWebForm = lazy(() => import('./pages/PublicWebForm').then(m => ({ default: m.PublicWebForm })));
 
 const SuperAdminDashboard = lazy(() => import('./pages/superadmin/SuperAdminDashboard').then(m => ({ default: m.SuperAdminDashboard })));
 const TenantsAdmin = lazy(() => import('./pages/superadmin/TenantsAdmin').then(m => ({ default: m.TenantsAdmin })));
@@ -81,6 +83,7 @@ export default function App() {
             <Route path="/about" element={<LegalPage type="about" />} />
             <Route path="/contact" element={<LegalPage type="contact" />} />
             <Route path="/help/:tenantId" element={<PublicKnowledgeBase />} />
+            <Route path="/f/:formId" element={<PublicWebForm />} />
             <Route path="/login" element={<PublicOnly><Login /></PublicOnly>} />
             <Route path="/forgot-password" element={<PublicOnly><ForgotPassword /></PublicOnly>} />
             <Route path="/reset-password" element={<ResetPassword />} />
@@ -104,6 +107,7 @@ export default function App() {
             <Route path="/tickets" element={<RequireAuth moduleKey="tickets"><Shell><Tickets /></Shell></RequireAuth>} />
             <Route path="/quotes-invoices" element={<RequireAuth moduleKey="quotes_invoices"><Shell><QuotesInvoices /></Shell></RequireAuth>} />
             <Route path="/campaigns" element={<RequireAuth moduleKey="campaigns"><Shell><Campaigns /></Shell></RequireAuth>} />
+            <Route path="/web-forms" element={<RequireAuth moduleKey="web_forms"><Shell><WebForms /></Shell></RequireAuth>} />
             <Route path="/knowledge-base" element={<RequireAuth moduleKey="knowledge_base"><Shell><KnowledgeBase /></Shell></RequireAuth>} />
             <Route path="/data-privacy" element={<RequireAuth><Shell><Privacy /></Shell></RequireAuth>} />
             <Route path="/territories" element={<RequireAuth moduleKey="territories"><Shell><Territories /></Shell></RequireAuth>} />
