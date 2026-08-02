@@ -1,15 +1,22 @@
-import { useRef, useState } from 'react';
-import { UserCog, Building2, Upload, Check, AlertCircle, Loader2 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { UserCog, Building2, Upload, Check, AlertCircle, Loader2, Mail, Unplug, Link2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { PageHeader, Card, Button, Input, Select, Avatar } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
 import { COUNTRIES, CURRENCIES } from '../../lib/constants';
 
+interface EmailConnection { provider: 'gmail' | 'outlook'; email_address: string }
+
 export function Settings() {
   const { profile, tenant, refresh } = useAuth();
   const { lang } = useLanguage();
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const [connections, setConnections] = useState<EmailConnection[]>([]);
+  const [connLoading, setConnLoading] = useState(true);
+  const [connectMessage, setConnectMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [disconnecting, setDisconnecting] = useState<string | null>(null);
 
   const [fullName, setFullName] = useState(profile?.full_name || '');
   const [phone, setPhone] = useState(profile?.phone || '');
@@ -26,6 +33,72 @@ export function Settings() {
   const [tenantSaved, setTenantSaved] = useState(false);
 
   const isAdmin = profile?.role === 'admin';
+
+  useEffect(() => {
+    loadConnections();
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get('email_connect');
+    if (status === 'success') setConnectMessage({ type: 'success', text: 'Compte email connecté avec succès.' });
+    else if (status === 'not_configured') setConnectMessage({ type: 'error', text: "Cette intégration n'est pas encore configurée par l'administrateur de la plateforme." });
+    else if (status === 'error') setConnectMessage({ type: 'error', text: 'La connexion a échoué. Réessayez.' });
+    if (status) window.history.replaceState({}, '', window.location.pathname + window.location.hash.split('?')[0]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const loadConnections = async () => {
+    setConnLoading(true);
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData.session?.access_token;
+    if (!token) { setConnLoading(false); return; }
+    try {
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/email-connection-status`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      setConnections(data.connections || []);
+    } catch { /* leave empty on failure */ }
+    setConnLoading(false);
+  };
+
+  const startConnect = async (provider: 'gmail' | 'outlook') => {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData.session?.access_token;
+    if (!token || !tenant) return;
+    const state = btoa(JSON.stringify({ accessToken: token, tenantId: tenant.id }));
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+
+    if (provider === 'gmail') {
+      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+      if (!clientId) { setConnectMessage({ type: 'error', text: "Google n'est pas encore configuré." }); return; }
+      const redirectUri = `${supabaseUrl}/functions/v1/gmail-oauth-callback`;
+      const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&access_type=offline&prompt=consent&scope=${encodeURIComponent('https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/userinfo.email')}&state=${encodeURIComponent(state)}`;
+      window.location.href = url;
+    } else {
+      const clientId = import.meta.env.VITE_MICROSOFT_CLIENT_ID;
+      if (!clientId) { setConnectMessage({ type: 'error', text: "Microsoft n'est pas encore configuré." }); return; }
+      const redirectUri = `${supabaseUrl}/functions/v1/outlook-oauth-callback`;
+      const url = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&response_mode=query&scope=${encodeURIComponent('offline_access Mail.Send User.Read')}&state=${encodeURIComponent(state)}`;
+      window.location.href = url;
+    }
+  };
+
+  const disconnect = async (provider: 'gmail' | 'outlook') => {
+    setDisconnecting(provider);
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData.session?.access_token;
+    if (token) {
+      await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/disconnect-email`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider }),
+      });
+    }
+    await loadConnections();
+    setDisconnecting(null);
+  };
+
+  const gmailConn = connections.find(c => c.provider === 'gmail');
+  const outlookConn = connections.find(c => c.provider === 'outlook');
 
   const saveProfile = async () => {
     if (!profile || !fullName.trim()) return;
@@ -155,6 +228,43 @@ export function Settings() {
           )}
         </Card>
       </div>
+
+      <Card className="mt-6 p-5">
+        <div className="flex items-center gap-3">
+          <div className="rounded-xl bg-blue-50 p-2.5 text-blue-600"><Mail size={20} /></div>
+          <div>
+            <h3 className="font-semibold text-gray-900">Intégrations email</h3>
+            <p className="text-sm text-gray-500">Connectez votre propre Gmail ou Outlook pour envoyer des emails aux contacts depuis votre vraie adresse.</p>
+          </div>
+        </div>
+
+        {connectMessage && (
+          <div className={`mt-4 flex items-start gap-2 rounded-lg p-3 text-sm ${connectMessage.type === 'success' ? 'bg-mint-50 text-mint-800' : 'bg-red-50 text-red-700'}`}>
+            {connectMessage.type === 'success' ? <Check size={16} className="mt-0.5 flex-shrink-0" /> : <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />}
+            <span>{connectMessage.text}</span>
+          </div>
+        )}
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          {([['gmail', 'Gmail', gmailConn], ['outlook', 'Outlook', outlookConn]] as const).map(([provider, label, conn]) => (
+            <div key={provider} className="flex items-center justify-between rounded-lg border border-gray-100 p-3">
+              <div>
+                <p className="text-sm font-medium text-gray-900">{label}</p>
+                <p className="text-xs text-gray-500">{connLoading ? 'Vérification…' : conn ? conn.email_address : 'Non connecté'}</p>
+              </div>
+              {connLoading ? (
+                <Loader2 size={16} className="animate-spin text-gray-300" />
+              ) : conn ? (
+                <Button size="sm" variant="secondary" onClick={() => disconnect(provider)} disabled={disconnecting === provider}>
+                  {disconnecting === provider ? '…' : <><Unplug size={13} /> Déconnecter</>}
+                </Button>
+              ) : (
+                <Button size="sm" onClick={() => startConnect(provider)}><Link2 size={13} /> Connecter</Button>
+              )}
+            </div>
+          ))}
+        </div>
+      </Card>
     </div>
   );
 }
