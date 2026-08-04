@@ -18,6 +18,7 @@ export function AdminModule() {
   const [members, setMembers] = useState<Profile[]>([]);
   const [roles, setRoles] = useState<CustomRole[]>([]);
   const [invitations, setInvitations] = useState<TenantInvitation[]>([]);
+  const [taskMetrics, setTaskMetrics] = useState({ total: 0, completed: 0, overdue: 0 });
   const [roleModal, setRoleModal] = useState(false);
   const [inviteModal, setInviteModal] = useState(false);
   const [roleForm, setRoleForm] = useState<{ name: string; description: string; permissions: Record<string, Perm[]> }>({ name: '', description: '', permissions: {} });
@@ -26,12 +27,20 @@ export function AdminModule() {
 
   const load = useCallback(async () => {
     if (!tenant) return;
-    const [m, r, i] = await Promise.all([
+    const [m, r, i, t] = await Promise.all([
       supabase.from('profiles').select('*').eq('tenant_id', tenant.id).order('created_at', { ascending: true }),
       supabase.from('roles').select('*').eq('tenant_id', tenant.id).order('created_at', { ascending: true }),
       supabase.from('tenant_invitations').select('*').eq('tenant_id', tenant.id).order('created_at', { ascending: false }),
+      supabase.from('tasks').select('id,status,due_date').eq('tenant_id', tenant.id),
     ]);
-    setMembers(m.data || []); setRoles(r.data || []); setInvitations(i.data || []);
+    setMembers(m.data || []);
+    setRoles(r.data || []);
+    setInvitations(i.data || []);
+    const tasks = t.data || [];
+    const total = tasks.length;
+    const completed = tasks.filter((task: { status: string }) => task.status === 'done').length;
+    const overdue = tasks.filter((task: { status: string; due_date?: string | null }) => task.due_date && new Date(task.due_date) < new Date() && task.status !== 'done').length;
+    setTaskMetrics({ total, completed, overdue });
   }, [tenant]);
   useEffect(() => { load(); }, [load]);
 
@@ -101,32 +110,69 @@ export function AdminModule() {
       </div>
 
       {tab === 'team' && (
-        <Card className="overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
-              <tr><th className="px-4 py-3">Membre</th><th className="px-4 py-3">Rôle système</th><th className="px-4 py-3">Rôle personnalisé</th><th className="px-4 py-3">Statut</th><th className="px-4 py-3">Créé</th></tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {members.map(m => (
-                <tr key={m.id} className="hover:bg-gray-50/60">
-                  <td className="px-4 py-3"><div className="flex items-center gap-2"><Avatar name={m.full_name || m.email} size={32} /><div><p className="font-medium text-gray-900">{m.full_name || m.email}</p><p className="text-xs text-gray-500">{m.email}</p></div></div></td>
-                  <td className="px-4 py-3"><Badge color={m.role === 'admin' ? 'orange' : 'gray'}>{m.role}</Badge></td>
-                  <td className="px-4 py-3">
-                    {m.role === 'admin' ? '— (Admin)' : (
-                      <Select value={m.role_id || ''} onChange={e => setMemberRole(m, e.target.value || null)} className="py-1 text-xs">
-                        <option value="">—</option>
-                        {roles.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
-                      </Select>
-                    )}
-                  </td>
-                  <td className="px-4 py-3"><Badge color={m.status === 'active' ? 'green' : 'red'}>{m.status}</Badge></td>
-                  <td className="px-4 py-3 text-gray-500">{formatDate(m.created_at)}</td>
-                </tr>
-              ))}
-              {members.length === 0 && <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-400">Aucun membre</td></tr>}
-            </tbody>
-          </table>
-        </Card>
+        <>
+          <div className="grid gap-3 sm:grid-cols-3 mb-4">
+            <Card className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-wider text-gray-500">Équipe</p>
+                  <p className="mt-2 text-2xl font-semibold text-gray-900">{members.length}</p>
+                </div>
+                <UsersRound size={28} className="text-coral-500" />
+              </div>
+              <p className="mt-3 text-sm text-gray-500">Membres actifs et accès en cours.</p>
+            </Card>
+            <Card className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-wider text-gray-500">Tâches</p>
+                  <p className="mt-2 text-2xl font-semibold text-gray-900">{taskMetrics.total}</p>
+                </div>
+                <TrendingUp size={28} className="text-mint-500" />
+              </div>
+              <div className="mt-3 flex gap-2 text-xs text-gray-500">
+                <span>{taskMetrics.completed} complétées</span>
+                <span className="border-l border-gray-200 pl-2">{taskMetrics.overdue} en retard</span>
+              </div>
+            </Card>
+            <Card className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-wider text-gray-500">Rôles personnalisés</p>
+                  <p className="mt-2 text-2xl font-semibold text-gray-900">{roles.length}</p>
+                </div>
+                <Shield size={28} className="text-mint-500" />
+              </div>
+              <p className="mt-3 text-sm text-gray-500">Contrôle précis des accès pour votre équipe.</p>
+            </Card>
+          </div>
+          <Card className="overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
+                <tr><th className="px-4 py-3">Membre</th><th className="px-4 py-3">Rôle système</th><th className="px-4 py-3">Rôle personnalisé</th><th className="px-4 py-3">Statut</th><th className="px-4 py-3">Créé</th></tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {members.map(m => (
+                  <tr key={m.id} className="hover:bg-gray-50/60">
+                    <td className="px-4 py-3"><div className="flex items-center gap-2"><Avatar name={m.full_name || m.email} size={32} /><div><p className="font-medium text-gray-900">{m.full_name || m.email}</p><p className="text-xs text-gray-500">{m.email}</p></div></div></td>
+                    <td className="px-4 py-3"><Badge color={m.role === 'admin' ? 'orange' : 'gray'}>{m.role}</Badge></td>
+                    <td className="px-4 py-3">
+                      {m.role === 'admin' ? '— (Admin)' : (
+                        <Select value={m.role_id || ''} onChange={e => setMemberRole(m, e.target.value || null)} className="py-1 text-xs">
+                          <option value="">—</option>
+                          {roles.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+                        </Select>
+                      )}
+                    </td>
+                    <td className="px-4 py-3"><Badge color={m.status === 'active' ? 'green' : 'red'}>{m.status}</Badge></td>
+                    <td className="px-4 py-3 text-gray-500">{formatDate(m.created_at)}</td>
+                  </tr>
+                ))}
+                {members.length === 0 && <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-400">Aucun membre</td></tr>}
+              </tbody>
+            </table>
+          </Card>
+        </>
       )}
 
       {tab === 'roles' && (
