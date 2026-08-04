@@ -15,7 +15,11 @@ export function Billing() {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
-  const [selectedProvider, setSelectedProvider] = useState<'stripe' | 'flutterwave'>('stripe');
+  const [selectedProvider, setSelectedProvider] = useState<'stripe' | 'flutterwave'>(() => {
+    if (typeof window === 'undefined') return 'stripe';
+    const stored = localStorage.getItem('crm_payment_provider');
+    return stored === 'flutterwave' ? 'flutterwave' : 'stripe';
+  });
 
   const load = async () => {
     if (!tenant) return;
@@ -62,6 +66,12 @@ export function Billing() {
     if (res.ok && res.url) window.location.href = res.url;
     else setError(res.error || 'Portail indisponible. Souscrivez d\'abord à un plan.');
   };
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('crm_payment_provider', selectedProvider);
+    }
+  }, [selectedProvider]);
 
   // Handle redirect status
   useEffect(() => {

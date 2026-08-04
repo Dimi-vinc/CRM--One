@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { UserCog, Building2, Upload, Check, AlertCircle, Loader2, Mail, Unplug, Link2, Paintbrush } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { UserCog, Building2, Upload, Check, AlertCircle, Loader2, Mail, Unplug, Link2, Paintbrush, CreditCard } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage, type Lang } from '../../context/LanguageContext';
 import { PageHeader, Card, Button, Input, Select, Avatar } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
 import { COUNTRIES, CURRENCIES } from '../../lib/constants';
@@ -31,9 +33,19 @@ const colorsData = {
 
 export function Settings() {
   const { profile, tenant, refresh } = useAuth();
+  const { lang, setLang } = useLanguage();
+  const navigate = useNavigate();
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const [currentTheme, setCurrentTheme] = useState<ThemeId>((localStorage.getItem('crm_theme') as ThemeId) || 'ocean');
+  const [currentTheme, setCurrentTheme] = useState<ThemeId>(() => {
+    if (typeof window === 'undefined') return 'ocean';
+    return (localStorage.getItem('crm_theme') as ThemeId) || 'ocean';
+  });
+  const [paymentProvider, setPaymentProvider] = useState<'stripe' | 'flutterwave'>(() => {
+    if (typeof window === 'undefined') return 'stripe';
+    const stored = localStorage.getItem('crm_payment_provider');
+    return stored === 'flutterwave' ? 'flutterwave' : 'stripe';
+  });
 
   const selectTheme = (themeId: ThemeId) => {
     setCurrentTheme(themeId);
@@ -65,6 +77,10 @@ export function Settings() {
   const [tenantSaved, setTenantSaved] = useState(false);
 
   const isAdmin = profile?.role === 'admin';
+
+  useEffect(() => {
+    localStorage.setItem('crm_payment_provider', paymentProvider);
+  }, [paymentProvider]);
 
   const loadConnections = useCallback(async () => {
     setConnLoading(true);
@@ -262,7 +278,69 @@ export function Settings() {
         </Card>
       </div>
 
-      <div className="grid gap-6 mt-6 lg:grid-cols-2">
+      <div className="grid gap-6 mt-6 lg:grid-cols-3">
+        <Card className="p-5">
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl bg-indigo-50 p-2.5 text-indigo-700"><Mail size={20} /></div>
+            <div>
+              <h3 className="font-semibold text-gray-900">Langue de la plateforme</h3>
+              <p className="text-sm text-gray-500">Choisissez la langue d'affichage du CRM.</p>
+            </div>
+          </div>
+          <div className="mt-4">
+            <Select label="Langue" value={lang} onChange={e => setLang(e.target.value as Lang)}>
+              <option value="fr">Français</option>
+              <option value="en">English</option>
+            </Select>
+          </div>
+        </Card>
+
+        <Card className="p-5">
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl bg-amber-50 p-2.5 text-amber-700"><CreditCard size={20} /></div>
+            <div>
+              <h3 className="font-semibold text-gray-900">Paiement & facturation</h3>
+              <p className="text-sm text-gray-500">Choisissez votre fournisseur de paiement préféré.</p>
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => setPaymentProvider('stripe')}
+              className={`rounded-xl border p-4 text-left transition-all ${paymentProvider === 'stripe' ? 'border-coral-500 ring-2 ring-coral-100 bg-coral-50/10' : 'border-gray-200 hover:bg-gray-50'}`}
+            >
+              <p className="font-semibold text-gray-900">Stripe</p>
+              <p className="mt-1 text-xs text-gray-500">Cartes internationales, Apple Pay et Google Pay.</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setPaymentProvider('flutterwave')}
+              className={`rounded-xl border p-4 text-left transition-all ${paymentProvider === 'flutterwave' ? 'border-coral-500 ring-2 ring-coral-100 bg-coral-50/10' : 'border-gray-200 hover:bg-gray-50'}`}
+            >
+              <p className="font-semibold text-gray-900">Flutterwave</p>
+              <p className="mt-1 text-xs text-gray-500">Mobile Money et cartes locales pour l'Afrique.</p>
+            </button>
+          </div>
+
+          <p className="mt-4 text-xs text-gray-500">
+            {paymentProvider === 'flutterwave'
+              ? 'Vous avez choisi Flutterwave. Souscrivez à un plan depuis la page Facturation et payez avec Orange Money, MTN MoMo, Wave ou M-Pesa.'
+              : 'Vous avez choisi Stripe. Le portail de facturation peut gérer vos cartes et abonnements.'}
+          </p>
+          <div className="mt-4">
+            <Button variant="secondary" onClick={() => navigate('/billing')}>Aller à Facturation</Button>
+          </div>
+        </Card>
+
+        <Card className="p-5">
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl bg-amber-50 p-2.5 text-amber-600"><Paintbrush size={20} /></div>
+            <div>
+              <h3 className="font-semibold text-gray-900">Personnalisation du thème</h3>
+              <p className="text-sm text-gray-500">Sélectionnez la couleur d'accentuation de l'interface CRM.</p>
+            </div>
+          </div>
         <Card className="p-5">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-blue-50 p-2.5 text-blue-600"><Mail size={20} /></div>
@@ -297,6 +375,44 @@ export function Settings() {
                 )}
               </div>
             ))}
+          </div>
+        </Card>
+
+        <Card className="p-5">
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl bg-amber-50 p-2.5 text-amber-700"><CreditCard size={20} /></div>
+            <div>
+              <h3 className="font-semibold text-gray-900">Paiement & facturation</h3>
+              <p className="text-sm text-gray-500">Choisissez votre fournisseur de paiement préféré pour la souscription à un plan.</p>
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => setPaymentProvider('stripe')}
+              className={`rounded-xl border p-4 text-left transition-all ${paymentProvider === 'stripe' ? 'border-coral-500 ring-2 ring-coral-100 bg-coral-50/10' : 'border-gray-200 hover:bg-gray-50'}`}
+            >
+              <p className="font-semibold text-gray-900">Stripe</p>
+              <p className="mt-1 text-xs text-gray-500">Cartes internationales, Apple Pay et Google Pay.</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setPaymentProvider('flutterwave')}
+              className={`rounded-xl border p-4 text-left transition-all ${paymentProvider === 'flutterwave' ? 'border-coral-500 ring-2 ring-coral-100 bg-coral-50/10' : 'border-gray-200 hover:bg-gray-50'}`}
+            >
+              <p className="font-semibold text-gray-900">Flutterwave</p>
+              <p className="mt-1 text-xs text-gray-500">Mobile Money et cartes locales pour l'Afrique.</p>
+            </button>
+          </div>
+
+          <p className="mt-4 text-xs text-gray-500">
+            {paymentProvider === 'flutterwave'
+              ? 'Vous avez choisi Flutterwave. Utilisez la page Facturation pour souscrire un plan via Orange Money, MTN MoMo, Wave ou M-Pesa.'
+              : 'Vous avez choisi Stripe. Le portail de facturation est disponible pour gérer vos cartes et abonnements.'}
+          </p>
+          <div className="mt-4">
+            <Button variant="secondary" onClick={() => navigate('/billing')}>Aller à Facturation</Button>
           </div>
         </Card>
 
