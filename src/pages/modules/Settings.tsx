@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { UserCog, Building2, Upload, Check, AlertCircle, Loader2, Mail, Unplug, Link2, Paintbrush } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { useLanguage } from '../../context/LanguageContext';
 import { PageHeader, Card, Button, Input, Select, Avatar } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
 import { COUNTRIES, CURRENCIES } from '../../lib/constants';

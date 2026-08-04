@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ComponentType } from 'react';
 import { TrendingUp, Users, Trophy, Target, Clock, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -41,7 +41,7 @@ export function Dashboard() {
   }, [deals]);
 
   const cur = tenant?.currency_code || 'USD';
-  const cards: { label: string; value: string; icon: any; color: ColorKey; sub?: string }[] = [
+  const cards: { label: string; value: string; icon: ComponentType<{ size?: number }>; color: ColorKey; sub?: string }[] = [
     { label: 'Pipeline ouvert', value: formatMoney(stats.totalPipeline, cur), icon: TrendingUp, color: 'blue', sub: `${stats.openCount} deals` },
     { label: 'Gagné', value: formatMoney(stats.totalWon, cur), icon: Trophy, color: 'teal', sub: `${stats.wonCount} deals` },
     { label: 'Taux de conversion', value: `${stats.conv}%`, icon: Target, color: 'violet', sub: `${stats.total} deals total` },

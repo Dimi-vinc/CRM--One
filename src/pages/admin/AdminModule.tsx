@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { UsersRound, Plus, Trash2, Mail, Shield, Edit2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { PageHeader, Card, Button, Modal, Input, Select, Badge, Avatar, EmptyState } from '../../components/ui';
@@ -24,7 +24,7 @@ export function AdminModule() {
   const [inviteForm, setInviteForm] = useState({ email: '', role_id: '' });
   const [editingRole, setEditingRole] = useState<CustomRole | null>(null);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     if (!tenant) return;
     const [m, r, i] = await Promise.all([
       supabase.from('profiles').select('*').eq('tenant_id', tenant.id).order('created_at', { ascending: true }),
@@ -32,8 +32,8 @@ export function AdminModule() {
       supabase.from('tenant_invitations').select('*').eq('tenant_id', tenant.id).order('created_at', { ascending: false }),
     ]);
     setMembers(m.data || []); setRoles(r.data || []); setInvitations(i.data || []);
-  };
-  useEffect(() => { load(); }, [tenant]);
+  }, [tenant]);
+  useEffect(() => { load(); }, [load]);
 
   const togglePerm = (mod: ModuleKey, perm: Perm) => {
     setRoleForm(f => {
