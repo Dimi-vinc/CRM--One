@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { CreditCard, Check, AlertCircle, Loader2, Crown } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { PageHeader, Card, Button, Badge, Skeleton } from '../../components/ui';
@@ -17,6 +17,11 @@ export function Billing() {
   const [note, setNote] = useState<string | null>(null);
   const [selectedProvider, setSelectedProvider] = useState<'stripe' | 'flutterwave'>('stripe');
 
+  const preferredProvider = useMemo(() => {
+    const localCurrencies = ['XAF', 'NGN', 'KES', 'GHS', 'RWF', 'UGX', 'TZS', 'ZMW', 'CVE', 'GMD', 'BWP'];
+    return localCurrencies.includes(tenant?.currency_code || '') ? 'flutterwave' : 'stripe';
+  }, [tenant?.currency_code]);
+
   const load = async () => {
     if (!tenant) return;
     const { data } = await supabase.from('subscriptions').select('*').eq('tenant_id', tenant.id).maybeSingle();
@@ -28,6 +33,12 @@ export function Billing() {
   const trialLeft = tenant?.trial_ends_at ? daysUntil(tenant.trial_ends_at) : null;
   const currentPlan = PLAN_BY_ID[tenant?.plan_id || 'starter'];
   const paymentRequired = tenant?.status !== 'active' && trialLeft !== null && trialLeft < 0;
+
+  useEffect(() => {
+    if (!selectedProvider || preferredProvider !== selectedProvider) {
+      setSelectedProvider(preferredProvider);
+    }
+  }, [preferredProvider, selectedProvider]);
 
   const checkout = async (planId: 'starter' | 'pro' | 'premium' | 'entreprise') => {
     if (!tenant || !profile) return;
