@@ -28,7 +28,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [openSidebar, setOpenSidebar] = useState(false);
   const [userMenu, setUserMenu] = useState(false);
   const [unread, setUnread] = useState(0);
-  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [announcements, setAnnouncements] = useState<unknown[]>([]);
 
   const planId = tenant?.plan_id || 'starter';
   const trialDaysLeft = tenant?.trial_ends_at ? daysUntil(tenant.trial_ends_at) : null;
@@ -46,7 +46,6 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   // Modules that are personal/universal — always visible regardless of a custom role's granted
   // business-module permissions (they don't touch tenant data access).
-  const ALWAYS_VISIBLE: ModuleKey[] = ['dashboard', 'settings', 'security', 'privacy', 'notifications'];
 
   const visibleModules: ModuleDef[] = useMemo(() => {
     if (isSuperAdmin) return MODULES.filter(m => m.key === 'dashboard');
@@ -217,5 +216,5 @@ function routeFor(key: ModuleKey): string {
 
 function upgradePlanFor(key: ModuleKey): 'starter' | 'pro' | 'premium' | 'entreprise' {
   const m = MODULES.find(x => x.key === key);
-  return (m?.minPlan as any) || 'premium';
+  return m?.minPlan || 'premium';
 }

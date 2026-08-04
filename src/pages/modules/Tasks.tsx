@@ -6,8 +6,8 @@ import { supabase } from '../../lib/supabase';
 import { TASK_PRIORITIES, TASK_STATUSES, formatDate } from '../../lib/constants';
 import type { Task } from '../../lib/types';
 
-const STATUS_COLORS: Record<string, any> = { todo: 'gray', in_progress: 'orange', done: 'green' };
-const PRIO_COLORS: Record<string, any> = { low: 'gray', medium: 'blue', high: 'orange', urgent: 'red' };
+const STATUS_COLORS: Record<'todo' | 'in_progress' | 'done', string> = { todo: 'gray', in_progress: 'orange', done: 'green' };
+const PRIO_COLORS: Record<'low' | 'medium' | 'high' | 'urgent', string> = { low: 'gray', medium: 'blue', high: 'orange', urgent: 'red' };
 
 export function Tasks() {
   const { tenant, profile } = useAuth();
@@ -16,12 +16,12 @@ export function Tasks() {
   const [modal, setModal] = useState(false);
   const [form, setForm] = useState({ title: '', description: '', due_date: '', priority: 'medium', status: 'todo' });
 
-  const load = async () => {
+  const load = useCallback(async () => {
     if (!tenant) return;
     const { data } = await supabase.from('tasks').select('*').order('due_date', { ascending: true });
     setItems(data || []);
-  };
-  useEffect(() => { load(); }, [tenant]);
+  }, [tenant]);
+  useEffect(() => { load(); }, [load]);
 
   const filtered = filter === 'all' ? items : items.filter(t => t.status === filter);
 
@@ -51,8 +51,8 @@ export function Tasks() {
         actions={<Button onClick={() => setModal(true)}><Plus size={16} /> Nouvelle tâche</Button>} />
 
       <div className="mb-4 flex gap-2">
-        {[{ k: 'all', l: 'Toutes' }, { k: 'todo', l: 'À faire' }, { k: 'in_progress', l: 'En cours' }, { k: 'done', l: 'Terminées' }].map(f => (
-          <button key={f.k} onClick={() => setFilter(f.k as any)} className={`rounded-lg px-3 py-1.5 text-xs font-medium ${filter === f.k ? 'bg-coral-500 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}>{f.l}</button>
+        {([{ k: 'all', l: 'Toutes' }, { k: 'todo', l: 'À faire' }, { k: 'in_progress', l: 'En cours' }, { k: 'done', l: 'Terminées' }] as const).map(f => (
+          <button key={f.k} onClick={() => setFilter(f.k)} className={`rounded-lg px-3 py-1.5 text-xs font-medium ${filter === f.k ? 'bg-coral-500 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}>{f.l}</button>
         ))}
       </div>
 

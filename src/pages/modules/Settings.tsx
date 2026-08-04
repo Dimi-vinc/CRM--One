@@ -31,12 +31,11 @@ const colorsData = {
 
 export function Settings() {
   const { profile, tenant, refresh } = useAuth();
-  const { lang } = useLanguage();
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const [currentTheme, setCurrentTheme] = useState(localStorage.getItem('crm_theme') || 'ocean');
+  const [currentTheme, setCurrentTheme] = useState<keyof typeof colorsData>(localStorage.getItem('crm_theme') as keyof typeof colorsData || 'ocean');
 
-  const selectTheme = (themeId: 'ocean' | 'coral' | 'classic') => {
+  const selectTheme = (themeId: keyof typeof colorsData) => {
     setCurrentTheme(themeId);
     localStorage.setItem('crm_theme', themeId);
     const selectedColors = colorsData[themeId];
@@ -67,6 +66,23 @@ export function Settings() {
 
   const isAdmin = profile?.role === 'admin';
 
+  const loadConnections = useCallback(async () => {
+    setConnLoading(true);
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData.session?.access_token;
+    if (!token) { setConnLoading(false); return; }
+    try {
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/email-connection-status`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      setConnections(data.connections || []);
+    } catch {
+      setConnections([]);
+    }
+    setConnLoading(false);
+  }, []);
+
   useEffect(() => {
     loadConnections();
     const params = new URLSearchParams(window.location.search);
@@ -75,8 +91,7 @@ export function Settings() {
     else if (status === 'not_configured') setConnectMessage({ type: 'error', text: "Cette intégration n'est pas encore configurée par l'administrateur de la plateforme." });
     else if (status === 'error') setConnectMessage({ type: 'error', text: 'La connexion a échoué. Réessayez.' });
     if (status) window.history.replaceState({}, '', window.location.pathname + window.location.hash.split('?')[0]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadConnections]);
 
   const loadConnections = async () => {
     setConnLoading(true);

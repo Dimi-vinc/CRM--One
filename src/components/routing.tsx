@@ -65,7 +65,7 @@ export function RequireAuth({ children, roles, requireTenant = true, moduleKey }
 
   // Real plan-level enforcement: redirect away if the module is not included in the tenant's current plan.
   if (moduleKey && !canAccessSuperAdmin && tenant) {
-    if (!planIncludes(tenant.plan_id || 'starter', moduleKey as any)) {
+    if (!planIncludes(tenant.plan_id || 'starter', moduleKey)) {
       return <Navigate to="/billing" replace />;
     }
   }

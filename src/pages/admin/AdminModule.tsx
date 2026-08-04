@@ -93,8 +93,8 @@ export function AdminModule() {
         actions={tab === 'team' && <Button onClick={() => setInviteModal(true)}><Mail size={16} /> Inviter</Button>} />
 
       <div className="mb-4 flex gap-2">
-        {[{ k: 'team', l: 'Équipe', i: UsersRound }, { k: 'roles', l: 'Rôles & Permissions', i: Shield }, { k: 'invitations', l: 'Invitations', i: Mail }].map(t => (
-          <button key={t.k} onClick={() => setTab(t.k as any)} className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium ${tab === t.k ? 'bg-coral-500 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
+        {([ { k: 'team', l: 'Équipe', i: UsersRound }, { k: 'roles', l: 'Rôles & Permissions', i: Shield }, { k: 'invitations', l: 'Invitations', i: Mail } ] as const).map(t => (
+          <button key={t.k} onClick={() => setTab(t.k)} className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium ${tab === t.k ? 'bg-coral-500 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
             <t.i size={14} /> {t.l}
           </button>
         ))}

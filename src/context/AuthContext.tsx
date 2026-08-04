@@ -66,16 +66,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } else {
       setTenant(null);
     }
-    // admin/super_admin always have full access — no restriction lookup needed. A 'custom' role
-    // user's actual access comes from their assigned role's permissions map; if none is assigned,
-    // they get no module access at all (fail closed, not fail open).
+    // admin/super_admin always have full access. Custom role access is loaded from
+    // the assigned role's permissions map. If no role is assigned, deny access.
     if (data?.role === 'custom' && data?.role_id) {
-      const { data: roleRow } = await supabase.from('roles').select('permissions').eq('id', data.role_id).maybeSingle();
-      setPermissions((roleRow?.permissions as Record<string, string[]>) || {});
+      const { data: roleRow } = await supabase
+        .from('roles')
+        .select('permissions')
+        .eq('id', data.role_id)
+        .maybeSingle();
+      const rolePermissions = roleRow?.permissions as Record<string, string[]> | undefined;
+      setPermissions(rolePermissions ?? {});
     } else {
       setPermissions(null);
     }
-  };
+  }, []);
 
   const refresh = useCallback(async () => {
     const { data } = await supabase.auth.getSession();
