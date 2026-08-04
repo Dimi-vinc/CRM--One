@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { UserCog, Building2, Upload, Check, AlertCircle, Loader2, Mail, Unplug, Link2, Paintbrush, CreditCard } from 'lucide-react';
+import { UserCog, Building2, Upload, Check, AlertCircle, Loader2, Mail, Unplug, Link2, Paintbrush } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { PageHeader, Card, Button, Input, Select, Avatar } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
@@ -327,35 +326,6 @@ export function Settings() {
                 );
               })}
             </div>
-          </div>
-        </Card>
-        <Card className="p-5">
-          <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-violet-50 p-2.5 text-violet-700"><CreditCard size={20} /></div>
-            <div>
-              <h3 className="font-semibold text-gray-900">Paiement & paramètres</h3>
-              <p className="text-sm text-gray-500">Accédez rapidement à la facturation, à la sécurité et aux notifications.</p>
-            </div>
-          </div>
-
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <Link to="/billing">
-              <Button className="w-full" variant="secondary"><CreditCard size={14} /> Voir la facturation</Button>
-            </Link>
-            <Link to="/security">
-              <Button className="w-full" variant="secondary"><UserCog size={14} /> Paramètres de sécurité</Button>
-            </Link>
-            <Link to="/notifications">
-              <Button className="w-full" variant="secondary"><Mail size={14} /> Notifications</Button>
-            </Link>
-            <Link to="/settings">
-              <Button className="w-full" variant="secondary"><Building2 size={14} /> Paramètres généraux</Button>
-            </Link>
-          </div>
-
-          <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
-            <p className="font-semibold text-gray-900">Flutterwave</p>
-            <p className="mt-2">La plateforme prend en charge Stripe et Flutterwave. Configurez les clés Flutterwave dans Supabase et choisissez Flutterwave dans la facturation pour accepter Orange Money, MTN MoMo, Wave, M-Pesa et les cartes locales.</p>
           </div>
         </Card>
       </div>
