@@ -8,13 +8,11 @@ export function classNames(...parts: (string | false | null | undefined)[]): str
 export function formatMoney(amount: number, currencyCode: string): string {
   const cur = CURRENCY_BY_CODE[currencyCode] || CURRENCY_BY_CODE.USD;
   const value = Number(amount || 0);
-  // For 0-decimal currencies (XOF, XAF, TZS, UGX), no decimals at all.
-  // For 2-decimal currencies, strip trailing .00 for clean display.
   const formatted = value.toLocaleString('fr-FR', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    minimumFractionDigits: cur.decimals,
+    maximumFractionDigits: cur.decimals,
   });
-  return `${formatted} ${cur.symbol}`;
+  return `${cur.decimals === 2 ? formatted.replace(/,00$/, '') : formatted} ${cur.symbol}`;
 }
 
 export function convertToUsd(amount: number, fromCurrency: string): number {

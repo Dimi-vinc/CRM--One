@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import { type ComponentType, type ReactNode, useEffect, useMemo, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import * as Icons from 'lucide-react';
 import { ChevronDown, LogOut, Settings, Crown, Menu, X, Bell, Search, Building2 } from 'lucide-react';
@@ -12,10 +12,14 @@ import { supabase } from '../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
 import { LanguageSelector } from './LanguageSelector';
 
+type LucideIconComponent = ComponentType<{ size?: number }>; 
+
 function LucIcon({ name, size = 18 }: { name: string; size?: number }) {
-  const C = (Icons as any)[name] || Icons.Circle;
+  const C = (Icons as Record<string, LucideIconComponent>)[name] || Icons.Circle;
   return <C size={size} />;
 }
+
+const ALWAYS_VISIBLE: ModuleKey[] = ['dashboard', 'settings', 'security', 'privacy', 'notifications'];
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { profile, tenant, permissions, signOut } = useAuth();

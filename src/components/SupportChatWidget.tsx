@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { MessageCircle, X, Send, Loader2, LifeBuoy, CheckCircle2 } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 
 interface ChatMsg { role: 'user' | 'assistant'; content: string }
 
