@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { UserCog, Building2, Upload, Check, AlertCircle, Loader2, Mail, Unplug, Link2, Paintbrush } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { PageHeader, Card, Button, Input, Select, Avatar } from '../../components/ui';
@@ -7,7 +7,8 @@ import { COUNTRIES, CURRENCIES } from '../../lib/constants';
 
 interface EmailConnection { provider: 'gmail' | 'outlook'; email_address: string }
 
-const THEMES = [
+type ThemeId = 'ocean' | 'coral' | 'classic';
+const THEMES: ReadonlyArray<{ id: ThemeId; name: string; color: string; previewClass: string }> = [
   { id: 'ocean', name: 'Ocean Blue (Défaut)', color: '#0369A1', previewClass: 'bg-[#0369A1]' },
   { id: 'coral', name: 'Corail Alternatif', color: '#FF6B35', previewClass: 'bg-[#FF6B35]' },
   { id: 'classic', name: 'Thème Actuel (Classic)', color: '#fb5d1f', previewClass: 'bg-[#fb5d1f]' },
@@ -32,9 +33,9 @@ export function Settings() {
   const { profile, tenant, refresh } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const [currentTheme, setCurrentTheme] = useState<keyof typeof colorsData>(localStorage.getItem('crm_theme') as keyof typeof colorsData || 'ocean');
+  const [currentTheme, setCurrentTheme] = useState<ThemeId>((localStorage.getItem('crm_theme') as ThemeId) || 'ocean');
 
-  const selectTheme = (themeId: keyof typeof colorsData) => {
+  const selectTheme = (themeId: ThemeId) => {
     setCurrentTheme(themeId);
     localStorage.setItem('crm_theme', themeId);
     const selectedColors = colorsData[themeId];
@@ -91,21 +92,6 @@ export function Settings() {
     else if (status === 'error') setConnectMessage({ type: 'error', text: 'La connexion a échoué. Réessayez.' });
     if (status) window.history.replaceState({}, '', window.location.pathname + window.location.hash.split('?')[0]);
   }, [loadConnections]);
-
-  const loadConnections = async () => {
-    setConnLoading(true);
-    const { data: sessionData } = await supabase.auth.getSession();
-    const token = sessionData.session?.access_token;
-    if (!token) { setConnLoading(false); return; }
-    try {
-      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/email-connection-status`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setConnections(data.connections || []);
-    } catch { /* leave empty on failure */ }
-    setConnLoading(false);
-  };
 
   const startConnect = async (provider: 'gmail' | 'outlook') => {
     const { data: sessionData } = await supabase.auth.getSession();
