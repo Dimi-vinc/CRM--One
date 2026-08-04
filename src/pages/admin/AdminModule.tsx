@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { UsersRound, Plus, Trash2, Mail, Shield, Edit2 } from 'lucide-react';
+import { UsersRound, Plus, Trash2, Mail, Shield, Edit2, TrendingUp } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { PageHeader, Card, Button, Modal, Input, Select, Badge, Avatar, EmptyState } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
