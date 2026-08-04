@@ -317,7 +317,7 @@ export function Settings() {
                 return (
                   <button
                     key={t.id}
-                    onClick={() => selectTheme(t.id as any)}
+                    onClick={() => selectTheme(t.id)}
                     className={`flex flex-col items-center justify-between rounded-xl border p-3.5 transition-all text-center focus:outline-none ${isActive ? 'border-coral-500 ring-2 ring-coral-100 bg-coral-50/10' : 'border-gray-200 hover:bg-gray-50'}`}
                   >
                     <div className={`h-8 w-8 rounded-full shadow-sm mb-2 ${t.previewClass}`} />
