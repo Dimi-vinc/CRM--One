@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { UserCog, Building2, Upload, Check, AlertCircle, Loader2, Mail, Unplug, Link2 } from 'lucide-react';
+import { UserCog, Building2, Upload, Check, AlertCircle, Loader2, Mail, Unplug, Link2, Paintbrush } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { PageHeader, Card, Button, Input, Select, Avatar } from '../../components/ui';
@@ -8,10 +8,43 @@ import { COUNTRIES, CURRENCIES } from '../../lib/constants';
 
 interface EmailConnection { provider: 'gmail' | 'outlook'; email_address: string }
 
+const THEMES = [
+  { id: 'ocean', name: 'Ocean Blue (Défaut)', color: '#0369A1', previewClass: 'bg-[#0369A1]' },
+  { id: 'coral', name: 'Corail Alternatif', color: '#FF6B35', previewClass: 'bg-[#FF6B35]' },
+  { id: 'classic', name: 'Thème Actuel (Classic)', color: '#fb5d1f', previewClass: 'bg-[#fb5d1f]' },
+];
+
+const colorsData = {
+  ocean: {
+    '50': '#f0f9ff', '100': '#e0f2fe', '200': '#bae6fd', '300': '#7dd3fc', '400': '#38bdf8',
+    '500': '#0369a1', '600': '#025a8b', '700': '#014a75', '800': '#013b5e', '900': '#0c2d48'
+  },
+  coral: {
+    '50': '#fff5f0', '100': '#ffe3d1', '200': '#ffc4a3', '300': '#ffa070', '400': '#ff7e42',
+    '500': '#ff6b35', '600': '#e0531f', '700': '#bc3d11', '800': '#962d0a', '900': '#7a2107'
+  },
+  classic: {
+    '50': '#fff5f0', '100': '#ffe8da', '200': '#ffcfb5', '300': '#ffac7f', '400': '#ff7e3f',
+    '500': '#fb5d1f', '600': '#ec4a0c', '700': '#c43a09', '800': '#9c3110', '900': '#7e2c11'
+  }
+};
+
 export function Settings() {
   const { profile, tenant, refresh } = useAuth();
   const { lang } = useLanguage();
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const [currentTheme, setCurrentTheme] = useState(localStorage.getItem('crm_theme') || 'ocean');
+
+  const selectTheme = (themeId: 'ocean' | 'coral' | 'classic') => {
+    setCurrentTheme(themeId);
+    localStorage.setItem('crm_theme', themeId);
+    const selectedColors = colorsData[themeId];
+    const root = document.documentElement;
+    Object.entries(selectedColors).forEach(([key, val]) => {
+      root.style.setProperty(`--color-primary-${key}`, val);
+    });
+  };
 
   const [connections, setConnections] = useState<EmailConnection[]>([]);
   const [connLoading, setConnLoading] = useState(true);
@@ -229,42 +262,73 @@ export function Settings() {
         </Card>
       </div>
 
-      <Card className="mt-6 p-5">
-        <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-blue-50 p-2.5 text-blue-600"><Mail size={20} /></div>
-          <div>
-            <h3 className="font-semibold text-gray-900">Intégrations email</h3>
-            <p className="text-sm text-gray-500">Connectez votre propre Gmail ou Outlook pour envoyer des emails aux contacts depuis votre vraie adresse.</p>
-          </div>
-        </div>
-
-        {connectMessage && (
-          <div className={`mt-4 flex items-start gap-2 rounded-lg p-3 text-sm ${connectMessage.type === 'success' ? 'bg-mint-50 text-mint-800' : 'bg-red-50 text-red-700'}`}>
-            {connectMessage.type === 'success' ? <Check size={16} className="mt-0.5 flex-shrink-0" /> : <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />}
-            <span>{connectMessage.text}</span>
-          </div>
-        )}
-
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          {([['gmail', 'Gmail', gmailConn], ['outlook', 'Outlook', outlookConn]] as const).map(([provider, label, conn]) => (
-            <div key={provider} className="flex items-center justify-between rounded-lg border border-gray-100 p-3">
-              <div>
-                <p className="text-sm font-medium text-gray-900">{label}</p>
-                <p className="text-xs text-gray-500">{connLoading ? 'Vérification…' : conn ? conn.email_address : 'Non connecté'}</p>
-              </div>
-              {connLoading ? (
-                <Loader2 size={16} className="animate-spin text-gray-300" />
-              ) : conn ? (
-                <Button size="sm" variant="secondary" onClick={() => disconnect(provider)} disabled={disconnecting === provider}>
-                  {disconnecting === provider ? '…' : <><Unplug size={13} /> Déconnecter</>}
-                </Button>
-              ) : (
-                <Button size="sm" onClick={() => startConnect(provider)}><Link2 size={13} /> Connecter</Button>
-              )}
+      <div className="grid gap-6 mt-6 lg:grid-cols-2">
+        <Card className="p-5">
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl bg-blue-50 p-2.5 text-blue-600"><Mail size={20} /></div>
+            <div>
+              <h3 className="font-semibold text-gray-900">Intégrations email</h3>
+              <p className="text-sm text-gray-500">Connectez votre propre Gmail ou Outlook pour envoyer des emails aux contacts.</p>
             </div>
-          ))}
-        </div>
-      </Card>
+          </div>
+
+          {connectMessage && (
+            <div className={`mt-4 flex items-start gap-2 rounded-lg p-3 text-sm ${connectMessage.type === 'success' ? 'bg-mint-50 text-mint-800' : 'bg-red-50 text-red-700'}`}>
+              {connectMessage.type === 'success' ? <Check size={16} className="mt-0.5 flex-shrink-0" /> : <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />}
+              <span>{connectMessage.text}</span>
+            </div>
+          )}
+
+          <div className="mt-4 space-y-3">
+            {([['gmail', 'Gmail', gmailConn], ['outlook', 'Outlook', outlookConn]] as const).map(([provider, label, conn]) => (
+              <div key={provider} className="flex items-center justify-between rounded-lg border border-gray-100 p-3">
+                <div>
+                  <p className="text-sm font-medium text-gray-900">{label}</p>
+                  <p className="text-xs text-gray-500">{connLoading ? 'Vérification…' : conn ? conn.email_address : 'Non connecté'}</p>
+                </div>
+                {connLoading ? (
+                  <Loader2 size={16} className="animate-spin text-gray-300" />
+                ) : conn ? (
+                  <Button size="sm" variant="secondary" onClick={() => disconnect(provider)} disabled={disconnecting === provider}>
+                    {disconnecting === provider ? '…' : <><Unplug size={13} /> Déconnecter</>}
+                  </Button>
+                ) : (
+                  <Button size="sm" onClick={() => startConnect(provider)}><Link2 size={13} /> Connecter</Button>
+                )}
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <Card className="p-5">
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl bg-amber-50 p-2.5 text-amber-600"><Paintbrush size={20} /></div>
+            <div>
+              <h3 className="font-semibold text-gray-900">Personnalisation du thème</h3>
+              <p className="text-sm text-gray-500">Sélectionnez la couleur d'accentuation de l'interface CRM.</p>
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <p className="text-xs text-gray-400 mb-3">La modification s'applique instantanément sur tous vos modules.</p>
+            <div className="grid gap-3 grid-cols-3">
+              {THEMES.map(t => {
+                const isActive = currentTheme === t.id;
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => selectTheme(t.id as any)}
+                    className={`flex flex-col items-center justify-between rounded-xl border p-3.5 transition-all text-center focus:outline-none ${isActive ? 'border-coral-500 ring-2 ring-coral-100 bg-coral-50/10' : 'border-gray-200 hover:bg-gray-50'}`}
+                  >
+                    <div className={`h-8 w-8 rounded-full shadow-sm mb-2 ${t.previewClass}`} />
+                    <span className="text-[11px] font-semibold text-gray-900 leading-tight">{t.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </Card>
+      </div>
     </div>
   );
 }
