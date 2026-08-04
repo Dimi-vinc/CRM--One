@@ -3,6 +3,7 @@ import { type ReactNode } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { hasModuleAccess } from '../lib/permissions';
+import { planIncludes } from '../lib/constants';
 import type { Role, Tenant } from '../lib/types';
 
 // The security boundary lives in the database (RLS + the anti-privilege-escalation trigger on
@@ -60,6 +61,13 @@ export function RequireAuth({ children, roles, requireTenant = true, moduleKey }
   // super_admin may bypass tenant requirement
   if (requireTenant && !canAccessSuperAdmin && !profile.tenant_id) {
     return <Navigate to="/onboarding" replace />;
+  }
+
+  // Real plan-level enforcement: redirect away if the module is not included in the tenant's current plan.
+  if (moduleKey && !canAccessSuperAdmin && tenant) {
+    if (!planIncludes(tenant.plan_id || 'starter', moduleKey as any)) {
+      return <Navigate to="/billing" replace />;
+    }
   }
 
   // Real module-level access control: a 'custom' role user without 'view' on this module is
