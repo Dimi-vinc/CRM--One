@@ -47,7 +47,7 @@ export interface Plan {
   currency: string;
   max_users: number;
   max_deals: number;
-  features: Record<string, any>;
+  features: Record<string, unknown>;
   is_active: boolean;
   sort_order: number;
 }
@@ -70,7 +70,7 @@ export interface AuditLog {
   target_type?: string | null;
   target_id?: string | null;
   tenant_id?: string | null;
-  details?: any;
+  details?: unknown;
   created_at: string;
 }
 

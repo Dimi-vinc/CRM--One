@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import { type ComponentType, type ReactNode, useEffect, useMemo, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import * as Icons from 'lucide-react';
 import { ChevronDown, LogOut, Settings, Crown, Menu, X, Bell, Search, Building2 } from 'lucide-react';
@@ -12,10 +12,14 @@ import { supabase } from '../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
 import { LanguageSelector } from './LanguageSelector';
 
+type LucideIconComponent = ComponentType<{ size?: number }>; 
+
 function LucIcon({ name, size = 18 }: { name: string; size?: number }) {
-  const C = (Icons as any)[name] || Icons.Circle;
+  const C = (Icons as Record<string, LucideIconComponent>)[name] || Icons.Circle;
   return <C size={size} />;
 }
+
+const ALWAYS_VISIBLE: ModuleKey[] = ['dashboard', 'settings', 'security', 'privacy', 'notifications'];
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { profile, tenant, permissions, signOut } = useAuth();
@@ -24,7 +28,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [openSidebar, setOpenSidebar] = useState(false);
   const [userMenu, setUserMenu] = useState(false);
   const [unread, setUnread] = useState(0);
-  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [announcements, setAnnouncements] = useState<unknown[]>([]);
 
   const planId = tenant?.plan_id || 'starter';
   const trialDaysLeft = tenant?.trial_ends_at ? daysUntil(tenant.trial_ends_at) : null;
@@ -42,7 +46,6 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   // Modules that are personal/universal — always visible regardless of a custom role's granted
   // business-module permissions (they don't touch tenant data access).
-  const ALWAYS_VISIBLE: ModuleKey[] = ['dashboard', 'settings', 'security', 'privacy', 'notifications'];
 
   const visibleModules: ModuleDef[] = useMemo(() => {
     if (isSuperAdmin) return MODULES.filter(m => m.key === 'dashboard');
@@ -213,5 +216,5 @@ function routeFor(key: ModuleKey): string {
 
 function upgradePlanFor(key: ModuleKey): 'starter' | 'pro' | 'premium' | 'entreprise' {
   const m = MODULES.find(x => x.key === key);
-  return (m?.minPlan as any) || 'premium';
+  return m?.minPlan || 'premium';
 }

@@ -3,6 +3,7 @@ import { type ReactNode } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { hasModuleAccess } from '../lib/permissions';
+import { planIncludes, type ModuleKey } from '../lib/constants';
 import type { Role, Tenant } from '../lib/types';
 
 // The security boundary lives in the database (RLS + the anti-privilege-escalation trigger on
@@ -29,7 +30,7 @@ const PAYWALL_ALLOWED_PATHS = new Set(['/billing', '/security']);
 // Redirect to /login if no session. Optionally restrict to roles, and/or to a specific module
 // permission (real enforcement for custom roles — direct URL access is blocked exactly like the
 // sidebar link is hidden, not just cosmetically).
-export function RequireAuth({ children, roles, requireTenant = true, moduleKey }: { children: ReactNode; roles?: Role[]; requireTenant?: boolean; moduleKey?: string }) {
+export function RequireAuth({ children, roles, requireTenant = true, moduleKey }: { children: ReactNode; roles?: Role[]; requireTenant?: boolean; moduleKey?: ModuleKey }) {
   const { loading, session, profile, tenant, permissions, mfaRequired } = useAuth();
   const { t } = useLanguage();
   const loc = useLocation();
@@ -60,6 +61,13 @@ export function RequireAuth({ children, roles, requireTenant = true, moduleKey }
   // super_admin may bypass tenant requirement
   if (requireTenant && !canAccessSuperAdmin && !profile.tenant_id) {
     return <Navigate to="/onboarding" replace />;
+  }
+
+  // Real plan-level enforcement: redirect away if the module is not included in the tenant's current plan.
+  if (moduleKey && !canAccessSuperAdmin && tenant) {
+    if (!planIncludes(tenant.plan_id || 'starter', moduleKey)) {
+      return <Navigate to="/billing" replace />;
+    }
   }
 
   // Real module-level access control: a 'custom' role user without 'view' on this module is

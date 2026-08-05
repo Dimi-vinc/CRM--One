@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { createContext, useContext, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import type { Profile, Tenant } from '../lib/types';
@@ -40,12 +40,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const profileRef = useRef<Profile | null>(null);
   useEffect(() => { profileRef.current = profile; }, [profile]);
 
-  const checkMfa = async () => {
+  const checkMfa = useCallback(async () => {
     const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
     setMfaRequired(!!data && data.nextLevel === 'aal2' && data.nextLevel !== data.currentLevel);
-  };
+  }, []);
 
-  const loadProfile = async (uid: string) => {
+  const loadProfile = useCallback(async (uid: string) => {
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -66,24 +66,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } else {
       setTenant(null);
     }
-    // admin/super_admin always have full access — no restriction lookup needed. A 'custom' role
-    // user's actual access comes from their assigned role's permissions map; if none is assigned,
-    // they get no module access at all (fail closed, not fail open).
+    // admin/super_admin always have full access. Custom role access is loaded from
+    // the assigned role's permissions map. If no role is assigned, deny access.
     if (data?.role === 'custom' && data?.role_id) {
-      const { data: roleRow } = await supabase.from('roles').select('permissions').eq('id', data.role_id).maybeSingle();
-      setPermissions((roleRow?.permissions as Record<string, string[]>) || {});
+      const { data: roleRow } = await supabase
+        .from('roles')
+        .select('permissions')
+        .eq('id', data.role_id)
+        .maybeSingle();
+      const rolePermissions = roleRow?.permissions as Record<string, string[]> | undefined;
+      setPermissions(rolePermissions ?? {});
     } else {
       setPermissions(null);
     }
-  };
+  }, []);
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     const { data } = await supabase.auth.getSession();
     setSession(data.session);
     if (data.session?.user) await loadProfile(data.session.user.id);
     await checkMfa();
     setLoading(false);
-  };
+  }, [checkMfa, loadProfile]);
 
   useEffect(() => {
     (async () => {
@@ -105,7 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       (async () => {
         setSession(sess);
         if (sess?.user) await loadProfile(sess.user.id);
-        else { setProfile(null); setTenant(null); }
+        else { setProfile(null); setTenant(null); setPermissions(null); }
         await checkMfa();
         setLoading(false);
       })();
@@ -114,14 +118,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     setSession(null);
     setProfile(null);
     setTenant(null);
     setPermissions(null);
     setMfaRequired(false);
-  };
+  }, []);
 
   const value = useMemo<AuthState>(() => ({
     loading, session, user: session?.user ?? null, profile, tenant, mfaRequired, permissions, refresh, signOut,

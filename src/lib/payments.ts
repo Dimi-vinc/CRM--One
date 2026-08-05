@@ -70,8 +70,9 @@ const stripeProvider: PaymentProvider = {
       const data = await res.json();
       if (!data || !data.url) return { ok: false, provider: 'stripe', error: 'Réponse invalide' };
       return { ok: true, provider: 'stripe', url: data.url };
-    } catch (e: any) {
-      return { ok: false, provider: 'stripe', error: e?.message || 'Échec réseau' };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      return { ok: false, provider: 'stripe', error: message || 'Échec réseau' };
     }
   },
   async createPortalSession(tenantId: string, returnUrl: string): Promise<CheckoutResult> {
@@ -94,8 +95,9 @@ const stripeProvider: PaymentProvider = {
       const data = await res.json();
       if (!data?.url) return { ok: false, provider: 'stripe', error: 'Réponse invalide' };
       return { ok: true, provider: 'stripe', url: data.url };
-    } catch (e: any) {
-      return { ok: false, provider: 'stripe', error: e?.message || 'Échec réseau' };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      return { ok: false, provider: 'stripe', error: message || 'Échec réseau' };
     }
   },
 };
@@ -132,8 +134,9 @@ const flutterwaveProvider: PaymentProvider = {
       const data = await res.json();
       if (!data?.url) return { ok: false, provider: 'flutterwave', error: 'Réponse invalide' };
       return { ok: true, provider: 'flutterwave', url: data.url };
-    } catch (e: any) {
-      return { ok: false, provider: 'flutterwave', error: e?.message || 'Échec réseau' };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      return { ok: false, provider: 'flutterwave', error: message || 'Échec réseau' };
     }
   },
   async createPortalSession(): Promise<CheckoutResult> {

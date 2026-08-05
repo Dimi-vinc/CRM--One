@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type ComponentType } from 'react';
 import { Plus, Phone, Mail, Users, FileText, CheckSquare, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { PageHeader, Card, Button, Modal, Input, Select, Textarea, Badge, EmptyState } from '../../components/ui';
@@ -6,7 +6,8 @@ import { supabase } from '../../lib/supabase';
 import { ACTIVITY_TYPES, formatDate } from '../../lib/constants';
 import type { Activity, Contact } from '../../lib/types';
 
-const ICONS: Record<string, any> = { call: Phone, email: Mail, meeting: Users, task: CheckSquare, note: FileText };
+type LucideIconComponent = ComponentType<{ size?: number }>;
+const ICONS: Record<Activity['type'], LucideIconComponent> = { call: Phone, email: Mail, meeting: Users, task: CheckSquare, note: FileText };
 
 export function Activities() {
   const { tenant, profile } = useAuth();
@@ -15,15 +16,15 @@ export function Activities() {
   const [modal, setModal] = useState(false);
   const [form, setForm] = useState({ type: 'call', title: '', description: '', due_at: '', contact_id: '' });
 
-  const load = async () => {
+  const load = useCallback(async () => {
     if (!tenant) return;
     const [a, c] = await Promise.all([
       supabase.from('activities').select('*').order('due_at', { ascending: true }).limit(3000),
       supabase.from('contacts').select('*'),
     ]);
     setItems(a.data || []); setContacts(c.data || []);
-  };
-  useEffect(() => { load(); }, [tenant]);
+  }, [tenant]);
+  useEffect(() => { load(); }, [load]);
 
   const save = async () => {
     if (!tenant || !form.title.trim()) return;

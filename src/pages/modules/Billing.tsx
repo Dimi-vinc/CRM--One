@@ -15,6 +15,11 @@ export function Billing() {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
+  const [selectedProvider, setSelectedProvider] = useState<'stripe' | 'flutterwave'>(() => {
+    if (typeof window === 'undefined') return 'stripe';
+    const stored = localStorage.getItem('crm_payment_provider');
+    return stored === 'flutterwave' ? 'flutterwave' : 'stripe';
+  });
 
   const load = async () => {
     if (!tenant) return;
@@ -38,11 +43,12 @@ export function Billing() {
       email: profile.email,
       successUrl: `${window.location.origin}/billing?status=success&plan=${planId}`,
       cancelUrl: `${window.location.origin}/billing?status=cancel`,
+      provider: selectedProvider,
     });
     setBusy(null);
     if (!res.ok) {
-      if (res.error?.includes('non encore configuré') || (res as any).error?.includes('Stripe')) {
-        setError('Stripe n\'est pas encore configuré. Activez Stripe pour accepter les paiements (voir le message à la fin de la livraison).');
+      if (res.error?.includes('non encore configuré') || res.error?.includes('Stripe') || res.error?.includes('Flutterwave')) {
+        setError(`${selectedProvider === 'stripe' ? 'Stripe' : 'Flutterwave'} n'est pas encore configuré sur cette instance de test. Veuillez configurer les clés d'API correspondantes.`);
       } else {
         setError(res.error || 'Échec du paiement');
       }
@@ -60,6 +66,12 @@ export function Billing() {
     if (res.ok && res.url) window.location.href = res.url;
     else setError(res.error || 'Portail indisponible. Souscrivez d\'abord à un plan.');
   };
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('crm_payment_provider', selectedProvider);
+    }
+  }, [selectedProvider]);
 
   // Handle redirect status
   useEffect(() => {
@@ -131,8 +143,51 @@ export function Billing() {
         </div>
       </Card>
 
+      {/* Choice of Payment Provider (Stripe vs Flutterwave) - Microsoft 365 style */}
+      <Card className="mb-6 p-5">
+        <h3 className="text-sm font-semibold text-gray-900 mb-3">1. Mode de règlement préféré</h3>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <button
+            onClick={() => setSelectedProvider('stripe')}
+            className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-all focus:outline-none ${selectedProvider === 'stripe' ? 'border-coral-500 ring-2 ring-coral-100 bg-coral-50/10' : 'border-gray-200 hover:bg-gray-50'}`}
+          >
+            <div className={`mt-1 flex h-4 w-4 items-center justify-center rounded-full border ${selectedProvider === 'stripe' ? 'border-coral-500 text-coral-600' : 'border-gray-300'}`}>
+              <div className={`h-2 w-2 rounded-full ${selectedProvider === 'stripe' ? 'bg-coral-500' : 'bg-transparent'}`} />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-gray-900">Carte Bancaire Internationale (Stripe)</p>
+              <p className="mt-0.5 text-xs text-gray-500">Visa, Mastercard, AMEX, Apple Pay & Google Pay.</p>
+              <div className="mt-2 flex gap-1.5">
+                <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-600">Visa</span>
+                <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-600">Mastercard</span>
+                <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-600">AMEX</span>
+              </div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => setSelectedProvider('flutterwave')}
+            className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-all focus:outline-none ${selectedProvider === 'flutterwave' ? 'border-coral-500 ring-2 ring-coral-100 bg-coral-50/10' : 'border-gray-200 hover:bg-gray-50'}`}
+          >
+            <div className={`mt-1 flex h-4 w-4 items-center justify-center rounded-full border ${selectedProvider === 'flutterwave' ? 'border-coral-500 text-coral-600' : 'border-gray-300'}`}>
+              <div className={`h-2 w-2 rounded-full ${selectedProvider === 'flutterwave' ? 'bg-coral-500' : 'bg-transparent'}`} />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-gray-900">Mobile Money & Cartes Locales (Flutterwave)</p>
+              <p className="mt-0.5 text-xs text-gray-500">Orange Money, MTN MoMo, Wave, M-Pesa & Cartes africaines.</p>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                <span className="rounded bg-coral-50 px-1.5 py-0.5 text-[10px] font-bold text-coral-700">Orange Money</span>
+                <span className="rounded bg-coral-50 px-1.5 py-0.5 text-[10px] font-bold text-coral-700">MTN MoMo</span>
+                <span className="rounded bg-coral-50 px-1.5 py-0.5 text-[10px] font-bold text-coral-700">Wave</span>
+                <span className="rounded bg-coral-50 px-1.5 py-0.5 text-[10px] font-bold text-coral-700">M-Pesa</span>
+              </div>
+            </div>
+          </button>
+        </div>
+      </Card>
+
       {/* Plans grid */}
-      <h3 className="mb-3 text-base font-semibold text-gray-900">Changer de forfait</h3>
+      <h3 className="mb-3 text-base font-semibold text-gray-900">2. Sélectionnez un forfait</h3>
       {loading ? <Skeleton className="h-48" /> : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {PLANS.map(p => {
@@ -157,15 +212,15 @@ export function Billing() {
       )}
 
       <Card className="mt-6 p-5">
-        <h3 className="font-semibold text-gray-900">Moyens de paiement</h3>
+        <h3 className="font-semibold text-gray-900">Moyens de paiement disponibles</h3>
         <div className="mt-3 flex flex-wrap gap-3 text-sm">
-          <span className="rounded-lg border border-gray-200 px-3 py-1.5">Cartes bancaires (Stripe)</span>
-          <span className="rounded-lg border border-gray-200 px-3 py-1.5 text-gray-400">Orange Money</span>
-          <span className="rounded-lg border border-gray-200 px-3 py-1.5 text-gray-400">MTN Mobile Money</span>
-          <span className="rounded-lg border border-gray-200 px-3 py-1.5 text-gray-400">Wave</span>
-          <span className="rounded-lg border border-gray-200 px-3 py-1.5 text-gray-400">M-Pesa</span>
+          <span className={`rounded-lg border px-3 py-1.5 ${selectedProvider === 'stripe' ? 'border-coral-500 bg-coral-50/20 text-coral-700 font-semibold' : 'border-gray-200 text-gray-400'}`}>Cartes bancaires (Stripe)</span>
+          <span className={`rounded-lg border px-3 py-1.5 ${selectedProvider === 'flutterwave' ? 'border-coral-500 bg-coral-50/20 text-coral-700 font-semibold' : 'border-gray-200 text-gray-400'}`}>Orange Money (Flutterwave)</span>
+          <span className={`rounded-lg border px-3 py-1.5 ${selectedProvider === 'flutterwave' ? 'border-coral-500 bg-coral-50/20 text-coral-700 font-semibold' : 'border-gray-200 text-gray-400'}`}>MTN Mobile Money (Flutterwave)</span>
+          <span className={`rounded-lg border px-3 py-1.5 ${selectedProvider === 'flutterwave' ? 'border-coral-500 bg-coral-50/20 text-coral-700 font-semibold' : 'border-gray-200 text-gray-400'}`}>Wave (Flutterwave)</span>
+          <span className={`rounded-lg border px-3 py-1.5 ${selectedProvider === 'flutterwave' ? 'border-coral-500 bg-coral-50/20 text-coral-700 font-semibold' : 'border-gray-200 text-gray-400'}`}>M-Pesa (Flutterwave)</span>
         </div>
-        <p className="mt-3 text-xs text-gray-500">Mobile Money sera proposé dynamiquement selon le pays. Une couche d'abstraction permet d'ajouter Flutterwave sans tout refaire.</p>
+        <p className="mt-3 text-xs text-gray-500">Les moyens de paiement sont proposés de manière dynamique et sécurisée selon votre mode de règlement préféré et la devise du compte.</p>
       </Card>
     </div>
   );

@@ -53,7 +53,7 @@ export function SuperAdminDashboard() {
     { l: t('sa.users'), v: String(totalUsers), i: Users, c: 'teal' as const },
     { l: t('sa.mrr'), v: fmt(mrrUsd, 'USD'), i: DollarSign, c: 'orange' as const },
     { l: t('sa.sales'), v: fmt(totalSales, 'USD'), i: TrendingUp, c: 'violet' as const },
-  ];
+  ] as const;
 
   return (
     <div>
@@ -76,7 +76,7 @@ export function SuperAdminDashboard() {
         {loading ? Array.from({length:4}).map((_,i)=><Skeleton key={i} className="h-28" />) : cards.map(c => {
           const r = COLOR_RAMPS[c.c as keyof typeof COLOR_RAMPS]; const Icon = c.i;
           return (
-            <Card key={c.l} edge={c.c as any} className="p-5">
+            <Card key={c.l} edge={c.c} className="p-5">
               <div className="flex items-start justify-between">
                 <div><p className="text-sm text-gray-500">{c.l}</p><p className="mt-1 text-2xl font-bold text-gray-900">{c.v}</p></div>
                 <div className={`rounded-xl ${r.bg} ${r.text} p-2.5`}><Icon size={20} /></div>

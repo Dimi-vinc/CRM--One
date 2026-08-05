@@ -9,6 +9,11 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { COUNTRIES, COUNTRY_BY_CODE, CURRENCIES, PLANS, PLAN_BY_ID, formatMoney, PLATFORM_NAME, PLATFORM_VENDOR } from '../lib/constants';
 
+interface OnboardingLocationState {
+  companyName?: string;
+  fullName?: string;
+}
+
 const STEPS = ['onboarding.location', 'onboarding.currency', 'onboarding.plan', 'onboarding.comCode'] as const;
 
 export function Onboarding() {
@@ -16,8 +21,8 @@ export function Onboarding() {
   const nav = useNavigate();
   const loc = useLocation();
   const { refresh } = useAuth();
-  const initialCompany = (loc.state as any)?.companyName || '';
-  const initialName = (loc.state as any)?.fullName || '';
+  const initialCompany = (loc.state as OnboardingLocationState)?.companyName || '';
+  const initialName = (loc.state as OnboardingLocationState)?.fullName || '';
 
   const [step, setStep] = useState(0);
   const [companyName, setCompanyName] = useState(initialCompany);
@@ -74,8 +79,9 @@ export function Onboarding() {
 
       await refresh();
       nav('/dashboard', { replace: true });
-    } catch (e: any) {
-      setError(e?.message || 'Erreur lors de la configuration');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setError(message || 'Erreur lors de la configuration');
     } finally {
       setSubmitting(false);
     }
