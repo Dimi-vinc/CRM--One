@@ -368,6 +368,40 @@ export interface WebFormSubmission {
   created_at: string;
 }
 
+// ---- API publique & Webhooks ----
+export interface ApiKey {
+  id: string;
+  tenant_id: string;
+  name: string;
+  key_prefix: string;
+  last_used_at: string | null;
+  revoked_at: string | null;
+  created_at: string;
+}
+
+export type WebhookEvent = 'contact_added' | 'deal_created' | 'deal_won' | 'activity_done';
+
+export interface Webhook {
+  id: string;
+  tenant_id: string;
+  name: string;
+  url: string;
+  events: WebhookEvent[];
+  secret: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface WebhookDelivery {
+  id: string;
+  webhook_id: string;
+  event: string;
+  status_code: number | null;
+  success: boolean;
+  response_body: string | null;
+  created_at: string;
+}
+
 // ---- Territoires & quotas ----
 export interface SalesTerritory {
   id: string;

@@ -48,7 +48,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     if (isSuperAdmin) return MODULES.filter(m => m.key === 'dashboard');
     return MODULES.filter(m => {
       if (m.key === 'super_admin') return false;
-      if (m.key === 'admin') return profile?.role === 'admin'; // Espace Admin (équipe/rôles) : tenant admins only
+      if (m.key === 'admin' || m.key === 'developers') return profile?.role === 'admin'; // Espace Admin, API & Webhooks : tenant admins only
       if (ALWAYS_VISIBLE.includes(m.key)) return true;
       // Real enforcement: a 'custom' role user only sees modules their assigned role grants
       // 'view' on. admin/super_admin already returned true above or are handled elsewhere.

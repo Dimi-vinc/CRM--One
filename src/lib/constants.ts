@@ -6,7 +6,7 @@ export type ModuleKey =
   | 'dashboard' | 'pipeline' | 'contacts' | 'companies' | 'activities'
   | 'tasks' | 'calendar' | 'forecast' | 'reports' | 'import_export'
   | 'billing' | 'notifications' | 'security' | 'documents' | 'automations'
-  | 'tickets' | 'quotes_invoices' | 'campaigns' | 'knowledge_base' | 'privacy' | 'territories' | 'settings' | 'web_forms'
+  | 'tickets' | 'quotes_invoices' | 'campaigns' | 'knowledge_base' | 'privacy' | 'territories' | 'settings' | 'web_forms' | 'developers'
   | 'super_admin' | 'admin';
 
 export interface ModuleDef {
@@ -34,6 +34,7 @@ export const MODULES: ModuleDef[] = [
   { key: 'quotes_invoices', label: 'Devis & Factures', icon: 'FileText', minPlan: 'pro', group: 'crm' },
   { key: 'campaigns', label: 'Campagnes email', icon: 'Mail', minPlan: 'premium', group: 'insights' },
   { key: 'web_forms', label: 'Formulaires web', icon: 'FileInput', minPlan: 'pro', group: 'insights' },
+  { key: 'developers', label: 'API & Webhooks', icon: 'Code2', minPlan: 'entreprise', group: 'admin' },
   { key: 'knowledge_base', label: 'Base de connaissances', icon: 'BookOpen', minPlan: 'premium', group: 'crm' },
   { key: 'territories', label: 'Territoires & Quotas', icon: 'Map', minPlan: 'pro', group: 'insights' },
   { key: 'notifications', label: 'Notifications', icon: 'Bell', group: 'system' },
@@ -91,7 +92,7 @@ export const PLANS: PlanDef[] = [
     id: 'entreprise', name: 'Entreprise', price: 159, priceAnnual: 132, currency: 'USD',
     maxUsers: 0, maxDeals: 0, trialDays: 7, customRoles: true, multiCurrency: true, mobileMoney: true, api: true, whiteLabel: true, webhooks: true, prioritySupport: true, sla: true,
     features: ['Tout Premium +', 'Support prioritaire', 'Marque blanche partielle', 'Webhooks/API complète', 'SLA', 'Utilisateurs illimités'],
-    modules: ['dashboard','pipeline','contacts','companies','activities','tasks','calendar','forecast','reports','import_export','automations','documents','notifications','security','privacy','settings','admin','tickets','quotes_invoices','territories','web_forms','campaigns','knowledge_base','billing'],
+    modules: ['dashboard','pipeline','contacts','companies','activities','tasks','calendar','forecast','reports','import_export','automations','documents','notifications','security','privacy','settings','admin','tickets','quotes_invoices','territories','web_forms','campaigns','knowledge_base','billing','developers'],
   },
 ];
 
