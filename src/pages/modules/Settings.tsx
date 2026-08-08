@@ -335,14 +335,6 @@ export function Settings() {
 
         <Card className="p-5">
           <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-amber-50 p-2.5 text-amber-600"><Paintbrush size={20} /></div>
-            <div>
-              <h3 className="font-semibold text-gray-900">Personnalisation du thème</h3>
-              <p className="text-sm text-gray-500">Sélectionnez la couleur d'accentuation de l'interface CRM.</p>
-            </div>
-          </div>
-        <Card className="p-5">
-          <div className="flex items-center gap-3">
             <div className="rounded-xl bg-blue-50 p-2.5 text-blue-600"><Mail size={20} /></div>
             <div>
               <h3 className="font-semibold text-gray-900">Intégrations email</h3>

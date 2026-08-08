@@ -42,7 +42,7 @@ export function AuditLogPage() {
               <p className="text-xs text-gray-500">
                 {i.target_type} {i.target_id && `· ${i.target_id.slice(0, 8)}`} {i.tenant_id && `· tenant ${i.tenant_id.slice(0, 8)}`}
               </p>
-              {i.details && <pre className="mt-1 overflow-x-auto rounded bg-gray-50 p-2 text-[10px] text-gray-600">{JSON.stringify(i.details)}</pre>}
+              {i.details ? <pre className="mt-1 overflow-x-auto rounded bg-gray-50 p-2 text-[10px] text-gray-600">{JSON.stringify(i.details)}</pre> : null}
             </div>
             <div className="text-right">
               <p className="text-xs text-gray-400">{formatDateTime(i.created_at)}</p>

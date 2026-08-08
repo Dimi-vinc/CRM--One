@@ -1,13 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Plus, Trash2, CheckSquare } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { PageHeader, Card, Button, Modal, Input, Select, Textarea, Badge, EmptyState } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
+import type { ColorKey } from '../../lib/utils';
 import { TASK_PRIORITIES, TASK_STATUSES, formatDate } from '../../lib/constants';
 import type { Task } from '../../lib/types';
 
-const STATUS_COLORS: Record<'todo' | 'in_progress' | 'done', string> = { todo: 'gray', in_progress: 'orange', done: 'green' };
-const PRIO_COLORS: Record<'low' | 'medium' | 'high' | 'urgent', string> = { low: 'gray', medium: 'blue', high: 'orange', urgent: 'red' };
+const STATUS_COLORS: Record<string, ColorKey> = { todo: 'gray', in_progress: 'orange', done: 'green' };
+const PRIO_COLORS: Record<string, ColorKey> = { low: 'gray', medium: 'blue', high: 'orange', urgent: 'red' };
 
 export function Tasks() {
   const { tenant, profile } = useAuth();

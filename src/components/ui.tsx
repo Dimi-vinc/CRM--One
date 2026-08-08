@@ -1,4 +1,4 @@
-import { type ReactNode, type ButtonHTMLAttributes, type InputHTMLAttributes, type SelectHTMLAttributes, type TextareaHTMLAttributes, useEffect } from 'react';
+import { type ReactNode, type ComponentType, type ButtonHTMLAttributes, type InputHTMLAttributes, type SelectHTMLAttributes, type TextareaHTMLAttributes, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { classNames, initials, type ColorKey, COLOR_RAMPS } from '../lib/utils';
 
@@ -111,7 +111,7 @@ export function Modal({ open, onClose, title, children, size = 'md' }: { open: b
 }
 
 // ---- Empty state ----
-export function EmptyState({ icon: Icon, title, description, action }: { icon: ComponentType<{ size?: number }>; title: string; description?: string; action?: ReactNode }) {
+export function EmptyState({ icon: Icon, title, description, action }: { icon: ComponentType<{ size?: number | string }>; title: string; description?: string; action?: ReactNode }) {
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
       <div className="mb-3 rounded-full bg-mint-50 p-3 text-mint-600"><Icon size={24} /></div>

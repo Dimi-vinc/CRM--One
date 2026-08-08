@@ -6,7 +6,7 @@ import { supabase } from '../../lib/supabase';
 import { ACTIVITY_TYPES, formatDate } from '../../lib/constants';
 import type { Activity, Contact } from '../../lib/types';
 
-type LucideIconComponent = ComponentType<{ size?: number }>;
+type LucideIconComponent = ComponentType<{ size?: number | string }>;
 const ICONS: Record<Activity['type'], LucideIconComponent> = { call: Phone, email: Mail, meeting: Users, task: CheckSquare, note: FileText };
 
 export function Activities() {

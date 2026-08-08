@@ -9,13 +9,14 @@ import { classNames, daysUntil } from '../lib/utils';
 import { hasModuleAccess } from '../lib/permissions';
 import { Avatar } from './ui';
 import { supabase } from '../lib/supabase';
+import type { Announcement } from '../lib/types';
 import { useLanguage } from '../context/LanguageContext';
 import { LanguageSelector } from './LanguageSelector';
 
-type LucideIconComponent = ComponentType<{ size?: number }>; 
+type LucideIconComponent = ComponentType<{ size?: number | string }>; 
 
 function LucIcon({ name, size = 18 }: { name: string; size?: number }) {
-  const C = (Icons as Record<string, LucideIconComponent>)[name] || Icons.Circle;
+  const C = (Icons as unknown as Record<string, LucideIconComponent>)[name] || Icons.Circle;
   return <C size={size} />;
 }
 
@@ -28,7 +29,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [openSidebar, setOpenSidebar] = useState(false);
   const [userMenu, setUserMenu] = useState(false);
   const [unread, setUnread] = useState(0);
-  const [announcements, setAnnouncements] = useState<unknown[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
 
   const planId = tenant?.plan_id || 'starter';
   const trialDaysLeft = tenant?.trial_ends_at ? daysUntil(tenant.trial_ends_at) : null;
