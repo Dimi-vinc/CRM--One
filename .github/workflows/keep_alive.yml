@@ -1,17 +1,36 @@
-name: Keep Supabase Alive
+name: Supabase Keep Alive
 
 on:
   schedule:
-    # S'exécute automatiquement tous les 3 jours à minuit UTC
-    - cron: '0 0 */3 * *'
-  # Permet aussi de déclencher le test manuellement depuis GitHub
+    - cron: "3,8,13,18,23,28,33,38,43,48,53,58 * * * *"
   workflow_dispatch:
 
 jobs:
-  ping-supabase:
+  ping:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Ping Supabase API
+      - name: Keep Supabase awake
         run: |
-          curl -i -X GET "https://zrmggvgyzwcyrherifbu.supabase.co/rest/v1/" \
-          -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}"
+          SUPABASE_URL="https://zrmggvgyzwcyrherifbu.supabase.co"
+          SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpybWdndmd5endjeXJoZXJpZmJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ0NjU3MDYsImV4cCI6MjEwMDA0MTcwNn0.rOKbKfsdOODulugfY6oxadsdV1P_07i1FjXv_8XNlRw"
+
+          echo "Ping de Supabase..."
+
+          HTTP_STATUS=$(curl \
+            --silent \
+            --output /dev/null \
+            --write-out "%{http_code}" \
+            --request GET \
+            --url "${SUPABASE_URL}/rest/v1/" \
+            --header "apikey: ${SUPABASE_ANON_KEY}" \
+            --header "Authorization: Bearer ${SUPABASE_ANON_KEY}")
+
+          echo "HTTP Status: ${HTTP_STATUS}"
+
+          if [ "${HTTP_STATUS}" -ge 200 ] && [ "${HTTP_STATUS}" -lt 500 ]; then
+            echo "✅ Supabase répond correctement."
+          else
+            echo "❌ Supabase ne répond pas correctement."
+            exit 1
+          fi
