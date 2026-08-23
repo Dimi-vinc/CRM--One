@@ -180,6 +180,14 @@ export const COUNTRIES: CountryDef[] = [
   { code: 'FR', name: 'France', dial: '+33', currency: 'EUR', timezone: 'Europe/Paris', mobileMoney: [], regions: ['Paris','Lyon','Marseille','Bordeaux'] },
   { code: 'US', name: 'États-Unis', dial: '+1', currency: 'USD', timezone: 'America/New_York', mobileMoney: [], regions: ['New York','Californie','Texas'] },
   { code: 'GB', name: 'Royaume-Uni', dial: '+44', currency: 'GBP', timezone: 'Europe/London', mobileMoney: [], regions: ['Londres','Manchester','Birmingham'] },
+  { code: 'DE', name: 'Allemagne', dial: '+49', currency: 'EUR', timezone: 'Europe/Berlin', mobileMoney: [], regions: ['Berlin','Munich','Francfort'] },
+  { code: 'CA', name: 'Canada', dial: '+1', currency: 'CAD', timezone: 'America/Toronto', mobileMoney: [], regions: ['Toronto','Montréal','Vancouver'] },
+  { code: 'SA', name: 'Arabie Saoudite', dial: '+966', currency: 'SAR', timezone: 'Asia/Riyadh', mobileMoney: [], regions: ['Riyad','Djeddah','La Mecque'] },
+  { code: 'CH', name: 'Suisse', dial: '+41', currency: 'CHF', timezone: 'Europe/Zurich', mobileMoney: [], regions: ['Zurich','Genève','Bâle'] },
+  { code: 'AU', name: 'Australie', dial: '+61', currency: 'AUD', timezone: 'Australia/Sydney', mobileMoney: [], regions: ['Sydney','Melbourne','Brisbane'] },
+  { code: 'IN', name: 'Inde', dial: '+91', currency: 'INR', timezone: 'Asia/Kolkata', mobileMoney: [], regions: ['New Delhi','Mumbai','Bangalore'] },
+  { code: 'CN', name: 'Chine', dial: '+86', currency: 'CNY', timezone: 'Asia/Shanghai', mobileMoney: [], regions: ['Pékin','Shanghai','Shenzhen'] },
+  { code: 'BR', name: 'Brésil', dial: '+55', currency: 'BRL', timezone: 'America/Sao_Paulo', mobileMoney: [], regions: ['São Paulo','Rio de Janeiro','Brasília'] },
 ];
 
 export const COUNTRY_BY_CODE: Record<string, CountryDef> = Object.fromEntries(COUNTRIES.map(c => [c.code, c]));
@@ -210,6 +218,14 @@ export const CURRENCIES: CurrencyDef[] = [
   { code: 'EUR', symbol: '€', name: 'Euro', decimals: 2, rateToUsd: 1.08 },
   { code: 'GBP', symbol: '£', name: 'Livre sterling', decimals: 2, rateToUsd: 1.27 },
   { code: 'AED', symbol: 'د.إ', name: 'Dirham émirati', decimals: 2, rateToUsd: 0.27 },
+  { code: 'SAR', symbol: '﷼', name: 'Riyal saoudien', decimals: 2, rateToUsd: 0.27 },
+  { code: 'CAD', symbol: 'CA$', name: 'Dollar canadien', decimals: 2, rateToUsd: 0.72 },
+  { code: 'AUD', symbol: 'AU$', name: 'Dollar australien', decimals: 2, rateToUsd: 0.65 },
+  { code: 'CHF', symbol: 'CHF', name: 'Franc suisse', decimals: 2, rateToUsd: 1.12 },
+  { code: 'JPY', symbol: '¥', name: 'Yen japonais', decimals: 0, rateToUsd: 0.0067 },
+  { code: 'CNY', symbol: '¥', name: 'Yuan chinois', decimals: 2, rateToUsd: 0.14 },
+  { code: 'INR', symbol: '₹', name: 'Roupie indienne', decimals: 2, rateToUsd: 0.012 },
+  { code: 'BRL', symbol: 'R$', name: 'Real brésilien', decimals: 2, rateToUsd: 0.18 },
 ];
 
 export const CURRENCY_BY_CODE: Record<string, CurrencyDef> = Object.fromEntries(CURRENCIES.map(c => [c.code, c]));

@@ -1,6 +1,15 @@
 // Small UI/utility helpers shared across the app.
 import { CURRENCY_BY_CODE } from './constants';
 
+// Mirrors the key LanguageContext persists to (kept in sync manually since this is a plain
+// module, not a React hook — see src/context/LanguageContext.tsx). Reading it here means every
+// date/time/number in the app follows the user's chosen language, not a hardcoded locale —
+// important for a SaaS with an international audience.
+function getLocale(): 'fr-FR' | 'en-US' {
+  if (typeof window === 'undefined') return 'fr-FR';
+  return localStorage.getItem('liafrik-lang') === 'en' ? 'en-US' : 'fr-FR';
+}
+
 export function classNames(...parts: (string | false | null | undefined)[]): string {
   return parts.filter(Boolean).join(' ');
 }
@@ -8,7 +17,7 @@ export function classNames(...parts: (string | false | null | undefined)[]): str
 export function formatMoney(amount: number, currencyCode: string): string {
   const cur = CURRENCY_BY_CODE[currencyCode] || CURRENCY_BY_CODE.USD;
   const value = Number(amount || 0);
-  const formatted = value.toLocaleString('fr-FR', {
+  const formatted = value.toLocaleString(getLocale(), {
     minimumFractionDigits: cur.decimals,
     maximumFractionDigits: cur.decimals,
   });
@@ -26,29 +35,36 @@ export function initials(name?: string | null): string {
   return name.split(' ').filter(Boolean).slice(0, 2).map(s => s[0]?.toUpperCase()).join('');
 }
 
+const TIME_AGO_STRINGS = {
+  'fr-FR': { now: "à l'instant", min: (n: number) => `il y a ${n} min`, hour: (n: number) => `il y a ${n} h`, day: (n: number) => `il y a ${n} j` },
+  'en-US': { now: 'just now', min: (n: number) => `${n}m ago`, hour: (n: number) => `${n}h ago`, day: (n: number) => `${n}d ago` },
+} as const;
+
 export function timeAgo(iso?: string | null): string {
   if (!iso) return '';
+  const locale = getLocale();
+  const strings = TIME_AGO_STRINGS[locale];
   const d = new Date(iso);
   const diff = Date.now() - d.getTime();
   const s = Math.floor(diff / 1000);
-  if (s < 60) return 'à l\'instant';
+  if (s < 60) return strings.now;
   const m = Math.floor(s / 60);
-  if (m < 60) return `il y a ${m} min`;
+  if (m < 60) return strings.min(m);
   const h = Math.floor(m / 60);
-  if (h < 24) return `il y a ${h} h`;
+  if (h < 24) return strings.hour(h);
   const days = Math.floor(h / 24);
-  if (days < 30) return `il y a ${days} j`;
-  return d.toLocaleDateString('fr-FR');
+  if (days < 30) return strings.day(days);
+  return d.toLocaleDateString(locale);
 }
 
 export function formatDate(iso?: string | null, opts: Intl.DateTimeFormatOptions = {}): string {
   if (!iso) return '';
-  return new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric', ...opts });
+  return new Date(iso).toLocaleDateString(getLocale(), { day: '2-digit', month: 'short', year: 'numeric', ...opts });
 }
 
 export function formatDateTime(iso?: string | null): string {
   if (!iso) return '';
-  return new Date(iso).toLocaleString('fr-FR', {
+  return new Date(iso).toLocaleString(getLocale(), {
     day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
   });
 }
