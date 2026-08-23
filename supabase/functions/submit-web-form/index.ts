@@ -68,7 +68,8 @@ Deno.serve(async (req: Request) => {
     }
 
     await supabase.from("web_form_submissions").insert({ tenant_id: form.tenant_id, form_id: form.id, contact_id: contactId, data });
-    await supabase.from("web_forms").update({ submission_count: (form.submission_count || 0) + 1 }).eq("id", form.id);
+    // Atomic increment (see migration 0027) — avoids a lost-update race under concurrent submits.
+    await supabase.rpc("increment_web_form_submission_count", { p_form_id: form.id });
 
     return new Response(JSON.stringify({ ok: true, message: form.success_message, redirectUrl: form.redirect_url || null }), { headers: jsonHeaders });
   } catch (err) {

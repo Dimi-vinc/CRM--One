@@ -49,18 +49,21 @@ Deno.serve(async (req: Request) => {
   const { data: keyRow } = await admin.from("api_keys").select("*").eq("key_hash", keyHash).is("revoked_at", null).maybeSingle();
   if (!keyRow) return new Response(JSON.stringify({ error: "Clé API invalide ou révoquée" }), { status: 401, headers: jsonHeaders });
 
-  // ---- Rate limiting: fixed 60s window per key ----
   const now = new Date();
-  const { data: rl } = await admin.from("api_rate_limits").select("*").eq("api_key_id", keyRow.id).maybeSingle();
-  const windowAge = rl ? (now.getTime() - new Date(rl.window_start).getTime()) / 1000 : Infinity;
-  if (!rl || windowAge > 60) {
-    await admin.from("api_rate_limits").upsert({ api_key_id: keyRow.id, window_start: now.toISOString(), request_count: 1 });
-  } else if (rl.request_count >= RATE_LIMIT_PER_MINUTE) {
+
+  // ---- Rate limiting: fixed 60s window per key, enforced atomically in a single DB call so
+  // concurrent requests can't all read the same pre-increment count and all slip through.
+  const { data: rlResult, error: rlErr } = await admin.rpc("check_and_increment_api_rate_limit", {
+    p_api_key_id: keyRow.id,
+    p_limit: RATE_LIMIT_PER_MINUTE,
+    p_window_seconds: 60,
+  }).single();
+  if (rlErr) return new Response(JSON.stringify({ error: "Erreur de limitation de débit." }), { status: 500, headers: jsonHeaders });
+  if (!rlResult.allowed) {
+    const retryAfter = Math.max(1, Math.ceil(60 - (Date.now() - new Date(rlResult.window_start).getTime()) / 1000));
     return new Response(JSON.stringify({ error: "Limite de débit atteinte (100 requêtes/minute)." }), {
-      status: 429, headers: { ...jsonHeaders, "Retry-After": String(Math.ceil(60 - windowAge)) },
+      status: 429, headers: { ...jsonHeaders, "Retry-After": String(retryAfter) },
     });
-  } else {
-    await admin.from("api_rate_limits").update({ request_count: rl.request_count + 1 }).eq("api_key_id", keyRow.id);
   }
   admin.from("api_keys").update({ last_used_at: now.toISOString() }).eq("id", keyRow.id).then(() => {});
 
