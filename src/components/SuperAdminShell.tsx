@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Building2, CreditCard, Ticket, Trophy, ScrollText, Megaphone, ShieldCheck, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Building2, CreditCard, Ticket, Trophy, ScrollText, Megaphone, ShieldCheck, Settings, LogOut, Menu, X } from 'lucide-react';
 import { Logo } from './Logo';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -17,6 +17,9 @@ const NAV = [
   { to: '/super-admin/audit', label: 'Journal d\'audit', icon: ScrollText },
   { to: '/super-admin/announcements', label: 'Annonces', icon: Megaphone },
   { to: '/super-admin/team', label: 'Équipe Super Admin', icon: ShieldCheck },
+  // Personal account settings live on the shared /settings route (rendered via AppShell), not a
+  // dedicated super-admin page — previously there was no link to it anywhere in this panel.
+  { to: '/settings', label: 'Paramètres', icon: Settings },
 ];
 
 export function SuperAdminShell({ children }: { children: ReactNode }) {

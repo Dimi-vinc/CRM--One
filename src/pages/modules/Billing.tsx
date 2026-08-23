@@ -15,10 +15,10 @@ export function Billing() {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
-  const [selectedProvider, setSelectedProvider] = useState<'stripe' | 'flutterwave'>(() => {
+  const [selectedProvider, setSelectedProvider] = useState<'stripe' | 'flutterwave' | 'payunit'>(() => {
     if (typeof window === 'undefined') return 'stripe';
     const stored = localStorage.getItem('crm_payment_provider');
-    return stored === 'flutterwave' ? 'flutterwave' : 'stripe';
+    return stored === 'flutterwave' || stored === 'payunit' ? stored : 'stripe';
   });
 
   const load = async () => {
@@ -50,8 +50,9 @@ export function Billing() {
     });
     setBusy(null);
     if (!res.ok) {
-      if (res.error?.includes('non encore configuré') || res.error?.includes('Stripe') || res.error?.includes('Flutterwave')) {
-        setError(`${selectedProvider === 'stripe' ? 'Stripe' : 'Flutterwave'} n'est pas encore configuré sur cette instance de test. Veuillez configurer les clés d'API correspondantes.`);
+      if (res.error?.includes('non encore configuré') || res.error?.includes('Stripe') || res.error?.includes('Flutterwave') || res.error?.includes('PayUnit')) {
+        const providerName = selectedProvider === 'stripe' ? 'Stripe' : selectedProvider === 'flutterwave' ? 'Flutterwave' : 'PayUnit';
+        setError(`${providerName} n'est pas encore configuré sur cette instance de test. Veuillez configurer les clés d'API correspondantes.`);
       } else {
         setError(res.error || 'Échec du paiement');
       }
@@ -146,10 +147,10 @@ export function Billing() {
         </div>
       </Card>
 
-      {/* Choice of Payment Provider (Stripe vs Flutterwave) - Microsoft 365 style */}
+      {/* Choice of Payment Provider (Stripe vs Flutterwave vs PayUnit) - Microsoft 365 style */}
       <Card className="mb-6 p-5">
         <h3 className="text-sm font-semibold text-gray-900 mb-3">1. Mode de règlement préféré</h3>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-3">
           <button
             onClick={() => setSelectedProvider('stripe')}
             className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-all focus:outline-none ${selectedProvider === 'stripe' ? 'border-coral-500 ring-2 ring-coral-100 bg-coral-50/10' : 'border-gray-200 hover:bg-gray-50'}`}
@@ -183,6 +184,23 @@ export function Billing() {
                 <span className="rounded bg-coral-50 px-1.5 py-0.5 text-[10px] font-bold text-coral-700">MTN MoMo</span>
                 <span className="rounded bg-coral-50 px-1.5 py-0.5 text-[10px] font-bold text-coral-700">Wave</span>
                 <span className="rounded bg-coral-50 px-1.5 py-0.5 text-[10px] font-bold text-coral-700">M-Pesa</span>
+              </div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => setSelectedProvider('payunit')}
+            className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-all focus:outline-none ${selectedProvider === 'payunit' ? 'border-coral-500 ring-2 ring-coral-100 bg-coral-50/10' : 'border-gray-200 hover:bg-gray-50'}`}
+          >
+            <div className={`mt-1 flex h-4 w-4 items-center justify-center rounded-full border ${selectedProvider === 'payunit' ? 'border-coral-500 text-coral-600' : 'border-gray-300'}`}>
+              <div className={`h-2 w-2 rounded-full ${selectedProvider === 'payunit' ? 'bg-coral-500' : 'bg-transparent'}`} />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-gray-900">Mobile Money & Cartes (PayUnit)</p>
+              <p className="mt-0.5 text-xs text-gray-500">Orange Money, MTN MoMo & cartes — Cameroun & Afrique centrale.</p>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                <span className="rounded bg-coral-50 px-1.5 py-0.5 text-[10px] font-bold text-coral-700">Orange Money</span>
+                <span className="rounded bg-coral-50 px-1.5 py-0.5 text-[10px] font-bold text-coral-700">MTN MoMo</span>
               </div>
             </div>
           </button>
@@ -222,6 +240,8 @@ export function Billing() {
           <span className={`rounded-lg border px-3 py-1.5 ${selectedProvider === 'flutterwave' ? 'border-coral-500 bg-coral-50/20 text-coral-700 font-semibold' : 'border-gray-200 text-gray-400'}`}>MTN Mobile Money (Flutterwave)</span>
           <span className={`rounded-lg border px-3 py-1.5 ${selectedProvider === 'flutterwave' ? 'border-coral-500 bg-coral-50/20 text-coral-700 font-semibold' : 'border-gray-200 text-gray-400'}`}>Wave (Flutterwave)</span>
           <span className={`rounded-lg border px-3 py-1.5 ${selectedProvider === 'flutterwave' ? 'border-coral-500 bg-coral-50/20 text-coral-700 font-semibold' : 'border-gray-200 text-gray-400'}`}>M-Pesa (Flutterwave)</span>
+          <span className={`rounded-lg border px-3 py-1.5 ${selectedProvider === 'payunit' ? 'border-coral-500 bg-coral-50/20 text-coral-700 font-semibold' : 'border-gray-200 text-gray-400'}`}>Orange Money (PayUnit)</span>
+          <span className={`rounded-lg border px-3 py-1.5 ${selectedProvider === 'payunit' ? 'border-coral-500 bg-coral-50/20 text-coral-700 font-semibold' : 'border-gray-200 text-gray-400'}`}>MTN MoMo (PayUnit)</span>
         </div>
         <p className="mt-3 text-xs text-gray-500">Les moyens de paiement sont proposés de manière dynamique et sécurisée selon votre mode de règlement préféré et la devise du compte.</p>
       </Card>

@@ -7,7 +7,7 @@
 import { supabase } from './supabase';
 import { PLAN_BY_ID, CURRENCY_BY_CODE } from './constants';
 
-export type ProviderCode = 'stripe' | 'flutterwave';
+export type ProviderCode = 'stripe' | 'flutterwave' | 'payunit';
 
 export interface CheckoutRequest {
   planId: 'starter' | 'pro' | 'premium' | 'entreprise';
@@ -148,9 +148,56 @@ const flutterwaveProvider: PaymentProvider = {
   },
 };
 
+// ---- PayUnit provider (via Supabase edge function) ----
+// Cameroon-based payment aggregator: Orange Money, MTN Mobile Money, and cards, focused on
+// Central Africa. This is the first PSP being validated for go-live on this platform.
+const payunitProvider: PaymentProvider = {
+  code: 'payunit',
+  label: 'PayUnit',
+  async createCheckoutSession(req: CheckoutRequest): Promise<CheckoutResult> {
+    const plan = PLAN_BY_ID[req.planId];
+    if (!plan) return { ok: false, provider: 'payunit', error: 'Plan inconnu' };
+    try {
+      const fnUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/payunit-checkout`;
+      const { data: sessionData } = await supabase.auth.getSession();
+      const res = await fetch(fnUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${sessionData.session?.access_token || ''}`,
+          apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({
+          planId: req.planId,
+          currency: req.currency,
+          tenantId: req.tenantId,
+          email: req.email,
+          successUrl: req.successUrl,
+        }),
+      });
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        return { ok: false, provider: 'payunit', error: errBody.error || `Erreur ${res.status}` };
+      }
+      const data = await res.json();
+      if (!data?.url) return { ok: false, provider: 'payunit', error: 'Réponse invalide' };
+      return { ok: true, provider: 'payunit', url: data.url };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      return { ok: false, provider: 'payunit', error: message || 'Échec réseau' };
+    }
+  },
+  async createPortalSession(): Promise<CheckoutResult> {
+    // Same situation as Flutterwave: no self-service billing portal API — subscription changes
+    // go through re-checkout or support.
+    return { ok: false, provider: 'payunit', error: "PayUnit ne propose pas de portail self-service. Contactez le support pour gérer votre abonnement." };
+  },
+};
+
 const PROVIDERS: Record<ProviderCode, PaymentProvider> = {
   stripe: stripeProvider,
   flutterwave: flutterwaveProvider,
+  payunit: payunitProvider,
 };
 
 // Default provider is Stripe. Callers may request flutterwave when ready.

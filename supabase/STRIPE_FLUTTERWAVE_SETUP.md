@@ -1,6 +1,6 @@
-# Activer les paiements (Stripe + Flutterwave)
+# Activer les paiements (Stripe + Flutterwave + PayUnit)
 
-Le code des deux fournisseurs est prêt. Rien ne fonctionne tant que les secrets ne sont pas
+Le code des trois fournisseurs est prêt. Rien ne fonctionne tant que les secrets ne sont pas
 configurés — mais aucun échec silencieux : les boutons afficheront un message clair
 ("non configuré") jusqu'à ce que ce soit fait.
 
@@ -81,10 +81,58 @@ documentation (https://developer.flutterwave.com/docs/integration-guides/testing
 
 ---
 
-## 3. Choisir le fournisseur par défaut
+---
 
-`src/lib/payments.ts` expose `getPaymentProvider(code)` — Stripe est utilisé par défaut. Pour
-proposer le choix à l'utilisateur (ex: Stripe pour cartes internationales, Flutterwave pour
-Mobile Money africain), il suffit d'ajouter un sélecteur dans `Billing.tsx` qui passe
-`provider: 'flutterwave'` à `startCheckout()` — l'abstraction gère déjà les deux de façon
-interchangeable, aucun autre changement de code nécessaire.
+## 3. PayUnit (premier PSP validé pour la mise en production)
+
+Agrégateur basé au Cameroun : Orange Money, MTN Mobile Money et cartes, centré sur l'Afrique
+centrale.
+
+### a. Compte et identifiants
+1. https://web.payunit.net → créez un compte et une application (mode Test d'abord).
+2. Activez l'application (menu ⋮ de la liste des applications → **Activate**).
+3. **Paramètres de l'utilisateur → API CREDENTIALS** → récupérez API user, API key et API
+   password.
+
+### b. Déployer les fonctions
+```bash
+supabase functions deploy payunit-checkout
+supabase functions deploy payunit-webhook
+supabase secrets set PAYUNIT_API_KEY=test_xxxxxxxxxxxxx
+supabase secrets set PAYUNIT_API_USERNAME=xxxxxxxxxxxxx
+supabase secrets set PAYUNIT_API_PASSWORD=xxxxxxxxxxxxx
+supabase secrets set PAYUNIT_MODE=test
+```
+`PAYUNIT_MODE` doit valoir exactement `live` pour prendre de vrais paiements — toute autre
+valeur (y compris absente) reste volontairement en mode `test`, pour qu'une mauvaise
+configuration ne bascule jamais accidentellement en production.
+
+### c. Notify URL
+Le `notify_url` est envoyé automatiquement par la fonction `payunit-checkout` à chaque
+transaction (`https://<PROJECT_REF>.supabase.co/functions/v1/payunit-webhook`) — rien à
+configurer manuellement côté tableau de bord PayUnit pour ça.
+
+### d. Limite importante (honnête)
+Comme pour Flutterwave : pas de portail self-service, et pas de renouvellement automatique
+natif dans l'API REST de base — chaque paiement réussi active le plan pour 30 jours, la relance
+du mois suivant reste à automatiser séparément.
+
+### e. Devise
+PayUnit est le plus fiable en XAF (franc CFA d'Afrique centrale) ; d'autres devises dépendent de
+la configuration du compte marchand. La fonction convertit toujours correctement le prix
+(voir `supabase/functions/_shared/currency-rates.ts`) — si une devise n'est pas prise en charge
+par votre compte, PayUnit renverra une erreur claire plutôt qu'un montant erroné.
+
+### f. Tester
+Utilisez le mode Test PayUnit et leurs identifiants de test Mobile Money fournis dans leur
+documentation (https://developer.payunit.net/getting-started) avant de passer `PAYUNIT_MODE` à
+`live`.
+
+---
+
+## 4. Choisir le fournisseur par défaut
+
+`src/lib/payments.ts` expose `getPaymentProvider(code)` — Stripe est utilisé par défaut. La page
+Facturation et la page Paramètres proposent déjà un sélecteur Stripe / Flutterwave / PayUnit qui
+passe le bon `provider` à `startCheckout()` — l'abstraction gère les trois de façon
+interchangeable, aucun autre changement de code nécessaire pour en ajouter un nouveau.

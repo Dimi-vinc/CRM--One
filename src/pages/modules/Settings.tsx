@@ -41,10 +41,10 @@ export function Settings() {
     if (typeof window === 'undefined') return 'ocean';
     return (localStorage.getItem('crm_theme') as ThemeId) || 'ocean';
   });
-  const [paymentProvider, setPaymentProvider] = useState<'stripe' | 'flutterwave'>(() => {
+  const [paymentProvider, setPaymentProvider] = useState<'stripe' | 'flutterwave' | 'payunit'>(() => {
     if (typeof window === 'undefined') return 'stripe';
     const stored = localStorage.getItem('crm_payment_provider');
-    return stored === 'flutterwave' ? 'flutterwave' : 'stripe';
+    return stored === 'flutterwave' || stored === 'payunit' ? stored : 'stripe';
   });
 
   const selectTheme = (themeId: ThemeId) => {
@@ -304,7 +304,7 @@ export function Settings() {
             </div>
           </div>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
             <button
               type="button"
               onClick={() => setPaymentProvider('stripe')}
@@ -321,12 +321,22 @@ export function Settings() {
               <p className="font-semibold text-gray-900">Flutterwave</p>
               <p className="mt-1 text-xs text-gray-500">Mobile Money et cartes locales pour l'Afrique.</p>
             </button>
+            <button
+              type="button"
+              onClick={() => setPaymentProvider('payunit')}
+              className={`rounded-xl border p-4 text-left transition-all ${paymentProvider === 'payunit' ? 'border-coral-500 ring-2 ring-coral-100 bg-coral-50/10' : 'border-gray-200 hover:bg-gray-50'}`}
+            >
+              <p className="font-semibold text-gray-900">PayUnit</p>
+              <p className="mt-1 text-xs text-gray-500">Orange Money, MTN MoMo et cartes — Cameroun & Afrique centrale.</p>
+            </button>
           </div>
 
           <p className="mt-4 text-xs text-gray-500">
             {paymentProvider === 'flutterwave'
-              ? 'Vous avez choisi Flutterwave. Souscrivez à un plan depuis la page Facturation et payez avec Orange Money, MTN MoMo, Wave ou M-Pesa.'
-              : 'Vous avez choisi Stripe. Le portail de facturation peut gérer vos cartes et abonnements.'}
+              ? 'Vous avez choisi Flutterwave. Utilisez la page Facturation pour souscrire un plan via Orange Money, MTN MoMo, Wave ou M-Pesa.'
+              : paymentProvider === 'payunit'
+              ? 'Vous avez choisi PayUnit. Utilisez la page Facturation pour souscrire un plan via Orange Money, MTN MoMo ou carte.'
+              : 'Vous avez choisi Stripe. Le portail de facturation est disponible pour gérer vos cartes et abonnements.'}
           </p>
           <div className="mt-4">
             <Button variant="secondary" onClick={() => navigate('/billing')}>Aller à Facturation</Button>
@@ -367,44 +377,6 @@ export function Settings() {
                 )}
               </div>
             ))}
-          </div>
-        </Card>
-
-        <Card className="p-5">
-          <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-amber-50 p-2.5 text-amber-700"><CreditCard size={20} /></div>
-            <div>
-              <h3 className="font-semibold text-gray-900">Paiement & facturation</h3>
-              <p className="text-sm text-gray-500">Choisissez votre fournisseur de paiement préféré pour la souscription à un plan.</p>
-            </div>
-          </div>
-
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={() => setPaymentProvider('stripe')}
-              className={`rounded-xl border p-4 text-left transition-all ${paymentProvider === 'stripe' ? 'border-coral-500 ring-2 ring-coral-100 bg-coral-50/10' : 'border-gray-200 hover:bg-gray-50'}`}
-            >
-              <p className="font-semibold text-gray-900">Stripe</p>
-              <p className="mt-1 text-xs text-gray-500">Cartes internationales, Apple Pay et Google Pay.</p>
-            </button>
-            <button
-              type="button"
-              onClick={() => setPaymentProvider('flutterwave')}
-              className={`rounded-xl border p-4 text-left transition-all ${paymentProvider === 'flutterwave' ? 'border-coral-500 ring-2 ring-coral-100 bg-coral-50/10' : 'border-gray-200 hover:bg-gray-50'}`}
-            >
-              <p className="font-semibold text-gray-900">Flutterwave</p>
-              <p className="mt-1 text-xs text-gray-500">Mobile Money et cartes locales pour l'Afrique.</p>
-            </button>
-          </div>
-
-          <p className="mt-4 text-xs text-gray-500">
-            {paymentProvider === 'flutterwave'
-              ? 'Vous avez choisi Flutterwave. Utilisez la page Facturation pour souscrire un plan via Orange Money, MTN MoMo, Wave ou M-Pesa.'
-              : 'Vous avez choisi Stripe. Le portail de facturation est disponible pour gérer vos cartes et abonnements.'}
-          </p>
-          <div className="mt-4">
-            <Button variant="secondary" onClick={() => navigate('/billing')}>Aller à Facturation</Button>
           </div>
         </Card>
 

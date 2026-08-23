@@ -52,7 +52,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   // business-module permissions (they don't touch tenant data access).
 
   const visibleModules: ModuleDef[] = useMemo(() => {
-    if (isSuperAdmin) return MODULES.filter(m => m.key === 'dashboard');
+    if (isSuperAdmin) return MODULES.filter(m => ALWAYS_VISIBLE.includes(m.key));
     return MODULES.filter(m => {
       if (m.key === 'super_admin') return false;
       if (m.key === 'admin' || m.key === 'developers') return profile?.role === 'admin'; // Espace Admin, API & Webhooks : tenant admins only
