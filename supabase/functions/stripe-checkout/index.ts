@@ -8,6 +8,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
 import Stripe from "npm:stripe@16.12.0";
+import { convertUsdTo } from "../_shared/currency-rates.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -22,7 +23,7 @@ const PLAN_PRICES: Record<string, { usd: number }> = {
   entreprise: { usd: 15900 }, // $159.00
 };
 
-// Currencies supported by Stripe for subscriptions (zero-decimal currencies handled)
+// Currencies Stripe treats as having no decimal subunit (amount is already in whole units).
 const ZERO_DECIMAL_CURRENCIES = new Set(['XOF','XAF','UGX','TZS','RWF','BIF','DJF','GNF','KMF','CLP','JPY','VND']);
 
 Deno.serve(async (req: Request) => {
@@ -82,31 +83,48 @@ Deno.serve(async (req: Request) => {
     }
 
     const cur = (currency || "USD").toUpperCase();
-    const isZero = ZERO_DECIMAL_CURRENCIES.has(cur);
-    const unitAmount = PLAN_PRICES[planId].usd; // base price in USD cents
-    // For simplicity (and to avoid live FX risk in demo), charge in USD unless currency == USD
-    const chargeCurrency = "usd";
-    const finalAmount = isZero ? Math.round(unitAmount / 100) : unitAmount;
+    const usdAmount = PLAN_PRICES[planId].usd / 100; // base price in whole USD
 
-    const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
-      customer: customerId,
-      line_items: [
-        {
-          price_data: {
-            currency: chargeCurrency,
-            product_data: { name: `CRM-One — Plan ${planId}` },
-            unit_amount: finalAmount,
-            recurring: { interval: "month" },
+    async function createSession(chargeCurrencyLower: string, unitAmount: number) {
+      return stripe.checkout.sessions.create({
+        mode: "subscription",
+        customer: customerId,
+        line_items: [
+          {
+            price_data: {
+              currency: chargeCurrencyLower,
+              product_data: { name: `CRM-One — Plan ${planId}` },
+              unit_amount: unitAmount,
+              recurring: { interval: "month" },
+            },
+            quantity: 1,
           },
-          quantity: 1,
-        },
-      ],
-      success_url: successUrl,
-      cancel_url: cancelUrl,
-      metadata: { tenant_id: tenantId, plan_id: planId, requested_currency: cur },
-      subscription_data: { metadata: { tenant_id: tenantId, plan_id: planId } },
-    });
+        ],
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+        metadata: { tenant_id: tenantId, plan_id: planId, requested_currency: cur },
+        subscription_data: { metadata: { tenant_id: tenantId, plan_id: planId } },
+      });
+    }
+
+    // Charge in the tenant's chosen currency — Stripe supports 135+ presentment currencies
+    // (including e.g. XOF) with automatic zero-decimal handling. Amount is properly converted
+    // from the USD list price (see supabase/functions/_shared/currency-rates.ts), not a hardcoded
+    // divide — the previous version always charged in "usd" but still (incorrectly) divided the
+    // amount as if the charge currency were zero-decimal, undercharging by 100x whenever a
+    // zero-decimal currency like XOF was selected.
+    let session;
+    try {
+      const isZeroDecimal = ZERO_DECIMAL_CURRENCIES.has(cur);
+      const converted = convertUsdTo(usdAmount, cur);
+      const unitAmount = isZeroDecimal ? Math.round(converted.amount) : Math.round(converted.amount * 100);
+      session = await createSession(cur.toLowerCase(), unitAmount);
+    } catch (stripeErr) {
+      // This Stripe account/region doesn't support the requested presentment currency — fall
+      // back to USD rather than hard-failing the checkout.
+      if (cur === "USD") throw stripeErr;
+      session = await createSession("usd", PLAN_PRICES[planId].usd);
+    }
 
     return new Response(JSON.stringify({ url: session.url, sessionId: session.id }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

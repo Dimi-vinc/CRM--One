@@ -7,6 +7,7 @@
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
+import { convertUsdTo } from "../_shared/currency-rates.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -56,7 +57,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const cur = (currency || "USD").toUpperCase();
-    const amount = PLAN_PRICES_USD[planId];
+    const amount = convertUsdTo(PLAN_PRICES_USD[planId], cur).amount;
     const txRef = `crmone-${tenantId}-${planId}-${Date.now()}`;
 
     const res = await fetch("https://api.flutterwave.com/v3/payments", {
