@@ -2,13 +2,14 @@
 // automatically refreshing it via the stored refresh_token if it has expired. Used by any
 // function that needs to send email "as" a connected Gmail/Outlook account.
 
+import type { SupabaseClient } from "npm:@supabase/supabase-js@2.57.4";
+
 interface Connection {
   id: string; user_id: string; provider: "gmail" | "outlook";
   email_address: string; access_token: string; refresh_token: string; expires_at: string;
 }
 
-// deno-lint-ignore no-explicit-any
-export async function getValidConnection(supabase: any, userId: string, provider: "gmail" | "outlook"): Promise<Connection | null> {
+export async function getValidConnection(supabase: SupabaseClient, userId: string, provider: "gmail" | "outlook"): Promise<Connection | null> {
   const { data: conn } = await supabase.from("email_connections").select("*").eq("user_id", userId).eq("provider", provider).maybeSingle();
   if (!conn) return null;
 

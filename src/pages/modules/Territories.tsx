@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Map, Plus, Target, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { PageHeader, Card, Button, Modal, Input, Select, EmptyState, Skeleton } from '../../components/ui';

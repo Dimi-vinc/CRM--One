@@ -71,7 +71,7 @@ Deno.serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: "Accès refusé au tenant" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const stripe = new Stripe(stripeSecret, { apiVersion: "2024-06-20" as any });
+    const stripe = new Stripe(stripeSecret, { apiVersion: "2024-06-20" as Stripe.LatestApiVersion });
 
     // Find or create Stripe customer
     const customers = await stripe.customers.list({ email, limit: 1 });

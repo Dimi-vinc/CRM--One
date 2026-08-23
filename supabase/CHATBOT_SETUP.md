@@ -1,8 +1,19 @@
-# Activer le chatbot de support (Groq — gratuit)
+# Activer l'IA (Groq — gratuite) : chatbot public + Assistant IA interne
 
-Widget de chat IA sur le portail public d'aide (`/help/:tenantId`), qui répond à partir de vos
-articles de la Base de connaissances marqués "publics", et bascule automatiquement vers la
-création d'un ticket support si l'IA ne peut pas répondre ou si le client demande un humain.
+Deux fonctionnalités partagent la même clé Groq gratuite :
+
+1. **Chatbot de support public** (`/help/:tenantId`) : répond à partir des articles de la Base
+   de connaissances marqués "publics", et bascule vers un ticket si l'IA ne peut pas répondre.
+2. **Assistant IA interne** (module "Assistant IA" du CRM) : disponible pour tous les
+   utilisateurs authentifiés de tous les tenants, **sur tous les plans, y compris Starter** —
+   ce n'est pas une fonctionnalité premium, elle est gratuite par conception (voir
+   `src/lib/constants.ts`, où `ai_assistant` figure dans les `modules` de chaque plan sans
+   `minPlan`). Il aide à rédiger des emails, résumer une situation et donner des conseils CRM,
+   en s'appuyant sur un aperçu chiffré (contacts, deals ouverts, tâches en retard, tickets
+   ouverts) lu sous le RLS de l'utilisateur — jamais de fuite inter-tenant possible. Un plafond
+   quotidien par tenant (`AI_ASSISTANT_DAILY_LIMIT`, 100 messages/jour par défaut) protège la
+   clé Groq partagée pour que la fonctionnalité reste gratuite et disponible pour tous ; les
+   super admins ne sont jamais plafonnés, cohérent avec le fait qu'ils ne paient aucun plan.
 
 ## 1. Créer un compte Groq (gratuit, sans carte bancaire)
 

@@ -24,7 +24,7 @@ Deno.serve(async (req: Request) => {
     return new Response(JSON.stringify({ error: "Stripe non configuré" }), { status: 503 });
   }
 
-  const stripe = new Stripe(stripeSecret, { apiVersion: "2024-06-20" as any });
+  const stripe = new Stripe(stripeSecret, { apiVersion: "2024-06-20" as Stripe.LatestApiVersion });
   const signature = req.headers.get("stripe-signature");
   const body = await req.text();
 

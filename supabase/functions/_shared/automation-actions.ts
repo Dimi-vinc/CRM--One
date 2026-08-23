@@ -2,6 +2,8 @@
 // automations-cron (processing delayed steps from automation_run_queue). Keeping this in one
 // place means every action behaves identically regardless of which function ran it.
 
+import type { SupabaseClient } from "npm:@supabase/supabase-js@2.57.4";
+
 export const PLATFORM_NAME = Deno.env.get("PLATFORM_NAME") || "CRM-One";
 
 // Implemented actions only. Anything else is logged as skipped rather than silently doing
@@ -12,8 +14,7 @@ export const IMPLEMENTED_ACTIONS = new Set([
 
 export interface ActionOutcome { status: "success" | "error" | "skipped"; detail: string }
 
-// deno-lint-ignore no-explicit-any
-export async function logRun(supabase: any, tenantId: string, automationId: string, trigger: string, action: string, outcome: ActionOutcome) {
+export async function logRun(supabase: SupabaseClient, tenantId: string, automationId: string, trigger: string, action: string, outcome: ActionOutcome) {
   await supabase.from("automation_runs").insert({
     tenant_id: tenantId, automation_id: automationId, trigger, action,
     status: outcome.status, detail: outcome.detail,
@@ -21,8 +22,7 @@ export async function logRun(supabase: any, tenantId: string, automationId: stri
 }
 
 export async function runAction(
-  // deno-lint-ignore no-explicit-any
-  supabase: any,
+  supabase: SupabaseClient,
   tenantId: string,
   automationName: string,
   action: string,
@@ -97,16 +97,14 @@ export async function runAction(
   }
 }
 
-// deno-lint-ignore no-explicit-any
-async function resolveContact(supabase: any, tenantId: string, trigger: string, payload: Record<string, unknown>) {
+async function resolveContact(supabase: SupabaseClient, tenantId: string, trigger: string, payload: Record<string, unknown>) {
   const contactId = trigger === "contact_added" ? (payload?.id as string) || null : (payload?.contact_id as string) || null;
   if (!contactId) return null;
   const { data } = await supabase.from("contacts").select("id, first_name, email, marketing_consent").eq("id", contactId).eq("tenant_id", tenantId).maybeSingle();
   return data;
 }
 
-// deno-lint-ignore no-explicit-any
-async function resolveTenantAdminPhones(supabase: any, tenantId: string): Promise<string[]> {
+async function resolveTenantAdminPhones(supabase: SupabaseClient, tenantId: string): Promise<string[]> {
   const { data } = await supabase.from("profiles").select("phone, role").eq("tenant_id", tenantId).in("role", ["admin", "super_admin"]);
   return (data || []).map((p: { phone?: string }) => p.phone).filter(Boolean) as string[];
 }
@@ -125,8 +123,7 @@ async function sendWhatsApp(to: string, body: string): Promise<void> {
   if (!res.ok) { const errBody = await res.text(); throw new Error(`Twilio a refusé l'envoi (${res.status}): ${errBody}`); }
 }
 
-// deno-lint-ignore no-explicit-any
-async function resolveTenantAdminEmails(supabase: any, tenantId: string): Promise<string[]> {
+async function resolveTenantAdminEmails(supabase: SupabaseClient, tenantId: string): Promise<string[]> {
   const { data } = await supabase.from("profiles").select("email, role").eq("tenant_id", tenantId).in("role", ["admin", "super_admin"]);
   return (data || []).map((p: { email: string }) => p.email).filter(Boolean);
 }

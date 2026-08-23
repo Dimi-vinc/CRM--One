@@ -28,7 +28,7 @@ VITE_MICROSOFT_CLIENT_ID=OPTIONNEL
 
 ## Déploiement Supabase
 
-1. Liez le projet Supabase puis appliquez toutes les migrations, y compris `20260806000000_0024_secure_oauth_and_billing.sql`.
+1. Liez le projet Supabase puis appliquez toutes les migrations (dans l'ordre du dossier `supabase/migrations/`), y compris `20260805000000_0025_critical_billing_rls_enforcement.sql` qui verrouille l'accès facturation au niveau base de données.
 
 ```powershell
 supabase link --project-ref VOTRE_PROJECT_REF

@@ -45,6 +45,7 @@ const Developers = lazy(() => import('./pages/modules/Developers').then(m => ({ 
 const KnowledgeBase = lazy(() => import('./pages/modules/KnowledgeBase').then(m => ({ default: m.KnowledgeBase })));
 const Privacy = lazy(() => import('./pages/modules/Privacy').then(m => ({ default: m.Privacy })));
 const Territories = lazy(() => import('./pages/modules/Territories').then(m => ({ default: m.Territories })));
+const AiAssistant = lazy(() => import('./pages/modules/AiAssistant').then(m => ({ default: m.AiAssistant })));
 const PublicKnowledgeBase = lazy(() => import('./pages/PublicKnowledgeBase').then(m => ({ default: m.PublicKnowledgeBase })));
 const PublicWebForm = lazy(() => import('./pages/PublicWebForm').then(m => ({ default: m.PublicWebForm })));
 
@@ -113,6 +114,8 @@ export default function App() {
             <Route path="/knowledge-base" element={<RequireAuth moduleKey="knowledge_base"><Shell><KnowledgeBase /></Shell></RequireAuth>} />
             <Route path="/data-privacy" element={<RequireAuth><Shell><Privacy /></Shell></RequireAuth>} />
             <Route path="/territories" element={<RequireAuth moduleKey="territories"><Shell><Territories /></Shell></RequireAuth>} />
+            {/* No moduleKey: free on every plan and every role, same treatment as /notifications. */}
+            <Route path="/ai-assistant" element={<RequireAuth><Shell><AiAssistant /></Shell></RequireAuth>} />
             <Route path="/notifications" element={<RequireAuth><Shell><Notifications /></Shell></RequireAuth>} />
             <Route path="/security" element={<RequireAuth><Shell><Security /></Shell></RequireAuth>} />
             <Route path="/settings" element={<RequireAuth><Shell><Settings /></Shell></RequireAuth>} />

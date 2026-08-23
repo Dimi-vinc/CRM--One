@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Plus, LifeBuoy, Send, Lock } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { PageHeader, Card, Button, Modal, Input, Select, Textarea, Badge, EmptyState, Skeleton } from '../../components/ui';
+import { PageHeader, Card, Button, Modal, Input, Select, Textarea, Badge, EmptyState } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
 import { formatDateTime } from '../../lib/utils';
 import type { Ticket, TicketComment, TicketStatus, TicketPriority, Contact } from '../../lib/types';

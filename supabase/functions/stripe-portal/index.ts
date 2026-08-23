@@ -58,7 +58,7 @@ Deno.serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: "Aucun client Stripe trouvé. Souscrivez d'abord à un plan." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const stripe = new Stripe(stripeSecret, { apiVersion: "2024-06-20" as any });
+    const stripe = new Stripe(stripeSecret, { apiVersion: "2024-06-20" as Stripe.LatestApiVersion });
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
       return_url: returnUrl,

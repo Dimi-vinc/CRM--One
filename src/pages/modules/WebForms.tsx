@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Plus, Trash2, Power, Copy, Check, FileInput, Users } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { PageHeader, Card, Button, Modal, Input, Select, Badge, EmptyState } from '../../components/ui';
+import { PageHeader, Card, Button, Modal, Input, Badge, EmptyState } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
 import { formatDateTime } from '../../lib/utils';
 import type { WebForm, WebFormField, WebFormFieldType, WebFormSubmission } from '../../lib/types';
