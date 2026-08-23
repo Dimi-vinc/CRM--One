@@ -35,6 +35,9 @@ export function Campaigns() {
     setContacts(cts || []);
     setLoading(false);
   };
+  // load() only reads `tenant` (already a dependency below) — intentionally omitted to avoid
+  // recreating the effect trigger on every render, since a new `load` closure is made each render.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load(); }, [tenant]);
 
   const consentedCount = useMemo(() => contacts.filter(c => c.marketing_consent && c.email).length, [contacts]);

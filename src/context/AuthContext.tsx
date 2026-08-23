@@ -52,7 +52,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .eq('id', uid)
       .maybeSingle();
     if (error) {
-      // eslint-disable-next-line no-console
       console.error('profile load error', error);
       setProfile(null);
       setTenant(null);

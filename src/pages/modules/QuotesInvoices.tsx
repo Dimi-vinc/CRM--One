@@ -63,6 +63,9 @@ export function QuotesInvoices() {
     setContacts(c || []); setCompanies(co || []);
     setLoading(false);
   };
+  // load() only reads `tenant` (already a dependency below) — intentionally omitted to avoid
+  // recreating the effect trigger on every render, since a new `load` closure is made each render.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load(); }, [tenant]);
 
   const contactName = (id: string | null) => { const c = contacts.find(x => x.id === id); return c ? `${c.first_name} ${c.last_name || ''}`.trim() : '—'; };

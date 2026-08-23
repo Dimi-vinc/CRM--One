@@ -27,6 +27,9 @@ export function Billing() {
     setSub(data as Subscription | null);
     setLoading(false);
   };
+  // load() only reads `tenant` (already a dependency below) — intentionally omitted to avoid
+  // recreating the effect trigger on every render, since a new `load` closure is made each render.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load(); }, [tenant]);
 
   const trialLeft = tenant?.trial_ends_at ? daysUntil(tenant.trial_ends_at) : null;
