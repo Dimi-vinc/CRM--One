@@ -11,6 +11,7 @@
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
+import { assertWebhookUrlIsSafe } from "../_shared/webhook-safety.ts";
 
 const corsHeaders = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "POST, OPTIONS" };
 
@@ -40,6 +41,11 @@ Deno.serve(async (req: Request) => {
 
     let delivered = 0;
     for (const wh of webhooks || []) {
+      const safety = await assertWebhookUrlIsSafe(wh.url);
+      if (!safety.safe) {
+        await supabase.from("webhook_deliveries").insert({ tenant_id, webhook_id: wh.id, event, status_code: null, success: false, response_body: `Livraison bloquée : ${safety.reason}` });
+        continue;
+      }
       const body = JSON.stringify({ event, data: payload, timestamp: new Date().toISOString() });
       const signature = await hmacSha256Hex(wh.secret, body);
       let statusCode: number | null = null;

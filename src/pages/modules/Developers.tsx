@@ -79,6 +79,10 @@ export function Developers() {
 
   const createWebhook = async () => {
     if (!tenant || !whForm.name.trim() || !whForm.url.trim() || whForm.events.length === 0) return;
+    if (!/^https:\/\//i.test(whForm.url.trim())) {
+      alert('L\'URL du webhook doit commencer par https://');
+      return;
+    }
     const { data, error } = await supabase.from('webhooks').insert({
       tenant_id: tenant.id, name: whForm.name, url: whForm.url, events: whForm.events, secret: randomHex(32),
     }).select().single();

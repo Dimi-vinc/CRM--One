@@ -42,12 +42,10 @@ Deno.serve(async () => {
     }
 
     // ---- Job 2: due steps in multi-step sequences ----
-    const { data: dueSteps, error: queueErr } = await supabase
-      .from("automation_run_queue")
-      .select("id, tenant_id, automation_id, step_id, trigger, payload")
-      .eq("status", "pending")
-      .lte("run_at", new Date().toISOString())
-      .limit(200); // safety cap per run; remaining items are picked up on the next scheduled run
+    // Atomically claims due rows (status -> 'processing', row-locked with SKIP LOCKED) before any
+    // processing happens — see migration 0029. This is what prevents two overlapping invocations
+    // of this function from both picking up and executing the same step.
+    const { data: dueSteps, error: queueErr } = await supabase.rpc("claim_due_automation_steps", { p_limit: 200 });
     if (queueErr) return new Response(JSON.stringify({ error: queueErr.message }), { status: 500 });
 
     let stepsProcessed = 0;
