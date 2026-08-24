@@ -91,8 +91,8 @@ export function Landing() {
         <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <motion.div initial="hidden" animate="show" variants={stagger}>
-              <motion.div variants={fadeUp} className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-800">
-                <Globe2 size={14} /> {t('landing.badge')}
+              <motion.div variants={fadeUp} className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-800">
+                <Globe2 size={14} /> {t('landing.welcomeBadge')}
               </motion.div>
               <motion.h1 variants={fadeUp} className="mt-5 text-4xl font-bold leading-tight tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
                 {t('landing.heroTitle1')} <span className="text-blue-700">{t('landing.heroTitle2')}</span>
@@ -104,7 +104,7 @@ export function Landing() {
                 <Link to="/signup" className="btn-primary-landing text-base px-6 py-3">{t('nav.startFree')}</Link>
                 <Link to="/pricing" className="btn-secondary-landing text-base px-6 py-3">{t('nav.seePricing')}</Link>
               </motion.div>
-              <motion.div variants={fadeUp} className="mt-6 flex items-center gap-4 text-sm text-gray-500">
+              <motion.div variants={fadeUp} className="mt-6 flex flex-wrap items-center gap-4 text-sm text-gray-500">
                 <span className="flex items-center gap-1"><CheckCircle2 size={16} className="text-blue-600" /> {t('landing.trialDays')}</span>
                 <span className="flex items-center gap-1"><CheckCircle2 size={16} className="text-blue-600" /> {t('landing.noCard')}</span>
                 <span className="flex items-center gap-1"><CheckCircle2 size={16} className="text-blue-600" /> {t('landing.multiTenant')}</span>
@@ -116,7 +116,7 @@ export function Landing() {
               transition={{ duration: 0.6, delay: 0.15, ease: 'easeOut' }}
               className="relative"
             >
-              <div className="rounded-2xl border border-gray-200 bg-white p-3 shadow-cardHover">
+              <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-cardHover">
                 <div className="grid grid-cols-3 gap-3">
                   {[{ l: 'Pipeline', v: '1,2 M$', c: 'navy' }, { l: 'Won', v: '34', c: 'teal' }, { l: 'Leads', v: '128', c: 'blue' }].map(s => (
                     <div key={s.l} className={`card card-edge ${s.c === 'navy' ? 'border-blue-800' : s.c === 'teal' ? 'border-tealx-500' : 'border-blue-500'} p-3`}>
@@ -137,7 +137,31 @@ export function Landing() {
                   {[1,2,3].map(i => <div key={i} className="flex items-center gap-2 rounded-lg border border-gray-100 p-2"><div className="h-6 w-6 rounded-full bg-sky-100" /><div className="flex-1"><div className="h-2 rounded bg-gray-100" /><div className="mt-1 h-2 w-1/2 rounded bg-gray-50" /></div></div>)}
                 </div>
               </div>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.5, ease: 'easeOut' }}
+                className="absolute -right-4 -top-5 hidden items-center gap-2 rounded-xl border border-gray-100 bg-white px-3.5 py-2.5 shadow-cardHover sm:flex"
+              >
+                <div className="rounded-lg bg-mint-50 p-1.5 text-mint-700"><CheckCircle2 size={16} /></div>
+                <div>
+                  <p className="text-sm font-bold leading-none text-gray-900">+34</p>
+                  <p className="text-[10px] text-gray-500">{t('landing.dealsWonBadge')}</p>
+                </div>
+              </motion.div>
             </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Payment & integration partners strip */}
+      <section className="border-y border-gray-100 bg-white py-8">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <p className="text-center text-xs font-semibold uppercase tracking-wide text-gray-400">{t('landing.integrationsLabel')}</p>
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-x-10 gap-y-3">
+            {['Stripe', 'Flutterwave', 'PayUnit', 'Orange Money', 'MTN MoMo', 'Wave', 'M-Pesa'].map(name => (
+              <span key={name} className="text-sm font-semibold text-gray-400 transition hover:text-blue-700">{name}</span>
+            ))}
           </div>
         </div>
       </section>
