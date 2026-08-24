@@ -40,12 +40,20 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!tenant) return;
-    (async () => {
+    const fetchUnread = async () => {
       const { count } = await supabase.from('notifications').select('*', { count: 'exact', head: true }).eq('read', false).eq('user_id', profile?.id);
       setUnread(count || 0);
+    };
+    fetchUnread();
+    (async () => {
       const { data: ann } = await supabase.from('announcements').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(3);
       setAnnouncements(ann || []);
     })();
+    // Notifications aren't realtime-subscribed (would need a channel + cleanup for a feature this
+    // small); a light poll is enough to keep the bell badge from going stale while the app stays
+    // open in a tab — previously it was fetched once on mount and never again.
+    const interval = setInterval(fetchUnread, 30_000);
+    return () => clearInterval(interval);
   }, [tenant, profile?.id]);
 
   // Modules that are personal/universal — always visible regardless of a custom role's granted
