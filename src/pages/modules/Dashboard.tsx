@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { PageHeader, Card, Button, Badge, Skeleton } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
-import { formatMoney, formatDate, COLOR_RAMPS, type ColorKey } from '../../lib/utils';
+import { formatMoney, formatDate, sumDealAmounts, COLOR_RAMPS, type ColorKey } from '../../lib/utils';
 import { DEAL_STAGES, PLAN_BY_ID } from '../../lib/constants';
 import type { Deal, Task, Activity } from '../../lib/types';
 
@@ -31,16 +31,17 @@ export function Dashboard() {
     })();
   }, [tenant]);
 
+  const cur = tenant?.currency_code || 'USD';
   const stats = useMemo(() => {
     const won = deals.filter(d => d.stage === 'won');
     const open = deals.filter(d => !['won','lost'].includes(d.stage));
-    const totalPipeline = open.reduce((s, d) => s + Number(d.amount || 0), 0);
-    const totalWon = won.reduce((s, d) => s + Number(d.amount || 0), 0);
+    const totalPipeline = sumDealAmounts(open, cur);
+    const totalWon = sumDealAmounts(won, cur);
     const conv = deals.length > 0 ? Math.round((won.length / deals.length) * 100) : 0;
     return { totalPipeline, totalWon, openCount: open.length, wonCount: won.length, conv, total: deals.length };
-  }, [deals]);
+  }, [deals, cur]);
 
-  const cur = tenant?.currency_code || 'USD';
+
   const cards: { label: string; value: string; icon: ComponentType<{ size?: number | string }>; color: ColorKey; sub?: string }[] = [
     { label: 'Pipeline ouvert', value: formatMoney(stats.totalPipeline, cur), icon: TrendingUp, color: 'blue', sub: `${stats.openCount} deals` },
     { label: 'Gagné', value: formatMoney(stats.totalWon, cur), icon: Trophy, color: 'teal', sub: `${stats.wonCount} deals` },

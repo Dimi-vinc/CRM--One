@@ -3,7 +3,7 @@ import { Download, Filter } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { PageHeader, Card, Button, Select, Badge } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
-import { formatMoney, formatDate, downloadCsv } from '../../lib/utils';
+import { formatMoney, formatDate, downloadCsv, sumDealAmounts } from '../../lib/utils';
 import { COUNTRIES } from '../../lib/constants';
 import type { Deal } from '../../lib/types';
 
@@ -23,8 +23,8 @@ export function Reports() {
   ), [deals, stageFilter]);
 
   const cur = tenant?.currency_code || 'USD';
-  const total = filtered.reduce((s, d) => s + Number(d.amount || 0), 0);
-  const won = filtered.filter(d => d.stage === 'won').reduce((s, d) => s + Number(d.amount || 0), 0);
+  const total = sumDealAmounts(filtered, cur);
+  const won = sumDealAmounts(filtered.filter(d => d.stage === 'won'), cur);
 
   const exportCsv = () => {
     const rows: (string | number)[][] = [['Titre','Montant','Devise','Étape','Date de clôture','Créé le']];

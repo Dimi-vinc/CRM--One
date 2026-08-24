@@ -30,6 +30,32 @@ export function convertToUsd(amount: number, fromCurrency: string): number {
   return amount * cur.rateToUsd;
 }
 
+export function convertFromUsd(usdAmount: number, toCurrency: string): number {
+  const cur = CURRENCY_BY_CODE[toCurrency];
+  if (!cur || !cur.rateToUsd) return usdAmount;
+  return usdAmount / cur.rateToUsd;
+}
+
+/**
+ * Sums deal amounts into a single target currency, correctly converting each deal from its OWN
+ * currency first. Tenants can price individual deals in different currencies (the multi_currency
+ * plan feature) — naively summing `.amount` directly across deals silently produces a meaningless
+ * number the moment more than one currency is actually in play (e.g. adding 100 USD + 50 000 XOF
+ * as if they were the same unit). Always use this for any pipeline/revenue rollup across deals.
+ * An optional `weight` (0..1) supports probability-weighted forecasts.
+ */
+export function sumDealAmounts<T extends { amount: number; currency_code?: string | null }>(
+  deals: T[],
+  targetCurrency: string,
+  weight?: (d: T) => number,
+): number {
+  const usdTotal = deals.reduce((sum, d) => {
+    const w = weight ? weight(d) : 1;
+    return sum + convertToUsd(Number(d.amount || 0), d.currency_code || targetCurrency) * w;
+  }, 0);
+  return convertFromUsd(usdTotal, targetCurrency);
+}
+
 export function initials(name?: string | null): string {
   if (!name) return '?';
   return name.split(' ').filter(Boolean).slice(0, 2).map(s => s[0]?.toUpperCase()).join('');

@@ -3,7 +3,7 @@ import { TrendingUp, Target, Trophy } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { PageHeader, Card, Skeleton } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
-import { formatMoney, COLOR_RAMPS } from '../../lib/utils';
+import { formatMoney, sumDealAmounts, COLOR_RAMPS } from '../../lib/utils';
 import { DEAL_STAGES } from '../../lib/constants';
 import type { Deal } from '../../lib/types';
 
@@ -24,16 +24,16 @@ export function Forecast() {
   const open = deals.filter(d => !['won','lost'].includes(d.stage));
   const won = deals.filter(d => d.stage === 'won');
   const lost = deals.filter(d => d.stage === 'lost');
-  const totalOpen = open.reduce((s, d) => s + Number(d.amount || 0), 0);
-  const totalWon = won.reduce((s, d) => s + Number(d.amount || 0), 0);
+  const totalOpen = sumDealAmounts(open, cur);
+  const totalWon = sumDealAmounts(won, cur);
 
   // Weighted forecast: each stage has a probability
   const PROB: Record<string, number> = { lead: 0.1, qualified: 0.3, proposal: 0.5, negotiation: 0.75, won: 1, lost: 0 };
-  const weighted = open.reduce((s, d) => s + Number(d.amount || 0) * (PROB[d.stage] || 0), 0);
+  const weighted = sumDealAmounts(open, cur, d => PROB[d.stage] || 0);
 
   const byStage = DEAL_STAGES.map(s => {
     const items = open.filter(d => d.stage === s.id);
-    return { ...s, count: items.length, total: items.reduce((sum, d) => sum + Number(d.amount || 0), 0), weighted: items.reduce((sum, d) => sum + Number(d.amount || 0) * (PROB[s.id] || 0), 0) };
+    return { ...s, count: items.length, total: sumDealAmounts(items, cur), weighted: sumDealAmounts(items, cur, () => PROB[s.id] || 0) };
   });
   const maxTotal = Math.max(...byStage.map(s => s.total), 1);
 

@@ -3,7 +3,7 @@ import { Plus, GripVertical, Trash2, Search } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { PageHeader, Card, Button, Modal, Input, Select } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
-import { DEAL_STAGES, CURRENCIES, formatMoney, COLOR_RAMPS, type ColorKey } from '../../lib/constants';
+import { DEAL_STAGES, CURRENCIES, formatMoney, sumDealAmounts, COLOR_RAMPS, type ColorKey } from '../../lib/constants';
 import type { Deal, Contact, Company } from '../../lib/types';
 
 export function Pipeline() {
@@ -39,7 +39,7 @@ export function Pipeline() {
   const filtered = deals.filter(d => d.title.toLowerCase().includes(search.toLowerCase()));
 
   const byStage = (stage: string) => filtered.filter(d => d.stage === stage);
-  const stageTotal = (stage: string) => byStage(stage).reduce((s, d) => s + Number(d.amount || 0), 0);
+  const stageTotal = (stage: string) => sumDealAmounts(byStage(stage), tenant?.currency_code || 'USD');
 
   const createDeal = async () => {
     if (!tenant || !form.title.trim()) return;
