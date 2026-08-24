@@ -32,11 +32,24 @@ Deno.serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: "campaign_id requis" }), { status: 400, headers: jsonHeaders });
     }
 
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) return new Response(JSON.stringify({ error: "Non authentifié" }), { status: 401, headers: jsonHeaders });
+
+    // Caller-scoped client (anon key + caller's own JWT) — RLS applies exactly as it would in
+    // the app, so a user can never trigger sending a campaign belonging to a tenant they aren't
+    // in. Kept deliberately identical in shape to every other function in this codebase (e.g.
+    // send-email) rather than the previous construction (service_role key with an overridden
+    // Authorization header), which relied on PostgREST decoding the overridden JWT correctly
+    // rather than the key the client was built with — likely fine, but an unnecessarily
+    // confusing pattern for a function that mass-emails a tenant's contacts.
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-      { global: { headers: { Authorization: req.headers.get("Authorization")! } } },
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } },
     );
+    const { data: { user }, error: authErr } = await supabase.auth.getUser();
+    if (authErr || !user) return new Response(JSON.stringify({ error: "Session invalide" }), { status: 401, headers: jsonHeaders });
+
     // Elevated client for cross-table reads/writes once the caller's JWT has been validated above
     const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
