@@ -6,6 +6,8 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
 
+import { computeLeadScoreValue } from "../_shared/lead-scoring.ts";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -15,6 +17,7 @@ const corsHeaders = {
 interface Contact {
   id: string;
   email: string | null;
+  phone: string | null;
   first_name: string;
   last_name: string | null;
   company_id: string | null;
@@ -75,11 +78,7 @@ Deno.serve(async (req: Request) => {
       const hasActivity = new Set((activityContactIds || []).map((a: { contact_id: string | null }) => a.contact_id));
       const hasDeal = new Set((dealContactIds || []).map((d: { contact_id: string | null }) => d.contact_id));
       recipients = recipients.filter((c) => {
-        let score = 0;
-        if (c.email) score += 20;
-        if (c.company_id) score += 15;
-        if (hasActivity.has(c.id)) score += 25;
-        if (hasDeal.has(c.id)) score += 25;
+        const score = computeLeadScoreValue(c, hasActivity.has(c.id), hasDeal.has(c.id));
         return score >= campaign.segment_min_score;
       });
     }

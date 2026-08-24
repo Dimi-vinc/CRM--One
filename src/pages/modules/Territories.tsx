@@ -3,7 +3,7 @@ import { Map, Plus, Target, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { PageHeader, Card, Button, Modal, Input, Select, EmptyState, Skeleton } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
-import { formatMoney } from '../../lib/utils';
+import { formatMoney, sumDealAmounts } from '../../lib/utils';
 import { COUNTRIES } from '../../lib/constants';
 import type { SalesTerritory, SalesQuota, Profile, Deal } from '../../lib/types';
 
@@ -48,8 +48,8 @@ export function Territories() {
 
   const memberName = (id: string) => team.find(p => p.id === id)?.full_name || team.find(p => p.id === id)?.email || '—';
 
-  const achievedFor = (userId: string, period: string) =>
-    deals.filter(d => d.owner_id === userId && d.created_at.slice(0, 7) === period).reduce((s, d) => s + d.amount, 0);
+  const achievedFor = (userId: string, period: string, targetCurrency: string) =>
+    sumDealAmounts(deals.filter(d => d.owner_id === userId && d.created_at.slice(0, 7) === period), targetCurrency);
 
   const createTerritory = async () => {
     if (!tenant || !terrForm.name.trim()) return;
@@ -116,7 +116,7 @@ export function Territories() {
           ) : (
             <div className="space-y-2">
               {quotas.map(q => {
-                const achieved = achievedFor(q.user_id, q.period);
+                const achieved = achievedFor(q.user_id, q.period, q.currency_code);
                 const pct = q.target_amount > 0 ? Math.min(100, Math.round((achieved / q.target_amount) * 100)) : 0;
                 return (
                   <Card key={q.id} className="p-4">
