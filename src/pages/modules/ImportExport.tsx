@@ -19,6 +19,34 @@ const ENTITY_CONFIG: Record<EntityKey, { label: string; table: string; fields: I
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/**
+ * Parses a number from a CSV cell that may use either thousands-separator convention
+ * (US: "1,234.56" or European: "1.234,56"), or none at all ("1234.56" / "1234,56").
+ * The previous implementation only replaced the FIRST comma with a dot, which broke on any
+ * value that actually had a thousands separator in either convention (e.g. "12,500.00" became
+ * "12.500.00" → NaN), silently rejecting valid deal amounts as "invalid" during import.
+ */
+function parseLocaleNumber(raw: string): number {
+  let s = raw.replace(/[^\d.,-]/g, '').trim();
+  const lastComma = s.lastIndexOf(',');
+  const lastDot = s.lastIndexOf('.');
+  if (lastComma > -1 && lastDot > -1) {
+    // Both separators present: whichever appears LAST is the decimal separator.
+    s = lastComma > lastDot ? s.replace(/\./g, '').replace(',', '.') : s.replace(/,/g, '');
+  } else if (lastComma > -1) {
+    // Only commas: a single comma followed by 1-2 digits is almost certainly a decimal
+    // separator ("12,5" = 12.5); anything else (e.g. "12,500" or multiple commas) is thousands
+    // separators to strip.
+    const parts = s.split(',');
+    s = parts.length === 2 && parts[1].length <= 2 ? s.replace(',', '.') : s.replace(/,/g, '');
+  } else if (lastDot > -1) {
+    // Only dots: more than one means they're thousands separators — keep just the last as decimal.
+    const parts = s.split('.');
+    if (parts.length > 2) { const dec = parts.pop(); s = parts.join('') + '.' + dec; }
+  }
+  return Number(s);
+}
+
 interface RowResult {
   rowIndex: number;
   ok: boolean;
@@ -128,7 +156,7 @@ export function ImportExport() {
           record[field.key] = raw;
           break;
         case 'number': {
-          const n = Number(raw.replace(/[^\d.,-]/g, '').replace(',', '.'));
+          const n = parseLocaleNumber(raw);
           if (Number.isNaN(n)) return { record, error: `Montant invalide : "${raw}"` };
           record[field.key] = n;
           break;
