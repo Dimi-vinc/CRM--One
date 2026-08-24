@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Building2, CheckCircle2, Globe2, Phone, Mail } from 'lucide-react';
+import { Building2, CheckCircle2, Globe2, Phone, Mail, ShieldCheck, Lock, KeyRound } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { LanguageSelector } from '../components/LanguageSelector';
 import { PLATFORM_NAME, PLATFORM_VENDOR, FAQ_ITEMS, PLANS } from '../lib/constants';
@@ -145,7 +145,8 @@ export function Landing() {
       {/* Features */}
       <section id="features" className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold text-gray-900">{t('landing.featuresTitle')}</h2>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-blue-800">{t('landing.eyebrowFeatures')}</span>
+          <h2 className="mt-3 text-3xl font-bold text-gray-900">{t('landing.featuresTitle')}</h2>
           <p className="mt-3 text-gray-600">{t('landing.featuresSubtitle')}</p>
         </div>
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -178,7 +179,8 @@ export function Landing() {
       <section id="pricing" className="bg-sky-50/40 py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold text-gray-900">{t('landing.pricingTitle')}</h2>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-blue-800">{t('landing.eyebrowPricing')}</span>
+            <h2 className="mt-3 text-3xl font-bold text-gray-900">{t('landing.pricingTitle')}</h2>
             <p className="mt-3 text-gray-600">{t('landing.pricingSubtitle')}</p>
           </div>
           <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
@@ -202,6 +204,35 @@ export function Landing() {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Security & trust */}
+      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-2xl text-center">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-blue-800">{t('landing.eyebrowSecurity')}</span>
+          <h2 className="mt-3 text-3xl font-bold text-gray-900">{t('landing.securityTitle')}</h2>
+          <p className="mt-3 text-gray-600">{t('landing.securitySubtitle')}</p>
+        </div>
+        <div className="mt-12 grid gap-5 md:grid-cols-3">
+          {[
+            { icon: ShieldCheck, t: t('landing.security1.title'), d: t('landing.security1.desc') },
+            { icon: Lock, t: t('landing.security2.title'), d: t('landing.security2.desc') },
+            { icon: KeyRound, t: t('landing.security3.title'), d: t('landing.security3.desc') },
+          ].map((f, i) => (
+            <motion.div
+              key={f.t}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-60px' }}
+              transition={{ duration: 0.4, delay: i * 0.08, ease: 'easeOut' }}
+              className="card p-6"
+            >
+              <div className="mb-3 inline-flex rounded-xl bg-blue-800 p-2.5 text-white"><f.icon size={20} /></div>
+              <h3 className="text-base font-semibold text-gray-900">{f.t}</h3>
+              <p className="mt-1.5 text-sm text-gray-600">{f.d}</p>
+            </motion.div>
+          ))}
         </div>
       </section>
 
@@ -237,7 +268,10 @@ export function Landing() {
       {/* FAQ */}
       <section id="faq" className="bg-sky-50/40 py-20">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-center text-3xl font-bold text-gray-900">{t('landing.faqTitle')}</h2>
+          <div className="text-center">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-blue-800">{t('landing.eyebrowFaq')}</span>
+          </div>
+          <h2 className="mt-3 text-center text-3xl font-bold text-gray-900">{t('landing.faqTitle')}</h2>
           <div className="mt-10 space-y-3">
             {FAQ_ITEMS.map((item, i) => (
               <motion.details
@@ -256,6 +290,28 @@ export function Landing() {
               </motion.details>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Closing CTA banner */}
+      <section className="relative overflow-hidden bg-blue-900 py-20">
+        <div className="absolute inset-0 -z-10 opacity-40" style={{ backgroundImage: 'radial-gradient(circle at 15% 30%, rgba(255,255,255,0.12), transparent 40%), radial-gradient(circle at 85% 70%, rgba(255,255,255,0.10), transparent 45%)' }} />
+        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+          <motion.h2
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-60px' }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
+            className="text-3xl font-bold text-white sm:text-4xl"
+          >
+            {t('landing.ctaBannerTitle')}
+          </motion.h2>
+          <p className="mx-auto mt-4 max-w-2xl text-blue-100">{t('landing.ctaBannerSubtitle')}</p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <Link to="/signup" className="rounded-xl bg-white px-6 py-3 text-base font-semibold text-blue-900 shadow-lg transition hover:bg-blue-50">{t('nav.startFree')}</Link>
+            <Link to="/pricing" className="rounded-xl border border-white/30 px-6 py-3 text-base font-semibold text-white transition hover:bg-white/10">{t('nav.seePricing')}</Link>
+          </div>
+          <p className="mt-5 text-xs font-medium uppercase tracking-wide text-blue-200">{t('landing.ctaBannerTrust')}</p>
         </div>
       </section>
 
