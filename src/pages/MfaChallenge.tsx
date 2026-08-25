@@ -5,11 +5,13 @@ import { Logo } from '../components/Logo';
 import { Button } from '../components/ui';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 export function MfaChallenge() {
   const nav = useNavigate();
   const loc = useLocation();
   const { refresh, signOut } = useAuth();
+  const { t } = useLanguage();
   const from = (loc.state as { from?: string } | null)?.from || '/dashboard';
   const [factorId, setFactorId] = useState<string | null>(null);
   const [code, setCode] = useState('');
@@ -34,7 +36,7 @@ export function MfaChallenge() {
     const { data: challenge, error: chErr } = await supabase.auth.mfa.challenge({ factorId });
     if (chErr || !challenge) {
       setLoading(false);
-      setError(chErr?.message || 'Échec de la vérification.');
+      setError(chErr?.message || t('mfa.verifyFailed'));
       return;
     }
     const { error: verifyErr } = await supabase.auth.mfa.verify({
@@ -44,7 +46,7 @@ export function MfaChallenge() {
     });
     setLoading(false);
     if (verifyErr) {
-      setError('Code invalide. Réessayez.');
+      setError(t('mfa.invalidCode'));
       return;
     }
     await refresh();
@@ -57,14 +59,14 @@ export function MfaChallenge() {
         <div className="flex justify-center"><Logo size="lg" /></div>
         <div className="mt-8 flex items-center justify-center gap-2">
           <ShieldCheck size={22} className="text-blue-600" />
-          <h1 className="text-2xl font-bold text-gray-900">Vérification en 2 étapes</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('mfa.title')}</h1>
         </div>
-        <p className="mt-1 text-center text-sm text-gray-500">Entrez le code à 6 chiffres de votre application d'authentification.</p>
+        <p className="mt-1 text-center text-sm text-gray-500">{t('mfa.subtitle')}</p>
 
         {ready && !factorId ? (
           <div className="mt-6 flex items-start gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
             <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
-            <span>Aucun facteur 2FA vérifié n'a été trouvé, mais votre compte requiert une vérification. Contactez le support.</span>
+            <span>{t('mfa.noFactor')}</span>
           </div>
         ) : (
           <form onSubmit={submit} className="mt-8 space-y-4">
@@ -84,13 +86,13 @@ export function MfaChallenge() {
               </div>
             )}
             <Button type="submit" disabled={loading || code.length < 6 || !factorId} className="w-full" size="lg">
-              {loading ? 'Vérification…' : 'Vérifier'}
+              {loading ? t('mfa.verifying') : t('mfa.verify')}
             </Button>
           </form>
         )}
 
         <button onClick={() => signOut()} className="mt-6 mx-auto flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700">
-          <LogOut size={14} /> Se déconnecter
+          <LogOut size={14} /> {t('mfa.signOut')}
         </button>
       </div>
     </div>

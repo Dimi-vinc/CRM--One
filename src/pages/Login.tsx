@@ -56,7 +56,7 @@ export function Login() {
                 <Lock size={16} className="absolute left-3 top-3.5 text-gray-400" />
                 <input type="password" required value={password} onChange={e => setPassword(e.target.value)} className="input pl-9" placeholder="••••••••" />
               </div>
-              <Link to="/forgot-password" className="mt-1.5 inline-block text-xs font-medium text-blue-700 hover:underline">Mot de passe oublié ?</Link>
+              <Link to="/forgot-password" className="mt-1.5 inline-block text-xs font-medium text-blue-700 hover:underline">{t('auth.forgotPassword')}</Link>
             </div>
             {error && (
               <div className="flex items-start gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
