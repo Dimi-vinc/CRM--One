@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, ArrowLeft } from 'lucide-react';
 import { Logo } from '../components/Logo';
@@ -9,7 +8,6 @@ import { useLanguage } from '../context/LanguageContext';
 
 export function Pricing() {
   const { t, lang } = useLanguage();
-  const [annual, setAnnual] = useState(false);
 
   return (
     <div className="min-h-screen bg-white">
@@ -29,28 +27,11 @@ export function Pricing() {
         <div className="mx-auto max-w-2xl text-center">
           <h1 className="text-4xl font-bold text-gray-900">{lang === 'fr' ? 'Des forfaits adaptés à chaque étape' : 'Plans for every stage'}</h1>
           <p className="mt-4 text-lg text-gray-600">{lang === 'fr' ? '7 jours d\'essai gratuit sur tous les plans. Sans carte bancaire. Changez de plan à tout moment.' : '7-day free trial on all plans. No credit card. Change anytime.'}</p>
-
-          {/* Monthly / Annual toggle */}
-          <div className="mt-8 inline-flex items-center gap-3 rounded-full bg-gray-100 p-1">
-            <button
-              onClick={() => setAnnual(false)}
-              className={`rounded-full px-5 py-2 text-sm font-medium transition ${!annual ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}
-            >
-              {lang === 'fr' ? 'Mensuel' : 'Monthly'}
-            </button>
-            <button
-              onClick={() => setAnnual(true)}
-              className={`flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition ${annual ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}
-            >
-              {lang === 'fr' ? 'Annuel' : 'Annual'}
-              <span className="rounded-full bg-mint-100 px-2 py-0.5 text-[10px] font-bold text-mint-700">-20%</span>
-            </button>
-          </div>
         </div>
 
         <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {PLANS.map(plan => {
-            const price = annual ? plan.priceAnnual : plan.price;
+            const price = plan.price;
             return (
               <div key={plan.id} className={`card flex flex-col p-6 ${plan.highlight ? 'ring-2 ring-blue-500 border-blue-300' : ''}`}>
                 {plan.highlight && <div className="mb-2 inline-flex w-fit rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800">{t('common.popular')}</div>}
@@ -59,11 +40,6 @@ export function Pricing() {
                   <span className="text-3xl font-bold text-gray-900">{formatMoney(price, plan.currency)}</span>
                   <span className="text-sm text-gray-500">{t('common.perMonth')}</span>
                 </p>
-                {annual && (
-                  <p className="mt-1 text-xs text-mint-600 font-medium">
-                    {lang === 'fr' ? 'Économisez' : 'Save'} {formatMoney((plan.price - plan.priceAnnual) * 12, plan.currency)} {lang === 'fr' ? '/an' : '/yr'}
-                  </p>
-                )}
                 <p className="mt-2 text-xs text-gray-500">
                   {plan.maxUsers === 0 ? t('common.unlimited') : `${t('common.upTo')} ${plan.maxUsers}`} {t('common.users')}
                   {' · '}

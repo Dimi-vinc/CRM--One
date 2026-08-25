@@ -17,7 +17,7 @@ interface OnboardingLocationState {
 const STEPS = ['onboarding.location', 'onboarding.currency', 'onboarding.plan', 'onboarding.comCode'] as const;
 
 export function Onboarding() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const nav = useNavigate();
   const loc = useLocation();
   const { refresh } = useAuth();
@@ -31,7 +31,6 @@ export function Onboarding() {
   const [city, setCity] = useState('');
   const [currency, setCurrency] = useState('XAF');
   const [planId, setPlanId] = useState<'starter'|'pro'|'premium'|'entreprise'>('pro');
-  const [billingCycle, setBillingCycle] = useState<'monthly'|'annual'>('monthly');
   const [commercialCode, setCommercialCode] = useState('');
   const [codeValid, setCodeValid] = useState<null | { ok: boolean; label?: string }>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -68,7 +67,7 @@ export function Onboarding() {
         p_city: city || '',
         p_currency_code: currency,
         p_timezone: countryDef?.timezone || 'Africa/Douala',
-        p_locale: 'fr',
+        p_locale: lang,
         p_phone_country_code: countryDef?.dial || '+237',
         p_plan_id: planId,
         p_full_name: initialName || user.email,
@@ -154,19 +153,9 @@ export function Onboarding() {
             <div className="space-y-4">
               <div className="flex items-center gap-2"><CreditCard className="text-blue-600" size={20} /><h2 className="text-lg font-bold text-gray-900">{t('onboarding.choosePlan')}</h2></div>
               <p className="text-sm text-gray-500">{t('onboarding.planHint')}</p>
-              {/* Billing cycle toggle */}
-              <div className="inline-flex items-center gap-3 rounded-full bg-gray-100 p-1">
-                <button onClick={() => setBillingCycle('monthly')} className={`rounded-full px-4 py-1.5 text-xs font-medium transition ${billingCycle === 'monthly' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}>
-                  {t('common.monthly') === 'common.monthly' ? 'Mensuel' : t('common.monthly')}
-                </button>
-                <button onClick={() => setBillingCycle('annual')} className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-medium transition ${billingCycle === 'annual' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}>
-                  {t('common.annual') === 'common.annual' ? 'Annuel' : t('common.annual')}
-                  <span className="rounded-full bg-mint-100 px-1.5 py-0.5 text-[9px] font-bold text-mint-700">-20%</span>
-                </button>
-              </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 {PLANS.map(p => {
-                  const price = billingCycle === 'annual' ? p.priceAnnual : p.price;
+                  const price = p.price;
                   return (
                     <button key={p.id} onClick={() => setPlanId(p.id)} className={`text-left rounded-xl border p-4 transition ${planId === p.id ? 'border-blue-400 ring-2 ring-blue-100 bg-blue-50/40' : 'border-gray-200 hover:border-gray-300'}`}>
                       <div className="flex items-center justify-between">
