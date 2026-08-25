@@ -149,8 +149,8 @@ const flutterwaveProvider: PaymentProvider = {
 };
 
 // ---- PayUnit provider (via Supabase edge function) ----
-// Cameroon-based payment aggregator: Orange Money, MTN Mobile Money, and cards, focused on
-// Central Africa. This is the first PSP being validated for go-live on this platform.
+// Payment aggregator giving access to cards, Mobile Money, and other international payment
+// methods — the first PSP being validated for go-live on this platform.
 const payunitProvider: PaymentProvider = {
   code: 'payunit',
   label: 'PayUnit',

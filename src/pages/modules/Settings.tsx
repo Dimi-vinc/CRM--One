@@ -327,7 +327,7 @@ export function Settings() {
               className={`rounded-xl border p-4 text-left transition-all ${paymentProvider === 'payunit' ? 'border-coral-500 ring-2 ring-coral-100 bg-coral-50/10' : 'border-gray-200 hover:bg-gray-50'}`}
             >
               <p className="font-semibold text-gray-900">PayUnit</p>
-              <p className="mt-1 text-xs text-gray-500">Orange Money, MTN MoMo et cartes — Cameroun & Afrique centrale.</p>
+              <p className="mt-1 text-xs text-gray-500">Cartes, Mobile Money et autres moyens de paiement internationaux.</p>
             </button>
           </div>
 

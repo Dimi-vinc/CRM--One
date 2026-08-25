@@ -1,7 +1,8 @@
 // PayUnit Checkout Edge Function
-// Creates a PayUnit hosted-payment-page link for a plan subscription (Orange Money, MTN Mobile
-// Money, cards — Cameroon/Central Africa focused). Mirrors stripe-checkout/flutterwave-checkout's
-// interface so the frontend payments.ts abstraction can call any of the three interchangeably.
+// Creates a PayUnit hosted-payment-page link for a plan subscription (cards, Mobile Money, and
+// other international payment methods depending on the merchant account's activated coverage).
+// Mirrors stripe-checkout/flutterwave-checkout's interface so the frontend payments.ts
+// abstraction can call any of the three interchangeably.
 //
 // Required secrets:
 //   PAYUNIT_API_KEY       (x-api-key header — from dashboard, API CREDENTIALS tab)
@@ -73,11 +74,11 @@ Deno.serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: "Accès refusé au tenant" }), { status: 403, headers: jsonHeaders });
     }
 
-    // PayUnit's principal, best-tested currency is XAF (Central African CFA franc); other
-    // currencies depend on account configuration. We still convert correctly regardless of what
-    // the tenant selected, and let PayUnit reject it with a clear error if unsupported for this
-    // account rather than silently defaulting.
-    const cur = (currency || "XAF").toUpperCase();
+    // Which currencies PayUnit actually accepts depends on the merchant account's activated
+    // coverage (international, not limited to a single region). We always convert correctly
+    // regardless of what the tenant selected, and let PayUnit reject it with a clear error if
+    // unsupported for this account rather than silently defaulting.
+    const cur = (currency || "USD").toUpperCase();
     const converted = convertUsdTo(PLAN_PRICES_USD[planId], cur);
     const amount = converted.decimals === 0 ? Math.round(converted.amount) : Math.round(converted.amount * 100) / 100;
 

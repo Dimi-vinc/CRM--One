@@ -23,7 +23,7 @@ function LucIcon({ name, size = 18 }: { name: string; size?: number }) {
 // Personal/universal modules shown to every team member regardless of a custom role's granted
 // business-module permissions. 'ai_assistant' is a free utility for every plan (see
 // src/lib/constants.ts) so it belongs here too, not behind per-role permission grants.
-const ALWAYS_VISIBLE: ModuleKey[] = ['dashboard', 'settings', 'security', 'privacy', 'notifications', 'ai_assistant'];
+const ALWAYS_VISIBLE: ModuleKey[] = ['dashboard', 'settings', 'security', 'privacy', 'notifications', 'ai_assistant', 'integrations'];
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { profile, tenant, permissions, signOut } = useAuth();

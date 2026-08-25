@@ -85,8 +85,10 @@ documentation (https://developer.flutterwave.com/docs/integration-guides/testing
 
 ## 3. PayUnit (premier PSP validé pour la mise en production)
 
-Agrégateur basé au Cameroun : Orange Money, MTN Mobile Money et cartes, centré sur l'Afrique
-centrale.
+Agrégateur de paiement donnant accès aux cartes bancaires, au Mobile Money et à d'autres moyens
+de paiement internationaux — pas limité à une seule région. La couverture exacte (pays, devises,
+moyens de paiement) dépend du compte marchand activé par PayUnit ; vérifiez votre contrat/
+tableau de bord PayUnit pour la liste à jour.
 
 ### a. Compte et identifiants
 1. https://web.payunit.net → créez un compte et une application (mode Test d'abord).
@@ -118,10 +120,11 @@ natif dans l'API REST de base — chaque paiement réussi active le plan pour 30
 du mois suivant reste à automatiser séparément.
 
 ### e. Devise
-PayUnit est le plus fiable en XAF (franc CFA d'Afrique centrale) ; d'autres devises dépendent de
-la configuration du compte marchand. La fonction convertit toujours correctement le prix
-(voir `supabase/functions/_shared/currency-rates.ts`) — si une devise n'est pas prise en charge
-par votre compte, PayUnit renverra une erreur claire plutôt qu'un montant erroné.
+La fonction convertit toujours correctement le prix vers la devise choisie par le tenant (voir
+`supabase/functions/_shared/currency-rates.ts`). La liste exacte des devises réellement
+supportées dépend de votre compte marchand PayUnit — si une devise n'est pas prise en charge,
+PayUnit renverra une erreur claire au lieu d'un montant erroné. Vérifiez avec PayUnit la liste
+complète des devises/pays activés sur votre compte avant le lancement.
 
 ### f. Tester
 Utilisez le mode Test PayUnit et leurs identifiants de test Mobile Money fournis dans leur

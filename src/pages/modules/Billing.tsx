@@ -197,7 +197,7 @@ export function Billing() {
             </div>
             <div>
               <p className="text-sm font-bold text-gray-900">Mobile Money & Cartes (PayUnit)</p>
-              <p className="mt-0.5 text-xs text-gray-500">Orange Money, MTN MoMo & cartes — Cameroun & Afrique centrale.</p>
+              <p className="mt-0.5 text-xs text-gray-500">Cartes, Mobile Money et autres moyens de paiement internationaux.</p>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 <span className="rounded bg-coral-50 px-1.5 py-0.5 text-[10px] font-bold text-coral-700">Orange Money</span>
                 <span className="rounded bg-coral-50 px-1.5 py-0.5 text-[10px] font-bold text-coral-700">MTN MoMo</span>
