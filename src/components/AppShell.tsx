@@ -1,7 +1,7 @@
 import { type ComponentType, type ReactNode, useEffect, useMemo, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import * as Icons from 'lucide-react';
-import { ChevronDown, LogOut, Settings, Crown, Menu, X, Bell, Search, Building2 } from 'lucide-react';
+import { ChevronDown, LogOut, Settings, Lock, Crown, Menu, X, Bell, Search, Building2 } from 'lucide-react';
 import { Logo } from './Logo';
 import { useAuth } from '../context/AuthContext';
 import { MODULES, type ModuleDef, planIncludes, type ModuleKey, PLAN_BY_ID } from '../lib/constants';
@@ -183,7 +183,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                       <p className="truncate text-sm font-medium text-gray-900">{profile?.full_name || profile?.email}</p>
                       <p className="truncate text-xs text-gray-500">{profile?.email}</p>
                     </div>
-                    <button onClick={() => { setUserMenu(false); nav('/security'); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"><Settings size={15} /> {t('nav.security')}</button>
+                    <button onClick={() => { setUserMenu(false); nav('/settings'); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"><Settings size={15} /> {t('mod.settings')}</button>
+                    <button onClick={() => { setUserMenu(false); nav('/security'); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"><Lock size={15} /> {t('nav.security')}</button>
                     {isSuperAdmin && <button onClick={() => { setUserMenu(false); nav('/super-admin'); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"><Crown size={15} /> {t('nav.superAdmin')}</button>}
                     <button onClick={() => { signOut(); nav('/'); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50"><LogOut size={15} /> {t('nav.logout')}</button>
                   </div>
