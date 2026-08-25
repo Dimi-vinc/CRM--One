@@ -3,7 +3,7 @@ import { Plus, LifeBuoy, Send, Lock } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { PageHeader, Card, Button, Modal, Input, Select, Textarea, Badge, EmptyState } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
-import { formatDateTime } from '../../lib/utils';
+import { formatDateTime, escapeHtml } from '../../lib/utils';
 import type { Ticket, TicketComment, TicketStatus, TicketPriority, Contact } from '../../lib/types';
 
 const STATUSES: { id: TicketStatus; label: string; color: 'gray' | 'orange' | 'green' | 'blue' }[] = [
@@ -107,7 +107,7 @@ export function Tickets() {
               body: JSON.stringify({
                 to: contact.email,
                 subject: `Re: ${detail.subject}`,
-                html: `<p>${commentBody.replace(/\n/g, '<br/>')}</p>`,
+                html: `<p>${escapeHtml(commentBody).replace(/\n/g, '<br/>')}</p>`,
                 contact_id: contact.id,
               }),
             });

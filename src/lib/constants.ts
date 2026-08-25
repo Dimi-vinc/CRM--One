@@ -233,7 +233,7 @@ export const CURRENCY_BY_CODE: Record<string, CurrencyDef> = Object.fromEntries(
 
 // Re-export utility helpers so callers can import everything from one place.
 // Circular import is safe: values are only read inside function bodies at call time.
-export { formatMoney, convertToUsd, convertFromUsd, sumDealAmounts, COLOR_RAMPS, formatDate, formatDateTime, timeAgo, daysUntil, downloadCsv, initials, classNames, type ColorKey } from './utils';
+export { formatMoney, convertToUsd, convertFromUsd, sumDealAmounts, COLOR_RAMPS, formatDate, formatDateTime, timeAgo, daysUntil, downloadCsv, initials, classNames, escapeHtml, type ColorKey } from './utils';
 
 export const MOBILE_MONEY_PROVIDERS = ['Orange Money','MTN Mobile Money','Wave','M-Pesa','Moov Money','Airtel Money','Vodafone Cash','Telebirr','EcoCash','OPay'];
 

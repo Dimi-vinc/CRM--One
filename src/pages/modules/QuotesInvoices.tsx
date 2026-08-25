@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { PageHeader, Card, Button, Modal, Input, Select, Textarea, Badge, EmptyState } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
 import { formatMoney, formatDate } from '../../lib/utils';
-import { PLATFORM_NAME } from '../../lib/constants';
+import { PLATFORM_NAME, CURRENCIES } from '../../lib/constants';
 import { generateDocumentPdf } from '../../lib/pdfDocument';
 import type { Quote, QuoteItem, Invoice, InvoiceItem, QuoteStatus, InvoiceStatus, Contact, Company } from '../../lib/types';
 
@@ -271,7 +271,9 @@ export function QuotesInvoices() {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Input label="Devise" value={form.currency_code} onChange={e => setForm({ ...form, currency_code: e.target.value.toUpperCase() })} />
+            <Select label="Devise" value={form.currency_code} onChange={e => setForm({ ...form, currency_code: e.target.value })}>
+              {CURRENCIES.map(c => <option key={c.code} value={c.code}>{c.code} — {c.name}</option>)}
+            </Select>
             {modal === 'quote' ? (
               <Input label="Valide jusqu'au" type="date" value={form.valid_until} onChange={e => setForm({ ...form, valid_until: e.target.value })} />
             ) : (

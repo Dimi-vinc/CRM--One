@@ -14,6 +14,22 @@ export function classNames(...parts: (string | false | null | undefined)[]): str
   return parts.filter(Boolean).join(' ');
 }
 
+/**
+ * Escapes HTML special characters. Required before interpolating any user-typed text into an
+ * HTML string that will actually be rendered/sent as HTML (e.g. an outgoing email body) — plain
+ * template-literal interpolation does NOT do this, and leaves the door open to broken rendering
+ * or injected markup (e.g. a fake link disguised as plain text) if the text contains `<`, `>`,
+ * `&`, or quote characters.
+ */
+export function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export function formatMoney(amount: number, currencyCode: string): string {
   const cur = CURRENCY_BY_CODE[currencyCode] || CURRENCY_BY_CODE.USD;
   const value = Number(amount || 0);
