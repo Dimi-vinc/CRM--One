@@ -42,6 +42,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'mod.admin': 'Espace Admin',
     'mod.super_admin': 'Super Admin',
     'mod.ai_assistant': 'Assistant IA',
+    'mod.integrations': 'Intégrations',
     // Common
     'common.loading': 'Chargement…',
     'common.profileLoading': 'Profil en cours de chargement…',
@@ -239,6 +240,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'mod.admin': 'Admin Space',
     'mod.super_admin': 'Super Admin',
     'mod.ai_assistant': 'AI Assistant',
+    'mod.integrations': 'Integrations',
     'common.loading': 'Loading…',
     'common.profileLoading': 'Loading profile…',
     'common.plan': 'Plan',
