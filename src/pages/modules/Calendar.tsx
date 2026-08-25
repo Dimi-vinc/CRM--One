@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { PageHeader, Card, Button } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
-import { formatMoney } from '../../lib/utils';
+import { formatMoney, getLocale } from '../../lib/utils';
 import type { Deal, Activity, Task } from '../../lib/types';
 
 export function Calendar() {
@@ -34,7 +34,12 @@ export function Calendar() {
   const startPad = (first.getDay() + 6) % 7; // Monday-first
   const days = Array.from({ length: last.getDate() }, (_, i) => i + 1);
   const cells = [...Array(startPad).fill(null), ...days];
-  const monthLabel = cursor.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  const monthLabel = cursor.toLocaleDateString(getLocale(), { month: 'long', year: 'numeric' });
+  // Jan 1, 2024 was a Monday, so days 1..7 of that month give Mon..Sun in order for any locale —
+  // avoids hardcoding weekday names in one language (was previously French-only, regardless of
+  // the app's selected language).
+  const weekdayFormatter = new Intl.DateTimeFormat(getLocale(), { weekday: 'short' });
+  const weekdays = [1, 2, 3, 4, 5, 6, 7].map(d => weekdayFormatter.format(new Date(2024, 0, d)));
   const evOn = (day: number) => events.filter(e => e.date === `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
   const today = new Date();
   const isToday = (d: number) => today.getFullYear() === year && today.getMonth() === month && today.getDate() === d;
@@ -53,7 +58,7 @@ export function Calendar() {
 
       <Card className="p-4">
         <div className="mb-2 grid grid-cols-7 text-center text-xs font-medium text-gray-500">
-          {['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'].map(d => <div key={d} className="py-2">{d}</div>)}
+          {weekdays.map(d => <div key={d} className="py-2">{d}</div>)}
         </div>
         <div className="grid grid-cols-7 gap-1">
           {cells.map((d, i) => (

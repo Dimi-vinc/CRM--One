@@ -5,7 +5,7 @@ import { CURRENCY_BY_CODE } from './constants';
 // module, not a React hook — see src/context/LanguageContext.tsx). Reading it here means every
 // date/time/number in the app follows the user's chosen language, not a hardcoded locale —
 // important for a SaaS with an international audience.
-function getLocale(): 'fr-FR' | 'en-US' {
+export function getLocale(): 'fr-FR' | 'en-US' {
   if (typeof window === 'undefined') return 'fr-FR';
   return localStorage.getItem('liafrik-lang') === 'en' ? 'en-US' : 'fr-FR';
 }
