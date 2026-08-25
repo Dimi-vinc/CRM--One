@@ -22,7 +22,13 @@ Deno.serve(async (req: Request) => {
     }
 
     const payload = await req.json().catch(() => ({}));
-    const txId: string | undefined = payload?.transaction_id || payload?.data?.transaction_id;
+    // PayUnit's docs are not fully consistent about which field carries the merchant-supplied
+    // transaction_id in the notify payload across different examples (transaction_id vs t_id,
+    // nested under `data` or not) — check every plausible shape rather than betting on one, since
+    // a wrong guess here would mean 100% of webhooks silently fail to match anything.
+    const txId: string | undefined =
+      payload?.transaction_id || payload?.data?.transaction_id ||
+      payload?.t_id || payload?.data?.t_id;
     if (!txId) {
       // Nothing usable to verify — acknowledge so PayUnit doesn't endlessly retry, do nothing.
       return new Response(JSON.stringify({ received: true, ignored: true }), { headers: { "Content-Type": "application/json" } });

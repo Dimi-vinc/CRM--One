@@ -128,6 +128,21 @@ Utilisez le mode Test PayUnit et leurs identifiants de test Mobile Money fournis
 documentation (https://developer.payunit.net/getting-started) avant de passer `PAYUNIT_MODE` à
 `live`.
 
+### ⚠️ Étape critique avant le lancement : vérifier le webhook avec une vraie transaction test
+La documentation PayUnit n'est pas totalement cohérente sur le nom exact du champ qui transporte
+votre `transaction_id` dans la notification envoyée à `notify_url` (`transaction_id` vs `t_id`,
+au niveau racine ou imbriqué sous `data`). Le code de `payunit-webhook` vérifie déjà toutes les
+variantes plausibles, mais **avant de considérer PayUnit prêt pour de vrais paiements** :
+1. Faites un paiement de test complet en mode `test`.
+2. Dans le tableau de bord Supabase → Edge Functions → `payunit-webhook` → Logs, vérifiez que la
+   fonction a bien reçu l'appel et trouvé une ligne correspondante dans `payunit_transactions`
+   (pas de `{"received": true, "ignored": true}` — cette réponse signifie que le `transaction_id`
+   n'a pas été retrouvé).
+3. Vérifiez dans la table `payunit_transactions` que la ligne passe bien à `status = 'confirmed'`
+   et que le tenant a bien été activé sur le bon plan.
+Si l'étape 2 montre un payload "ignored", ouvrez `supabase/functions/payunit-webhook/index.ts` et
+ajoutez le nom de champ réel observé dans les logs à la liste de repli.
+
 ---
 
 ## 4. Choisir le fournisseur par défaut
