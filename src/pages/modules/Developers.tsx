@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Plus, Trash2, Copy, Check, Key, Webhook as WebhookIcon, AlertCircle, ScrollText, Power } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Plus, Trash2, Copy, Check, Key, Webhook as WebhookIcon, AlertCircle, ScrollText, Power, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { PageHeader, Card, Button, Modal, Input, Badge } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
@@ -28,6 +29,8 @@ export function Developers() {
   const [newKeyName, setNewKeyName] = useState('');
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
   const [copiedKey, setCopiedKey] = useState(false);
+  const [revealedSecrets, setRevealedSecrets] = useState<Record<string, boolean>>({});
+  const [copiedSecretFor, setCopiedSecretFor] = useState<string | null>(null);
 
   const [webhooks, setWebhooks] = useState<Webhook[]>([]);
   const [whModal, setWhModal] = useState(false);
@@ -75,6 +78,12 @@ export function Developers() {
     await navigator.clipboard.writeText(revealedKey);
     setCopiedKey(true);
     setTimeout(() => setCopiedKey(false), 2000);
+  };
+
+  const copySecret = async (w: Webhook) => {
+    await navigator.clipboard.writeText(w.secret);
+    setCopiedSecretFor(w.id);
+    setTimeout(() => setCopiedSecretFor(null), 2000);
   };
 
   const createWebhook = async () => {
@@ -139,7 +148,7 @@ export function Developers() {
             ))}
           </div>
           <p className="mt-4 text-xs text-gray-400">
-            Documentation complète : voir <code className="mx-1 rounded bg-gray-100 px-1">supabase/API_DOCUMENTATION.md</code> dans le dépôt.
+            Documentation complète : <Link to="/docs/api" target="_blank" className="font-medium text-coral-600 hover:underline">Référence de l'API</Link> (endpoints, exemples de code, vérification de signature).
           </p>
         </Card>
       ) : (
@@ -162,6 +171,18 @@ export function Developers() {
                     <p className="text-xs text-gray-500 break-all">{w.url}</p>
                     <div className="mt-1 flex flex-wrap gap-1">
                       {w.events.map(ev => <Badge key={ev} color="blue">{EVENTS.find(e => e.value === ev)?.label || ev}</Badge>)}
+                    </div>
+                    <div className="mt-2 flex items-center gap-2">
+                      <span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">Secret de signature</span>
+                      <code className="rounded bg-gray-50 px-1.5 py-0.5 text-xs text-gray-600">
+                        {revealedSecrets[w.id] ? w.secret : '••••••••••••••••••••••••••••••••'}
+                      </code>
+                      <button onClick={() => setRevealedSecrets(prev => ({ ...prev, [w.id]: !prev[w.id] }))} className="text-gray-400 hover:text-gray-700" title={revealedSecrets[w.id] ? 'Masquer' : 'Afficher'}>
+                        {revealedSecrets[w.id] ? <EyeOff size={13} /> : <Eye size={13} />}
+                      </button>
+                      <button onClick={() => copySecret(w)} className="text-gray-400 hover:text-gray-700" title="Copier">
+                        {copiedSecretFor === w.id ? <Check size={13} className="text-mint-600" /> : <Copy size={13} />}
+                      </button>
                     </div>
                   </div>
                   <div className="flex items-center gap-1">

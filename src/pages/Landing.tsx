@@ -25,6 +25,7 @@ export function Footer({ onManageCookies }: { onManageCookies?: () => void }) {
               <li><Link to="/pricing" className="hover:text-blue-700">{t('nav.pricing')}</Link></li>
               <li><a href="#features" className="hover:text-blue-700">{t('nav.features')}</a></li>
               <li><a href="#faq" className="hover:text-blue-700">{t('nav.faq')}</a></li>
+              <li><Link to="/docs/api" className="hover:text-blue-700">{t('footer.apiDocs')}</Link></li>
               <li><Link to="/about" className="hover:text-blue-700">{t('footer.about')}</Link></li>
             </ul>
           </div>

@@ -107,11 +107,25 @@ Trigger), copiez son URL, collez-la dans CRM-One.
 }
 ```
 
-## Vérifier l'authenticité (optionnel mais recommandé)
+## Vérifier l'authenticité (recommandé)
 
 Chaque requête inclut un header `X-CRM-Signature` : HMAC-SHA256 du corps JSON brut, signé avec
-le secret unique du webhook (non affiché dans l'UI pour l'instant — contactez le support si vous
-avez besoin de le récupérer pour vérifier la signature côté récepteur).
+le secret unique du webhook. Récupérez ce secret dans **API & Webhooks → Webhooks** → icône œil
+à côté de "Secret de signature" (masqué par défaut, visible et copiable à tout moment — ce n'est
+pas un secret à usage unique comme une clé API).
+
+Exemple de vérification côté récepteur (Node.js) :
+```js
+const crypto = require('crypto');
+
+function isValidSignature(rawBody, signatureHeader, secret) {
+  const expected = crypto.createHmac('sha256', secret).update(rawBody).digest('hex');
+  return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signatureHeader));
+}
+```
+Utilisez toujours le corps **brut** de la requête (avant tout `JSON.parse`) pour calculer la
+signature — un corps re-sérialisé peut différer octet pour octet (ordre des clés, espacement) et
+faire échouer la vérification même si le contenu est identique.
 
 ## Déploiement (côté administrateur Supabase)
 

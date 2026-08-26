@@ -19,6 +19,7 @@ const MfaChallenge = lazy(() => import('./pages/MfaChallenge').then(m => ({ defa
 const Signup = lazy(() => import('./pages/Signup').then(m => ({ default: m.Signup })));
 const Onboarding = lazy(() => import('./pages/Onboarding').then(m => ({ default: m.Onboarding })));
 const LegalPage = lazy(() => import('./pages/LegalPage').then(m => ({ default: m.LegalPage })));
+const ApiDocs = lazy(() => import('./pages/ApiDocs').then(m => ({ default: m.ApiDocs })));
 
 const Dashboard = lazy(() => import('./pages/modules/Dashboard').then(m => ({ default: m.Dashboard })));
 const Pipeline = lazy(() => import('./pages/modules/Pipeline').then(m => ({ default: m.Pipeline })));
@@ -85,6 +86,7 @@ export default function App() {
             <Route path="/cgu" element={<LegalPage type="cgu" />} />
             <Route path="/about" element={<LegalPage type="about" />} />
             <Route path="/contact" element={<LegalPage type="contact" />} />
+            <Route path="/docs/api" element={<ApiDocs />} />
             <Route path="/help/:tenantId" element={<PublicKnowledgeBase />} />
             <Route path="/f/:formId" element={<PublicWebForm />} />
             <Route path="/login" element={<PublicOnly><Login /></PublicOnly>} />
