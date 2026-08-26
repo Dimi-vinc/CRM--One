@@ -36,9 +36,18 @@ triggers sur `contacts`, `deals`, `activities`.
 
 ## 4. Déployer les fonctions Edge et leurs secrets
 
+⚠️ **`--no-verify-jwt` est obligatoire pour les deux fonctions ci-dessous.** `automations-dispatch`
+est appelée par un trigger PostgreSQL (via `pg_net`) qui envoie `Authorization: Bearer
+<AUTOMATION_DISPATCH_SECRET>` — ce n'est PAS un jeton Supabase valide, donc sans ce flag, Supabase
+rejette l'appel avec une 401 au niveau de la passerelle, avant même que la fonction ne vérifie
+elle-même ce secret. `automations-cron` est appelée par le planificateur (Schedule) — même
+précaution par sécurité. Sans ce flag, **le moteur d'automatisations entier ne s'exécute jamais**,
+silencieusement (le `EXCEPTION WHEN OTHERS THEN NULL` du trigger avale l'erreur pour ne jamais
+bloquer l'écriture CRM sous-jacente — vous ne verriez donc aucune erreur visible nulle part).
+
 ```bash
-supabase functions deploy automations-dispatch
-supabase functions deploy automations-cron
+supabase functions deploy automations-dispatch --no-verify-jwt
+supabase functions deploy automations-cron --no-verify-jwt
 
 supabase secrets set RESEND_API_KEY=re_xxxxxxxx
 supabase secrets set AUTOMATION_DISPATCH_SECRET=<le secret généré à l'étape 2>

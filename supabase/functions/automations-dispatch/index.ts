@@ -1,3 +1,6 @@
+// DEPLOY WITH: supabase functions deploy automations-dispatch --no-verify-jwt
+// Required because called via pg_net with a raw shared secret (AUTOMATION_DISPATCH_SECRET), not a Supabase JWT. Without this flag, Supabase's gateway rejects every call with a
+// 401 before this function's own code ever runs — a failure that won't show up in these logs.
 // Automations dispatch Edge Function
 // Called (async, fire-and-forget) by DB triggers via pg_net whenever a row-based automation
 // event happens. Looks up active automations matching the tenant + trigger.

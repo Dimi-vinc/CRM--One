@@ -115,9 +115,17 @@ avez besoin de le récupérer pour vérifier la signature côté récepteur).
 
 ## Déploiement (côté administrateur Supabase)
 
+⚠️ **`--no-verify-jwt` est obligatoire pour les deux fonctions ci-dessous**, sinon Supabase
+rejette leurs appels avant même que leur propre code ne s'exécute :
+- `api-v1` est appelée par des développeurs tiers avec `Authorization: Bearer <clé API CRM-One>`
+  — ce n'est pas un jeton Supabase, donc la vérification JWT par défaut la bloquerait.
+- `webhook-dispatch` est appelée par un trigger PostgreSQL (`pg_net`) avec un secret partagé
+  (`Authorization: Bearer <dispatch_secret>`), même situation que `automations-dispatch` (voir
+  `AUTOMATIONS_SETUP.md`).
+
 ```bash
-supabase functions deploy api-v1
-supabase functions deploy webhook-dispatch
+supabase functions deploy api-v1 --no-verify-jwt
+supabase functions deploy webhook-dispatch --no-verify-jwt
 ```
 
 Puis, dans le SQL Editor, complétez la configuration existante des automatisations avec l'URL de

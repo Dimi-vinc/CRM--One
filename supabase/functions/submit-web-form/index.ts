@@ -1,3 +1,6 @@
+// DEPLOY WITH: supabase functions deploy submit-web-form --no-verify-jwt
+// Required because called by anonymous public website visitors — no Supabase session exists. Without this flag, Supabase's gateway rejects every call with a
+// 401 before this function's own code ever runs — a failure that won't show up in these logs.
 // Submit Web Form Edge Function
 // Public, anonymous-callable: a visitor filling out an embedded form has no CRM login. Uses the
 // service role internally — this function IS the security boundary, validating the form is

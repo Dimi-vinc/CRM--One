@@ -1,3 +1,6 @@
+// DEPLOY WITH: supabase functions deploy webhook-dispatch --no-verify-jwt
+// Required because called via pg_net with a raw shared secret (dispatch_secret), not a Supabase JWT. Without this flag, Supabase's gateway rejects every call with a
+// 401 before this function's own code ever runs — a failure that won't show up in these logs.
 // Webhook Dispatch Edge Function
 // Called (async, fire-and-forget) by DB triggers via pg_net whenever a CRM event happens.
 // Delivers the event to every active webhook the tenant configured for it — this is what makes

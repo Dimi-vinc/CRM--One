@@ -1,3 +1,6 @@
+// DEPLOY WITH: supabase functions deploy api-v1 --no-verify-jwt
+// Required because external developers authenticate with a custom API key, not a Supabase JWT. Without this flag, Supabase's gateway rejects every call with a
+// 401 before this function's own code ever runs — a failure that won't show up in these logs.
 // Public API Gateway (v1)
 // Authenticated via `Authorization: Bearer <api_key>` (generated in Paramètres → API & Webhooks),
 // NOT a Supabase session — this is what lets external tools (Zapier "Webhooks/API Request"

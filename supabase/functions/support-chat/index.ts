@@ -1,3 +1,6 @@
+// DEPLOY WITH: supabase functions deploy support-chat --no-verify-jwt
+// Required because called by anonymous public website visitors — no Supabase session exists. Without this flag, Supabase's gateway rejects every call with a
+// 401 before this function's own code ever runs — a failure that won't show up in these logs.
 // Support Chat Edge Function — free real AI via Groq (Llama 3.3), grounded in the tenant's own
 // public Knowledge Base articles (lightweight RAG: relevant articles are fetched by keyword
 // match and injected into the system prompt). No login required — this powers the public

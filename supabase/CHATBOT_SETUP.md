@@ -22,9 +22,15 @@ Deux fonctionnalités partagent la même clé Groq gratuite :
 
 ## 2. Déployer les fonctions et configurer le secret
 
+⚠️ **`--no-verify-jwt` est obligatoire pour les deux fonctions ci-dessous.** Elles sont appelées
+par des visiteurs anonymes depuis le portail public d'aide (`/help/:tenantId`) — personne n'est
+connecté à ce moment-là, donc il n'y a aucun jeton Supabase à vérifier. Sans ce flag, Supabase
+rejette systématiquement l'appel avec une 401, et le widget de chat/ticket public ne fonctionne
+jamais, sans qu'aucune erreur applicative n'apparaisse dans vos logs.
+
 ```bash
-supabase functions deploy support-chat
-supabase functions deploy create-public-ticket
+supabase functions deploy support-chat --no-verify-jwt
+supabase functions deploy create-public-ticket --no-verify-jwt
 supabase secrets set GROQ_API_KEY=gsk_xxxxxxxxxxxxxxxxxxxxx
 ```
 

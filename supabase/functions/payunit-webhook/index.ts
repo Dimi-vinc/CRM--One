@@ -1,3 +1,6 @@
+// DEPLOY WITH: supabase functions deploy payunit-webhook --no-verify-jwt
+// Required because PayUnit calls this directly from its servers — no Supabase JWT is ever present. Without this flag, Supabase's gateway rejects every call with a
+// 401 before this function's own code ever runs — a failure that won't show up in these logs.
 // PayUnit Webhook (notify_url) Edge Function.
 // PayUnit's documented notify payload isn't a signed request (no HMAC secret to check, unlike
 // Stripe), so — same defensive pattern as flutterwave-webhook — we treat the incoming POST as

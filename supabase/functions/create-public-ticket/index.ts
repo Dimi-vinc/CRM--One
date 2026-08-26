@@ -1,3 +1,6 @@
+// DEPLOY WITH: supabase functions deploy create-public-ticket --no-verify-jwt
+// Required because called by anonymous public website visitors — no Supabase session exists. Without this flag, Supabase's gateway rejects every call with a
+// 401 before this function's own code ever runs — a failure that won't show up in these logs.
 // Create Public Ticket Edge Function
 // Lets an anonymous website visitor (not logged into the CRM) file a support ticket from the
 // public Knowledge Base / chatbot widget. Uses the service role internally since anonymous

@@ -39,8 +39,8 @@ supabase db push
 
 ```powershell
 supabase functions deploy create-email-oauth-state
-supabase functions deploy gmail-oauth-callback
-supabase functions deploy outlook-oauth-callback
+supabase functions deploy gmail-oauth-callback --no-verify-jwt
+supabase functions deploy outlook-oauth-callback --no-verify-jwt
 supabase functions deploy email-connection-status
 supabase functions deploy disconnect-email
 supabase functions deploy send-connected-email
@@ -49,7 +49,17 @@ supabase functions deploy stripe-portal
 supabase functions deploy stripe-webhook --no-verify-jwt
 supabase functions deploy flutterwave-checkout
 supabase functions deploy flutterwave-webhook --no-verify-jwt
+supabase functions deploy submit-web-form --no-verify-jwt
 ```
+
+⚠️ `--no-verify-jwt` est requis partout ci-dessus où la fonction est appelée par quelque chose
+d'autre qu'une session utilisateur connectée (webhook de paiement, redirection OAuth d'un
+fournisseur, ou visiteur anonyme remplissant un formulaire public) — sans ce flag, Supabase
+rejette l'appel avec une 401 avant même d'exécuter le code de la fonction. Pour les autres
+fonctions du projet (automatisations, API publique, chatbot/tickets publics, PayUnit,
+intégrations), voir `AUTOMATIONS_SETUP.md`, `API_DOCUMENTATION.md`, `CHATBOT_SETUP.md`,
+`STRIPE_FLUTTERWAVE_SETUP.md` et `INTEGRATIONS_SETUP.md`, qui documentent chacune le flag exact
+requis pour leurs propres fonctions.
 
 3. Configurez les secrets uniquement côté Supabase. Ne placez jamais ces valeurs dans Cloudflare ni dans le frontend :
 

@@ -1,3 +1,6 @@
+// DEPLOY WITH: supabase functions deploy flutterwave-webhook --no-verify-jwt
+// Required because Flutterwave calls this directly from its servers — no Supabase JWT is ever present. Without this flag, Supabase's gateway rejects every call with a
+// 401 before this function's own code ever runs — a failure that won't show up in these logs.
 // Flutterwave Webhook Edge Function
 // Verifies the webhook signature AND re-verifies the transaction directly with Flutterwave's
 // API before trusting it (defense in depth — never trust a webhook payload's amount/status

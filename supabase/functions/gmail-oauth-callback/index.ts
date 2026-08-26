@@ -1,3 +1,6 @@
+// DEPLOY WITH: supabase functions deploy gmail-oauth-callback --no-verify-jwt
+// Required because reached via a plain browser redirect from Google — no Authorization header is attached. Without this flag, Supabase's gateway rejects every call with a
+// 401 before this function's own code ever runs — a failure that won't show up in these logs.
 // Gmail OAuth Callback Edge Function
 // Google redirects the user's browser here after they approve access, with `code` and `state`
 // query params. `state` carries the user's own Supabase access token (base64-encoded) so this

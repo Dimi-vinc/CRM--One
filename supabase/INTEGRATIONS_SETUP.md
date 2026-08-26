@@ -46,9 +46,14 @@ PayUnit ailleurs dans ce SaaS.
 4. Déployez les deux fonctions génériques une seule fois (elles servent tous les fournisseurs) :
    ```bash
    supabase functions deploy oauth-integration-start
-   supabase functions deploy oauth-integration-callback
+   supabase functions deploy oauth-integration-callback --no-verify-jwt
    supabase functions deploy save-integration-key
    ```
+   ⚠️ `--no-verify-jwt` est obligatoire pour `oauth-integration-callback` : comme
+   `gmail-oauth-callback`/`outlook-oauth-callback`, elle est atteinte par une redirection brute du
+   navigateur depuis le fournisseur OAuth, sans jeton Supabase attaché. Sans ce flag, Supabase la
+   rejette avec une 401 avant même que son code ne s'exécute, et "Connecter" échoue
+   systématiquement sans erreur visible.
 
 ### ⚠️ À vérifier avant mise en production
 Les endpoints OAuth de `_shared/oauth-providers.ts` utilisent les URLs standards documentées par

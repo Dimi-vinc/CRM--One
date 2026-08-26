@@ -40,8 +40,10 @@ supabase secrets set TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
 ## 5. Redéployer la fonction
 
 ```bash
-supabase functions deploy automations-dispatch
+supabase functions deploy automations-dispatch --no-verify-jwt
 ```
+(voir `AUTOMATIONS_SETUP.md` pour l'explication : ce flag est obligatoire, la fonction est
+appelée par un trigger PostgreSQL avec un secret partagé, pas un jeton Supabase.)
 
 ## 6. Chaque administrateur doit renseigner son numéro
 

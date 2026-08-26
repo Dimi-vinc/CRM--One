@@ -22,9 +22,15 @@ peut activer un plan.** La page Billing attend juste la confirmation.
 ```bash
 supabase functions deploy stripe-checkout
 supabase functions deploy stripe-portal
-supabase functions deploy stripe-webhook
+supabase functions deploy stripe-webhook --no-verify-jwt
 supabase secrets set STRIPE_SECRET_KEY=sk_test_xxxxxxxxxxxxx
 ```
+⚠️ **`--no-verify-jwt` est obligatoire pour `stripe-webhook`.** Stripe appelle cette fonction
+directement depuis ses serveurs, sans jeton Supabase — sans ce flag, la passerelle Supabase
+rejette l'appel avec une 401 *avant même* que le code de la fonction ne s'exécute (vous ne
+verriez même pas l'erreur dans les logs de la fonction). `stripe-checkout` et `stripe-portal`
+n'en ont pas besoin : ils sont appelés depuis votre propre frontend avec le jeton de l'utilisateur
+connecté.
 
 ### c. Créer le webhook
 1. **Developers → Webhooks → Add endpoint**.
@@ -55,7 +61,7 @@ différents entre Test et Live).
 ### b. Déployer les fonctions
 ```bash
 supabase functions deploy flutterwave-checkout
-supabase functions deploy flutterwave-webhook
+supabase functions deploy flutterwave-webhook --no-verify-jwt
 supabase secrets set FLW_SECRET_KEY=FLWSECK_TEST-xxxxxxxxxxxxx
 ```
 
@@ -85,6 +91,14 @@ documentation (https://developer.flutterwave.com/docs/integration-guides/testing
 
 ## 3. PayUnit (premier PSP validé pour la mise en production)
 
+⚠️ **Cause la plus fréquente d'un webhook qui ne fonctionne jamais** : Supabase exige par défaut
+un jeton (JWT) valide sur CHAQUE appel à une Edge Function. PayUnit (comme Stripe et Flutterwave)
+appelle votre fonction `payunit-webhook` directement depuis ses serveurs, sans jeton Supabase —
+sans le flag `--no-verify-jwt` au déploiement (voir étape b ci-dessous), Supabase **rejette
+l'appel avec une erreur 401 avant même que le code de la fonction ne s'exécute**. Ce genre
+d'échec n'apparaît même pas dans les logs applicatifs de la fonction, ce qui le rend difficile à
+diagnostiquer sans le savoir à l'avance.
+
 Agrégateur de paiement donnant accès aux cartes bancaires, au Mobile Money et à d'autres moyens
 de paiement internationaux — pas limité à une seule région. La couverture exacte (pays, devises,
 moyens de paiement) dépend du compte marchand activé par PayUnit ; vérifiez votre contrat/
@@ -99,7 +113,7 @@ tableau de bord PayUnit pour la liste à jour.
 ### b. Déployer les fonctions
 ```bash
 supabase functions deploy payunit-checkout
-supabase functions deploy payunit-webhook
+supabase functions deploy payunit-webhook --no-verify-jwt
 supabase secrets set PAYUNIT_API_KEY=test_xxxxxxxxxxxxx
 supabase secrets set PAYUNIT_API_USERNAME=xxxxxxxxxxxxx
 supabase secrets set PAYUNIT_API_PASSWORD=xxxxxxxxxxxxx
@@ -132,19 +146,34 @@ documentation (https://developer.payunit.net/getting-started) avant de passer `P
 `live`.
 
 ### ⚠️ Étape critique avant le lancement : vérifier le webhook avec une vraie transaction test
-La documentation PayUnit n'est pas totalement cohérente sur le nom exact du champ qui transporte
-votre `transaction_id` dans la notification envoyée à `notify_url` (`transaction_id` vs `t_id`,
-au niveau racine ou imbriqué sous `data`). Le code de `payunit-webhook` vérifie déjà toutes les
-variantes plausibles, mais **avant de considérer PayUnit prêt pour de vrais paiements** :
+Deux problèmes distincts peuvent empêcher un webhook de fonctionner — vérifiez-les dans cet
+ordre :
+
+**0. Le déploiement a-t-il bien inclus `--no-verify-jwt` ?** Si vous avez déployé
+`payunit-webhook` sans ce flag (ou redéployé depuis le dashboard Supabase, qui ne l'applique pas
+automatiquement), chaque appel de PayUnit échoue avec une 401 au niveau de la passerelle, invisible
+dans les logs de la fonction elle-même. Dans le dashboard Supabase → Edge Functions →
+`payunit-webhook` → onglet **Logs**, si vous ne voyez STRICTEMENT AUCUNE invocation malgré un
+paiement test terminé, c'est le symptôme classique de ce problème — redéployez avec :
+```bash
+supabase functions deploy payunit-webhook --no-verify-jwt
+```
+
+**1. Le nom du champ transaction_id.** La documentation PayUnit n'est pas totalement cohérente
+sur le nom exact du champ qui transporte votre `transaction_id` dans la notification envoyée à
+`notify_url` (`transaction_id` vs `t_id`, au niveau racine ou imbriqué sous `data`). Le code de
+`payunit-webhook` vérifie déjà toutes les variantes plausibles, mais **avant de considérer
+PayUnit prêt pour de vrais paiements** :
 1. Faites un paiement de test complet en mode `test`.
 2. Dans le tableau de bord Supabase → Edge Functions → `payunit-webhook` → Logs, vérifiez que la
-   fonction a bien reçu l'appel et trouvé une ligne correspondante dans `payunit_transactions`
-   (pas de `{"received": true, "ignored": true}` — cette réponse signifie que le `transaction_id`
-   n'a pas été retrouvé).
+   fonction a bien reçu l'appel (donc que le point 0 ci-dessus est correct) et trouvé une ligne
+   correspondante dans `payunit_transactions` (pas de `{"received": true, "ignored": true}` —
+   cette réponse signifie que le `transaction_id` n'a pas été retrouvé).
 3. Vérifiez dans la table `payunit_transactions` que la ligne passe bien à `status = 'confirmed'`
    et que le tenant a bien été activé sur le bon plan.
-Si l'étape 2 montre un payload "ignored", ouvrez `supabase/functions/payunit-webhook/index.ts` et
-ajoutez le nom de champ réel observé dans les logs à la liste de repli.
+Si l'étape 2 montre un payload "ignored" (et que le point 0 est bien correct), ouvrez
+`supabase/functions/payunit-webhook/index.ts` et ajoutez le nom de champ réel observé dans les
+logs à la liste de repli.
 
 ---
 

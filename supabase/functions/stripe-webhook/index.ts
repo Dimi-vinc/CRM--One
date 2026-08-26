@@ -1,3 +1,6 @@
+// DEPLOY WITH: supabase functions deploy stripe-webhook --no-verify-jwt
+// Required because Stripe calls this directly from its servers — no Supabase JWT is ever present. Without this flag, Supabase's gateway rejects every call with a
+// 401 before this function's own code ever runs — a failure that won't show up in these logs.
 // Stripe Webhook Edge Function
 // This is the ONLY place that should ever mark a tenant/subscription as paid. The previous
 // client-side code did this from a URL query param (?status=success), which was a full

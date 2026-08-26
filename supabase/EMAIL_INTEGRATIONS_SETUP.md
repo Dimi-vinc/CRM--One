@@ -30,9 +30,16 @@ connecté, les emails aux contacts partent depuis sa vraie adresse, pas depuis u
 
 ## 3. Configurer les secrets Supabase (côté serveur)
 
+⚠️ **`--no-verify-jwt` est obligatoire pour `gmail-oauth-callback` et
+`outlook-oauth-callback`.** Ces deux fonctions sont atteintes par une redirection brute du
+navigateur depuis Google/Microsoft après le consentement OAuth — aucun jeton Supabase n'est
+attaché à cette requête. Sans ce flag, Supabase rejette la redirection avec une 401 avant même
+que le code de la fonction ne s'exécute, et la connexion Gmail/Outlook échoue systématiquement
+sans erreur visible côté application.
+
 ```bash
-supabase functions deploy gmail-oauth-callback
-supabase functions deploy outlook-oauth-callback
+supabase functions deploy gmail-oauth-callback --no-verify-jwt
+supabase functions deploy outlook-oauth-callback --no-verify-jwt
 supabase functions deploy email-connection-status
 supabase functions deploy disconnect-email
 supabase functions deploy send-connected-email

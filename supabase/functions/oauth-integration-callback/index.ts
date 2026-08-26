@@ -1,3 +1,6 @@
+// DEPLOY WITH: supabase functions deploy oauth-integration-callback --no-verify-jwt
+// Required because reached via a plain browser redirect from the OAuth provider — no Authorization header is attached. Without this flag, Supabase's gateway rejects every call with a
+// 401 before this function's own code ever runs — a failure that won't show up in these logs.
 // Generic OAuth callback: exchanges the authorization code for tokens and stores the connection
 // in integration_connections. Mirrors gmail-oauth-callback/outlook-oauth-callback's pattern
 // exactly (verify the access token via auth.getUser(token) before trusting anything from state).

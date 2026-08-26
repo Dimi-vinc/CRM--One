@@ -1,3 +1,6 @@
+// DEPLOY WITH: supabase functions deploy outlook-oauth-callback --no-verify-jwt
+// Required because reached via a plain browser redirect from Microsoft — no Authorization header is attached. Without this flag, Supabase's gateway rejects every call with a
+// 401 before this function's own code ever runs — a failure that won't show up in these logs.
 // Outlook OAuth Callback Edge Function — same pattern as gmail-oauth-callback, via Microsoft
 // identity platform + Graph API.
 //
