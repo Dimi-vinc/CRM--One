@@ -62,6 +62,7 @@ export function Territories() {
   };
 
   const removeTerritory = async (id: string) => {
+    if (!confirm('Supprimer ce territoire ?')) return;
     setTerritories(prev => prev.filter(t => t.id !== id));
     await supabase.from('sales_territories').delete().eq('id', id);
   };

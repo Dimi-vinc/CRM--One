@@ -6,7 +6,26 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
 
-import { computeLeadScoreValue } from "../_shared/lead-scoring.ts";
+// Lead scoring formula. MUST stay in sync with src/lib/leadScoring.ts's WEIGHTS and computation
+// exactly — duplicated inline (not imported from a shared folder) because Supabase's function
+// bundler has a known, currently-active issue resolving relative imports into `_shared/` folders
+// in some deployment paths, producing a "Module not found ... _shared/..." error at deploy time
+// even when the file is present. If you change the weights in src/lib/leadScoring.ts, mirror the
+// change here too.
+const LEAD_SCORE_WEIGHTS = { hasEmail: 20, hasPhone: 15, hasCompany: 15, hasActivity: 25, hasDeal: 25 };
+function computeLeadScoreValue(
+  contact: { email?: string | null; phone?: string | null; company_id?: string | null },
+  hasActivity: boolean,
+  hasDeal: boolean,
+): number {
+  let score = 0;
+  if (contact.email) score += LEAD_SCORE_WEIGHTS.hasEmail;
+  if (contact.phone) score += LEAD_SCORE_WEIGHTS.hasPhone;
+  if (contact.company_id) score += LEAD_SCORE_WEIGHTS.hasCompany;
+  if (hasActivity) score += LEAD_SCORE_WEIGHTS.hasActivity;
+  if (hasDeal) score += LEAD_SCORE_WEIGHTS.hasDeal;
+  return score;
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",

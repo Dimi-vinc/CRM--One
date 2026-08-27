@@ -144,8 +144,8 @@ export function QuotesInvoices() {
     setTab('invoices');
   };
 
-  const deleteQuote = async (id: string) => { setQuotes(prev => prev.filter(x => x.id !== id)); await supabase.from('quotes').delete().eq('id', id); };
-  const deleteInvoice = async (id: string) => { setInvoices(prev => prev.filter(x => x.id !== id)); await supabase.from('invoices').delete().eq('id', id); };
+  const deleteQuote = async (id: string) => { if (!confirm('Supprimer ce devis ?')) return; setQuotes(prev => prev.filter(x => x.id !== id)); await supabase.from('quotes').delete().eq('id', id); };
+  const deleteInvoice = async (id: string) => { if (!confirm('Supprimer cette facture ?')) return; setInvoices(prev => prev.filter(x => x.id !== id)); await supabase.from('invoices').delete().eq('id', id); };
 
   const totals = useMemo(() => computeTotal(form.lines), [form.lines]);
 

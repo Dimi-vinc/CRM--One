@@ -42,6 +42,7 @@ export function Tasks() {
   };
 
   const remove = async (id: string) => {
+    if (!confirm('Supprimer cette tâche ?')) return;
     setItems(prev => prev.filter(x => x.id !== id));
     await supabase.from('tasks').delete().eq('id', id);
   };

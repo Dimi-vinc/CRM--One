@@ -41,6 +41,7 @@ export function Activities() {
   };
 
   const remove = async (id: string) => {
+    if (!confirm('Supprimer cette activité ?')) return;
     setItems(prev => prev.filter(x => x.id !== id));
     await supabase.from('activities').delete().eq('id', id);
   };

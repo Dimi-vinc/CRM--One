@@ -104,6 +104,7 @@ export function Contacts() {
   };
 
   const remove = async (id: string) => {
+    if (!confirm('Supprimer ce contact ?')) return;
     setItems(prev => prev.filter(c => c.id !== id));
     await supabase.from('contacts').delete().eq('id', id);
   };

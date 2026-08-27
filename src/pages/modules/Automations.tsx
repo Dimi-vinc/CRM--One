@@ -147,6 +147,7 @@ export function Automations() {
   };
 
   const remove = async (id: string) => {
+    if (!confirm('Supprimer cette automatisation ?')) return;
     setItems(prev => prev.filter(x => x.id !== id));
     await supabase.from('automations').delete().eq('id', id);
   };

@@ -26,7 +26,9 @@ Gmail et Outlook utilisent déjà leurs propres fonctions dédiées (`gmail-oaut
 Toutes les autres intégrations OAuth (Slack, PayPal, Shopify, QuickBooks, Xero, Google
 Drive/Calendar/Meet, Notion, Asana, Trello, Zendesk, Intercom, Meta/Google/LinkedIn Ads, etc.)
 passent par un flux générique unique : `oauth-integration-start` + `oauth-integration-callback`,
-configuré par `supabase/functions/_shared/oauth-providers.ts`.
+configuré par la constante `OAUTH_PROVIDERS`, dupliquée en haut de `oauth-integration-start/index.ts`
+et `oauth-integration-callback/index.ts` (chacune a sa propre copie plutôt qu'un import partagé —
+voir la note en tête de ces fichiers).
 
 **Tant qu'aucune app n'est enregistrée pour un fournisseur, son bouton "Connecter" affiche un
 message clair ("non configuré") au lieu d'échouer silencieusement** — même principe que Stripe/
@@ -56,7 +58,8 @@ PayUnit ailleurs dans ce SaaS.
    systématiquement sans erreur visible.
 
 ### ⚠️ À vérifier avant mise en production
-Les endpoints OAuth de `_shared/oauth-providers.ts` utilisent les URLs standards documentées par
+Les endpoints OAuth (constante `OAUTH_PROVIDERS`, dupliquée en tête de `oauth-integration-start`
+et `oauth-integration-callback`) utilisent les URLs standards documentées par
 chaque fournisseur au moment de l'écriture. Certains ont des particularités (Shopify nécessite un
 sous-domaine par boutique, QuickBooks/Intuit un `realmId`, Trello utilise un flux de jeton hérité
 non-OAuth2 standard) — **vérifiez la documentation actuelle du fournisseur avant d'activer son

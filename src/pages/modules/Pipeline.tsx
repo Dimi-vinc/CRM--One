@@ -63,6 +63,7 @@ export function Pipeline() {
   };
 
   const remove = async (id: string) => {
+    if (!confirm('Supprimer ce deal ?')) return;
     setDeals(prev => prev.filter(d => d.id !== id));
     await supabase.from('deals').delete().eq('id', id);
   };

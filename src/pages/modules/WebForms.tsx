@@ -97,6 +97,7 @@ export function WebForms() {
     await supabase.from('web_forms').update({ is_active: !f.is_active }).eq('id', f.id);
   };
   const remove = async (id: string) => {
+    if (!confirm("Supprimer ce formulaire ? Les liens/embeds existants sur votre site cesseront de fonctionner.")) return;
     setItems(prev => prev.filter(x => x.id !== id));
     await supabase.from('web_forms').delete().eq('id', id);
   };

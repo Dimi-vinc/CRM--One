@@ -69,6 +69,7 @@ export function Documents() {
   };
 
   const remove = async (d: DocumentRow) => {
+    if (!confirm(`Supprimer "${d.name}" ?`)) return;
     setItems(prev => prev.filter(x => x.id !== d.id));
     await supabase.from('documents').delete().eq('id', d.id);
     if (d.url) await supabase.storage.from('documents').remove([d.url]);

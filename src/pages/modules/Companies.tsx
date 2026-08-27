@@ -79,6 +79,7 @@ export function Companies() {
   };
 
   const remove = async (id: string) => {
+    if (!confirm('Supprimer cette entreprise ?')) return;
     setItems(prev => prev.filter(c => c.id !== id));
     await supabase.from('companies').delete().eq('id', id);
   };

@@ -14,7 +14,56 @@
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
-import { assertWebhookUrlIsSafe } from "../_shared/webhook-safety.ts";
+// SSRF guard, inlined (not imported from a shared folder) because Supabase's function bundler
+// has a known, currently-active issue resolving relative imports into `_shared/` folders in some
+// deployment paths, producing a "Module not found ... _shared/..." error at deploy time even
+// when the file is present. See git history for the full design rationale (DNS resolution +
+// private-range checks, documented DNS-rebinding residual risk).
+function isPrivateOrReservedIPv4(ip: string): boolean {
+  const parts = ip.split(".").map(Number);
+  if (parts.length !== 4 || parts.some(n => Number.isNaN(n) || n < 0 || n > 255)) return false;
+  const [a, b] = parts;
+  if (a === 10) return true;
+  if (a === 127) return true;
+  if (a === 0) return true;
+  if (a === 169 && b === 254) return true;
+  if (a === 172 && b >= 16 && b <= 31) return true;
+  if (a === 192 && b === 168) return true;
+  if (a === 100 && b >= 64 && b <= 127) return true;
+  return false;
+}
+function isPrivateOrReservedIPv6(ip: string): boolean {
+  const lower = ip.toLowerCase();
+  if (lower === "::1") return true;
+  if (lower.startsWith("fc") || lower.startsWith("fd")) return true;
+  if (lower.startsWith("fe80")) return true;
+  if (lower.startsWith("::ffff:")) return isPrivateOrReservedIPv4(lower.slice(7));
+  return false;
+}
+async function assertWebhookUrlIsSafe(rawUrl: string): Promise<{ safe: boolean; reason?: string }> {
+  let parsed: URL;
+  try { parsed = new URL(rawUrl); } catch { return { safe: false, reason: "URL invalide" }; }
+  if (parsed.protocol !== "https:") return { safe: false, reason: "Seules les URLs https:// sont autorisées" };
+  const hostname = parsed.hostname;
+  if (hostname === "localhost" || hostname.endsWith(".localhost") || hostname.endsWith(".local")) {
+    return { safe: false, reason: "Adresse locale non autorisée" };
+  }
+  if (isPrivateOrReservedIPv4(hostname) || isPrivateOrReservedIPv6(hostname.replace(/^\[|\]$/g, ""))) {
+    return { safe: false, reason: "Adresse IP privée/interne non autorisée" };
+  }
+  try {
+    const records = await Deno.resolveDns(hostname, "A").catch(() => []);
+    const recordsV6 = await Deno.resolveDns(hostname, "AAAA").catch(() => []);
+    for (const ip of [...records, ...recordsV6]) {
+      if (isPrivateOrReservedIPv4(ip) || isPrivateOrReservedIPv6(ip)) {
+        return { safe: false, reason: "Ce nom de domaine pointe vers une adresse interne" };
+      }
+    }
+  } catch {
+    return { safe: false, reason: "Impossible de vérifier la destination de cette URL" };
+  }
+  return { safe: true };
+}
 
 const corsHeaders = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "POST, OPTIONS" };
 

@@ -135,10 +135,10 @@ du mois suivant reste à automatiser séparément.
 
 ### e. Devise
 La fonction convertit toujours correctement le prix vers la devise choisie par le tenant (voir
-`supabase/functions/_shared/currency-rates.ts`). La liste exacte des devises réellement
-supportées dépend de votre compte marchand PayUnit — si une devise n'est pas prise en charge,
-PayUnit renverra une erreur claire au lieu d'un montant erroné. Vérifiez avec PayUnit la liste
-complète des devises/pays activés sur votre compte avant le lancement.
+la fonction `convertUsdTo()` en tête de `payunit-checkout/index.ts`). La liste exacte des devises
+réellement supportées dépend de votre compte marchand PayUnit — si une devise n'est pas prise en
+charge, PayUnit renverra une erreur claire au lieu d'un montant erroné. Vérifiez avec PayUnit la
+liste complète des devises/pays activés sur votre compte avant le lancement.
 
 ### f. Tester
 Utilisez le mode Test PayUnit et leurs identifiants de test Mobile Money fournis dans leur
