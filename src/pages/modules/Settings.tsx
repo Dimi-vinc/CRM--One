@@ -6,6 +6,7 @@ import { useLanguage, type Lang } from '../../context/LanguageContext';
 import { PageHeader, Card, Button, Input, Select, Avatar } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
 import { COUNTRIES, CURRENCIES } from '../../lib/constants';
+import { setManualProviderChoice } from '../../lib/payments';
 
 interface EmailConnection { provider: 'gmail' | 'outlook'; email_address: string }
 
@@ -78,9 +79,10 @@ export function Settings() {
 
   const isAdmin = profile?.role === 'admin';
 
-  useEffect(() => {
-    localStorage.setItem('crm_payment_provider', paymentProvider);
-  }, [paymentProvider]);
+  const choosePaymentProvider = (provider: 'stripe' | 'flutterwave' | 'payunit') => {
+    setPaymentProvider(provider);
+    setManualProviderChoice(provider);
+  };
 
   const loadConnections = useCallback(async () => {
     setConnLoading(true);
@@ -307,7 +309,7 @@ export function Settings() {
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
             <button
               type="button"
-              onClick={() => setPaymentProvider('stripe')}
+              onClick={() => choosePaymentProvider('stripe')}
               className={`rounded-xl border p-4 text-left transition-all ${paymentProvider === 'stripe' ? 'border-coral-500 ring-2 ring-coral-100 bg-coral-50/10' : 'border-gray-200 hover:bg-gray-50'}`}
             >
               <p className="font-semibold text-gray-900">Stripe</p>
@@ -315,7 +317,7 @@ export function Settings() {
             </button>
             <button
               type="button"
-              onClick={() => setPaymentProvider('flutterwave')}
+              onClick={() => choosePaymentProvider('flutterwave')}
               className={`rounded-xl border p-4 text-left transition-all ${paymentProvider === 'flutterwave' ? 'border-coral-500 ring-2 ring-coral-100 bg-coral-50/10' : 'border-gray-200 hover:bg-gray-50'}`}
             >
               <p className="font-semibold text-gray-900">Flutterwave</p>
@@ -323,7 +325,7 @@ export function Settings() {
             </button>
             <button
               type="button"
-              onClick={() => setPaymentProvider('payunit')}
+              onClick={() => choosePaymentProvider('payunit')}
               className={`rounded-xl border p-4 text-left transition-all ${paymentProvider === 'payunit' ? 'border-coral-500 ring-2 ring-coral-100 bg-coral-50/10' : 'border-gray-200 hover:bg-gray-50'}`}
             >
               <p className="font-semibold text-gray-900">PayUnit</p>

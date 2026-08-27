@@ -1,9 +1,10 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Building2, CheckCircle2, Globe2, Phone, Mail, ShieldCheck, Lock, KeyRound } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { LanguageSelector } from '../components/LanguageSelector';
-import { PLATFORM_NAME, PLATFORM_VENDOR, FAQ_ITEMS, PLANS } from '../lib/constants';
+import { PLATFORM_NAME, PLATFORM_VENDOR, FAQ_ITEMS, PLANS, guessVisitorCurrency, convertFromUsd } from '../lib/constants';
 import { formatMoney } from '../lib/utils';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -66,6 +67,7 @@ const stagger = {
 
 export function Landing() {
   const { t } = useLanguage();
+  const [displayCurrency] = useState(() => guessVisitorCurrency());
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -221,7 +223,7 @@ export function Landing() {
               >
                 {plan.highlight && <div className="mb-2 inline-flex w-fit rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800">{t('common.popular')}</div>}
                 <h3 className="text-lg font-bold text-gray-900">{plan.name}</h3>
-                <p className="mt-2"><span className="text-3xl font-bold text-gray-900">{formatMoney(plan.price, plan.currency)}</span><span className="text-sm text-gray-500">{t('common.perMonth')}</span></p>
+                <p className="mt-2"><span className="text-3xl font-bold text-gray-900">{formatMoney(displayCurrency === 'USD' ? plan.price : convertFromUsd(plan.price, displayCurrency), displayCurrency)}</span><span className="text-sm text-gray-500">{t('common.perMonth')}</span></p>
                 <ul className="mt-4 flex-1 space-y-2 text-sm text-gray-600">
                   {plan.features.map(f => <li key={f} className="flex gap-2"><CheckCircle2 size={16} className="mt-0.5 flex-shrink-0 text-blue-600" />{f}</li>)}
                 </ul>

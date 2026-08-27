@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Plus, GripVertical, Trash2, Search } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { PageHeader, Card, Button, Modal, Input, Select } from '../../components/ui';
@@ -14,6 +15,7 @@ export function Pipeline() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [modal, setModal] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
   const [form, setForm] = useState({ title: '', amount: '', currency_code: tenant?.currency_code || 'USD', stage: 'lead', contact_id: '', company_id: '', expected_close_date: '' });
 
@@ -43,6 +45,7 @@ export function Pipeline() {
 
   const createDeal = async () => {
     if (!tenant || !form.title.trim()) return;
+    setCreateError(null);
     const { data, error } = await supabase.from('deals').insert({
       tenant_id: tenant.id,
       title: form.title,
@@ -54,7 +57,8 @@ export function Pipeline() {
       expected_close_date: form.expected_close_date || null,
       owner_id: null,
     }).select().single();
-    if (!error && data) { setDeals(prev => [data, ...prev]); setModal(false); setForm({ title: '', amount: '', currency_code: tenant.currency_code, stage: 'lead', contact_id: '', company_id: '', expected_close_date: '' }); }
+    if (error) { setCreateError(error.message); return; }
+    if (data) { setDeals(prev => [data, ...prev]); setModal(false); setForm({ title: '', amount: '', currency_code: tenant.currency_code, stage: 'lead', contact_id: '', company_id: '', expected_close_date: '' }); }
   };
 
   const moveStage = async (id: string, stage: string) => {
@@ -73,7 +77,7 @@ export function Pipeline() {
       <PageHeader
         title="Pipeline"
         subtitle="Deals par étape. Glissez pour faire avancer."
-        actions={<Button onClick={() => setModal(true)}><Plus size={16} /> Nouveau deal</Button>}
+        actions={<Button onClick={() => { setCreateError(null); setModal(true); }}><Plus size={16} /> Nouveau deal</Button>}
       />
 
       <div className="mb-4 relative max-w-md">
@@ -151,6 +155,12 @@ export function Pipeline() {
             </Select>
           </div>
           <Input label="Date de clôture prévue" type="date" value={form.expected_close_date} onChange={e => setForm({ ...form, expected_close_date: e.target.value })} />
+          {createError && (
+            <div className="rounded-lg border border-red-100 bg-red-50 p-3 text-sm text-red-700">
+              {createError}
+              {createError.toLowerCase().includes('limite') && <Link to="/billing" className="ml-1 font-semibold underline">Voir les plans</Link>}
+            </div>
+          )}
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="secondary" onClick={() => setModal(false)}>Annuler</Button>
             <Button onClick={createDeal}>Créer</Button>

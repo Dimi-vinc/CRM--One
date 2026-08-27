@@ -5,9 +5,53 @@
 // for a plan+currency and get back a URL to redirect to. They never import Stripe directly.
 
 import { supabase } from './supabase';
-import { PLAN_BY_ID, CURRENCY_BY_CODE } from './constants';
+import { PLAN_BY_ID, CURRENCY_BY_CODE, COUNTRY_BY_CODE } from './constants';
 
 export type ProviderCode = 'stripe' | 'flutterwave' | 'payunit';
+
+/**
+ * Picks a sensible default payment provider for a tenant based on their country, WITHOUT
+ * overriding an explicit manual choice the person already made — see getPreferredProvider(),
+ * which is what callers should actually use.
+ *
+ * Rule: countries where mobile money is a real local payment method (driven by the existing
+ * COUNTRY_BY_CODE data, not a separately-maintained list that could drift out of sync) default
+ * to PayUnit — the first PSP validated for launch on this platform, which the tenant is likely to
+ * actually be able to pay with locally. Everywhere else defaults to Stripe. Flutterwave stays
+ * manually selectable but is never auto-picked, since only PayUnit and Stripe are confirmed live.
+ */
+export function defaultProviderForCountry(countryCode?: string | null): ProviderCode {
+  if (!countryCode) return 'stripe';
+  const country = COUNTRY_BY_CODE[countryCode];
+  if (country && country.mobileMoney.length > 0) return 'payunit';
+  return 'stripe';
+}
+
+const MANUAL_PROVIDER_KEY = 'crm_payment_provider_manual';
+
+/** True once the person has ever explicitly picked a provider themselves (as opposed to just
+ *  inheriting whatever the location-based default was). */
+export function hasManualProviderChoice(): boolean {
+  return typeof window !== 'undefined' && localStorage.getItem(MANUAL_PROVIDER_KEY) === 'true';
+}
+
+/** Call this when the person explicitly clicks a provider option, so their choice persists and
+ *  is never silently overridden by the location-based default again. */
+export function setManualProviderChoice(provider: ProviderCode): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem('crm_payment_provider', provider);
+  localStorage.setItem(MANUAL_PROVIDER_KEY, 'true');
+}
+
+/** The provider to preselect on load: the person's own manual choice if they ever made one,
+ *  otherwise a location-based default from their tenant's country. */
+export function getPreferredProvider(countryCode?: string | null): ProviderCode {
+  if (typeof window !== 'undefined' && hasManualProviderChoice()) {
+    const stored = localStorage.getItem('crm_payment_provider');
+    if (stored === 'stripe' || stored === 'flutterwave' || stored === 'payunit') return stored;
+  }
+  return defaultProviderForCountry(countryCode);
+}
 
 export interface CheckoutRequest {
   planId: 'starter' | 'pro' | 'premium' | 'entreprise';

@@ -1,13 +1,17 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, ArrowLeft } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { LanguageSelector } from '../components/LanguageSelector';
 import { Footer } from './Landing';
-import { PLANS, formatMoney } from '../lib/constants';
+import { PLANS, formatMoney, convertFromUsd, guessVisitorCurrency } from '../lib/constants';
 import { useLanguage } from '../context/LanguageContext';
 
 export function Pricing() {
   const { t, lang } = useLanguage();
+  const [displayCurrency] = useState(() => guessVisitorCurrency());
+  const [showUsd, setShowUsd] = useState(false);
+  const currency = showUsd ? 'USD' : displayCurrency;
 
   return (
     <div className="min-h-screen bg-white">
@@ -27,17 +31,25 @@ export function Pricing() {
         <div className="mx-auto max-w-2xl text-center">
           <h1 className="text-4xl font-bold text-gray-900">{lang === 'fr' ? 'Des forfaits adaptés à chaque étape' : 'Plans for every stage'}</h1>
           <p className="mt-4 text-lg text-gray-600">{lang === 'fr' ? '7 jours d\'essai gratuit sur tous les plans. Sans carte bancaire. Changez de plan à tout moment.' : '7-day free trial on all plans. No credit card. Change anytime.'}</p>
+          {displayCurrency !== 'USD' && (
+            <p className="mt-3 text-xs text-gray-400">
+              {lang === 'fr' ? `Prix indicatifs convertis en ${displayCurrency}.` : `Indicative prices converted to ${displayCurrency}.`}{' '}
+              <button onClick={() => setShowUsd(v => !v)} className="font-medium text-coral-600 hover:underline">
+                {showUsd ? (lang === 'fr' ? `Voir en ${displayCurrency}` : `Show in ${displayCurrency}`) : (lang === 'fr' ? 'Voir en USD' : 'Show in USD')}
+              </button>
+            </p>
+          )}
         </div>
 
         <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {PLANS.map(plan => {
-            const price = plan.price;
+            const price = currency === 'USD' ? plan.price : convertFromUsd(plan.price, currency);
             return (
               <div key={plan.id} className={`card flex flex-col p-6 ${plan.highlight ? 'ring-2 ring-blue-500 border-blue-300' : ''}`}>
                 {plan.highlight && <div className="mb-2 inline-flex w-fit rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800">{t('common.popular')}</div>}
                 <h3 className="text-lg font-bold text-gray-900">{plan.name}</h3>
                 <p className="mt-3">
-                  <span className="text-3xl font-bold text-gray-900">{formatMoney(price, plan.currency)}</span>
+                  <span className="text-3xl font-bold text-gray-900">{formatMoney(price, currency)}</span>
                   <span className="text-sm text-gray-500">{t('common.perMonth')}</span>
                 </p>
                 <p className="mt-2 text-xs text-gray-500">

@@ -24,12 +24,20 @@ export function Login() {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
+    const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (signInErr) { setError(signInErr.message); return; }
     // RequireAuth / PublicOnly will redirect to /mfa-challenge automatically if 2FA is enabled on this account
     await refresh();
-    nav(from, { replace: true });
+    // Super admins land in their own panel, never the regular tenant dashboard — queried directly
+    // rather than read from AuthContext's `profile`, which isn't guaranteed to have re-rendered
+    // with the fresh value in this same closure right after calling refresh().
+    let target = from;
+    if (signInData.user) {
+      const { data: prof } = await supabase.from('profiles').select('role').eq('id', signInData.user.id).maybeSingle();
+      if (prof?.role === 'super_admin' && !from.startsWith('/super-admin')) target = '/super-admin';
+    }
+    nav(target, { replace: true });
   };
 
   return (

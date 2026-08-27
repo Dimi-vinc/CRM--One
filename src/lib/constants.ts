@@ -193,6 +193,25 @@ export const COUNTRIES: CountryDef[] = [
 
 export const COUNTRY_BY_CODE: Record<string, CountryDef> = Object.fromEntries(COUNTRIES.map(c => [c.code, c]));
 
+/**
+ * Guesses the visitor's likely currency from their browser's IANA timezone (e.g.
+ * "Africa/Douala" -> XAF), matched against COUNTRIES. Entirely client-side, no network call, no
+ * external geolocation service — a reasonable best-effort default for PRE-signup display
+ * purposes only (the public Pricing page). This is NOT what actually gets charged: real billing
+ * always uses the tenant's own explicitly selected currency, converted correctly at checkout
+ * time — see supabase/functions/*-checkout/index.ts. Falls back to USD if the timezone doesn't
+ * match any known country.
+ */
+export function guessVisitorCurrency(): string {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const match = COUNTRIES.find(c => c.timezone === tz);
+    return match?.currency || 'USD';
+  } catch {
+    return 'USD';
+  }
+}
+
 export interface CurrencyDef {
   code: string;
   symbol: string;

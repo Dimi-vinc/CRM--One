@@ -5,7 +5,7 @@ import { PageHeader, Card, Button, Badge, Skeleton } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
 import { PLANS, PLAN_BY_ID, formatMoney } from '../../lib/constants';
 import { daysUntil, formatDate } from '../../lib/utils';
-import { startCheckout, getPaymentProvider } from '../../lib/payments';
+import { startCheckout, getPaymentProvider, getPreferredProvider, defaultProviderForCountry, hasManualProviderChoice, setManualProviderChoice } from '../../lib/payments';
 import type { Subscription } from '../../lib/types';
 
 export function Billing() {
@@ -15,11 +15,23 @@ export function Billing() {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
-  const [selectedProvider, setSelectedProvider] = useState<'stripe' | 'flutterwave' | 'payunit'>(() => {
-    if (typeof window === 'undefined') return 'stripe';
-    const stored = localStorage.getItem('crm_payment_provider');
-    return stored === 'flutterwave' || stored === 'payunit' ? stored : 'stripe';
-  });
+  const [selectedProvider, setSelectedProvider] = useState<'stripe' | 'flutterwave' | 'payunit'>(() => getPreferredProvider());
+  const [autoSelected, setAutoSelected] = useState(false);
+
+  // Auto-pick the provider from the tenant's country once it's loaded — but only if the person
+  // has never manually chosen one themselves. A manual choice, once made, is never silently
+  // overridden by the location-based default again.
+  useEffect(() => {
+    if (!tenant?.country_code || hasManualProviderChoice()) return;
+    setSelectedProvider(defaultProviderForCountry(tenant.country_code));
+    setAutoSelected(true);
+  }, [tenant?.country_code]);
+
+  const chooseProvider = (provider: 'stripe' | 'flutterwave' | 'payunit') => {
+    setSelectedProvider(provider);
+    setAutoSelected(false);
+    setManualProviderChoice(provider);
+  };
 
   const load = async () => {
     if (!tenant) return;
@@ -150,9 +162,12 @@ export function Billing() {
       {/* Choice of Payment Provider (Stripe vs Flutterwave vs PayUnit) - Microsoft 365 style */}
       <Card className="mb-6 p-5">
         <h3 className="text-sm font-semibold text-gray-900 mb-3">1. Mode de règlement préféré</h3>
+        {autoSelected && (
+          <p className="mb-3 text-xs text-gray-500">Sélectionné automatiquement selon votre pays — changez librement si vous préférez un autre mode.</p>
+        )}
         <div className="grid gap-4 sm:grid-cols-3">
           <button
-            onClick={() => setSelectedProvider('stripe')}
+            onClick={() => chooseProvider('stripe')}
             className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-all focus:outline-none ${selectedProvider === 'stripe' ? 'border-coral-500 ring-2 ring-coral-100 bg-coral-50/10' : 'border-gray-200 hover:bg-gray-50'}`}
           >
             <div className={`mt-1 flex h-4 w-4 items-center justify-center rounded-full border ${selectedProvider === 'stripe' ? 'border-coral-500 text-coral-600' : 'border-gray-300'}`}>
@@ -170,7 +185,7 @@ export function Billing() {
           </button>
 
           <button
-            onClick={() => setSelectedProvider('flutterwave')}
+            onClick={() => chooseProvider('flutterwave')}
             className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-all focus:outline-none ${selectedProvider === 'flutterwave' ? 'border-coral-500 ring-2 ring-coral-100 bg-coral-50/10' : 'border-gray-200 hover:bg-gray-50'}`}
           >
             <div className={`mt-1 flex h-4 w-4 items-center justify-center rounded-full border ${selectedProvider === 'flutterwave' ? 'border-coral-500 text-coral-600' : 'border-gray-300'}`}>
@@ -189,7 +204,7 @@ export function Billing() {
           </button>
 
           <button
-            onClick={() => setSelectedProvider('payunit')}
+            onClick={() => chooseProvider('payunit')}
             className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-all focus:outline-none ${selectedProvider === 'payunit' ? 'border-coral-500 ring-2 ring-coral-100 bg-coral-50/10' : 'border-gray-200 hover:bg-gray-50'}`}
           >
             <div className={`mt-1 flex h-4 w-4 items-center justify-center rounded-full border ${selectedProvider === 'payunit' ? 'border-coral-500 text-coral-600' : 'border-gray-300'}`}>
