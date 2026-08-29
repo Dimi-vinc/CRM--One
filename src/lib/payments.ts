@@ -7,21 +7,24 @@
 import { supabase } from './supabase';
 import { PLAN_BY_ID, CURRENCY_BY_CODE, COUNTRY_BY_CODE } from './constants';
 
-export type ProviderCode = 'stripe' | 'flutterwave' | 'payunit';
+export type ProviderCode = 'stripe' | 'flutterwave' | 'payunit' | 'paystack';
 
 /**
  * Picks a sensible default payment provider for a tenant based on their country, WITHOUT
  * overriding an explicit manual choice the person already made — see getPreferredProvider(),
  * which is what callers should actually use.
  *
- * Rule: countries where mobile money is a real local payment method (driven by the existing
- * COUNTRY_BY_CODE data, not a separately-maintained list that could drift out of sync) default
- * to PayUnit — the first PSP validated for launch on this platform, which the tenant is likely to
- * actually be able to pay with locally. Everywhere else defaults to Stripe. Flutterwave stays
- * manually selectable but is never auto-picked, since only PayUnit and Stripe are confirmed live.
+ * Rule: Paystack is strongest in Nigeria, Ghana, South Africa and Kenya (its officially
+ * supported currencies) — default to it there. Elsewhere, countries where mobile money is a
+ * real local payment method (driven by the existing COUNTRY_BY_CODE data) default to PayUnit —
+ * the first PSP validated for launch on this platform. Everywhere else defaults to Stripe.
+ * Flutterwave stays manually selectable but is never auto-picked, to keep the automatic choice
+ * limited to the providers actively confirmed live.
  */
 export function defaultProviderForCountry(countryCode?: string | null): ProviderCode {
   if (!countryCode) return 'stripe';
+  const PAYSTACK_COUNTRIES = new Set(['NG', 'GH', 'ZA', 'KE']);
+  if (PAYSTACK_COUNTRIES.has(countryCode)) return 'paystack';
   const country = COUNTRY_BY_CODE[countryCode];
   if (country && country.mobileMoney.length > 0) return 'payunit';
   return 'stripe';
@@ -48,7 +51,7 @@ export function setManualProviderChoice(provider: ProviderCode): void {
 export function getPreferredProvider(countryCode?: string | null): ProviderCode {
   if (typeof window !== 'undefined' && hasManualProviderChoice()) {
     const stored = localStorage.getItem('crm_payment_provider');
-    if (stored === 'stripe' || stored === 'flutterwave' || stored === 'payunit') return stored;
+    if (stored === 'stripe' || stored === 'flutterwave' || stored === 'payunit' || stored === 'paystack') return stored;
   }
   return defaultProviderForCountry(countryCode);
 }
@@ -238,10 +241,55 @@ const payunitProvider: PaymentProvider = {
   },
 };
 
+// ---- Paystack provider (via Supabase edge function) ----
+// Strongest coverage in Nigeria, Ghana, South Africa, Kenya — cards, bank transfer, mobile
+// money, USSD depending on channels enabled on the merchant account.
+const paystackProvider: PaymentProvider = {
+  code: 'paystack',
+  label: 'Paystack',
+  async createCheckoutSession(req: CheckoutRequest): Promise<CheckoutResult> {
+    const plan = PLAN_BY_ID[req.planId];
+    if (!plan) return { ok: false, provider: 'paystack', error: 'Plan inconnu' };
+    try {
+      const fnUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/paystack-checkout`;
+      const { data: sessionData } = await supabase.auth.getSession();
+      const res = await fetch(fnUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${sessionData.session?.access_token || ''}`,
+          apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({
+          planId: req.planId,
+          currency: req.currency,
+          tenantId: req.tenantId,
+          email: req.email,
+          successUrl: req.successUrl,
+        }),
+      });
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        return { ok: false, provider: 'paystack', error: errBody.error || `Erreur ${res.status}` };
+      }
+      const data = await res.json();
+      if (!data?.url) return { ok: false, provider: 'paystack', error: 'Réponse invalide' };
+      return { ok: true, provider: 'paystack', url: data.url };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      return { ok: false, provider: 'paystack', error: message || 'Échec réseau' };
+    }
+  },
+  async createPortalSession(): Promise<CheckoutResult> {
+    return { ok: false, provider: 'paystack', error: "Paystack ne propose pas de portail self-service. Contactez le support pour gérer votre abonnement." };
+  },
+};
+
 const PROVIDERS: Record<ProviderCode, PaymentProvider> = {
   stripe: stripeProvider,
   flutterwave: flutterwaveProvider,
   payunit: payunitProvider,
+  paystack: paystackProvider,
 };
 
 // Default provider is Stripe. Callers may request flutterwave when ready.

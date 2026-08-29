@@ -5,10 +5,15 @@ import { useAuth } from '../../context/AuthContext';
 import { useLanguage, type Lang } from '../../context/LanguageContext';
 import { PageHeader, Card, Button, Input, Select, Avatar } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
-import { COUNTRIES, CURRENCIES } from '../../lib/constants';
+import { COUNTRIES, COUNTRY_BY_CODE, CURRENCIES } from '../../lib/constants';
 import { setManualProviderChoice } from '../../lib/payments';
 
 interface EmailConnection { provider: 'gmail' | 'outlook'; email_address: string }
+
+// Derived from COUNTRIES' own timezone field, deduplicated and sorted — every option here is a
+// real IANA zone already used by a supported country, not a separately-maintained list that
+// could drift out of sync.
+const TIMEZONES = Array.from(new Set(COUNTRIES.map(c => c.timezone))).sort();
 
 type ThemeId = 'ocean' | 'coral' | 'classic';
 const THEMES: ReadonlyArray<{ id: ThemeId; name: string; color: string; previewClass: string }> = [
@@ -42,10 +47,10 @@ export function Settings() {
     if (typeof window === 'undefined') return 'ocean';
     return (localStorage.getItem('crm_theme') as ThemeId) || 'ocean';
   });
-  const [paymentProvider, setPaymentProvider] = useState<'stripe' | 'flutterwave' | 'payunit'>(() => {
+  const [paymentProvider, setPaymentProvider] = useState<'stripe' | 'flutterwave' | 'payunit' | 'paystack'>(() => {
     if (typeof window === 'undefined') return 'stripe';
     const stored = localStorage.getItem('crm_payment_provider');
-    return stored === 'flutterwave' || stored === 'payunit' ? stored : 'stripe';
+    return stored === 'flutterwave' || stored === 'payunit' || stored === 'paystack' ? stored : 'stripe';
   });
 
   const selectTheme = (themeId: ThemeId) => {
@@ -79,7 +84,7 @@ export function Settings() {
 
   const isAdmin = profile?.role === 'admin';
 
-  const choosePaymentProvider = (provider: 'stripe' | 'flutterwave' | 'payunit') => {
+  const choosePaymentProvider = (provider: 'stripe' | 'flutterwave' | 'payunit' | 'paystack') => {
     setPaymentProvider(provider);
     setManualProviderChoice(provider);
   };
@@ -257,14 +262,33 @@ export function Settings() {
           <div className="mt-4 space-y-3">
             <Input label="Nom de l'entreprise" value={tenantForm.name} onChange={e => setTenantForm({ ...tenantForm, name: e.target.value })} disabled={!isAdmin} />
             <div className="grid grid-cols-2 gap-3">
-              <Select label="Pays" value={tenantForm.country_code} onChange={e => setTenantForm({ ...tenantForm, country_code: e.target.value })} disabled={!isAdmin}>
+              <Select
+                label="Pays"
+                value={tenantForm.country_code}
+                onChange={e => {
+                  const country = COUNTRY_BY_CODE[e.target.value];
+                  // Auto-suggest the matching currency/timezone for the newly selected country —
+                  // both remain freely editable right after, this just prevents an easy-to-miss
+                  // mismatch (e.g. switching country but forgetting to also update currency).
+                  setTenantForm({
+                    ...tenantForm,
+                    country_code: e.target.value,
+                    currency_code: country?.currency || tenantForm.currency_code,
+                    timezone: country?.timezone || tenantForm.timezone,
+                  });
+                }}
+                disabled={!isAdmin}
+              >
                 {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
               </Select>
               <Select label="Devise" value={tenantForm.currency_code} onChange={e => setTenantForm({ ...tenantForm, currency_code: e.target.value })} disabled={!isAdmin}>
                 {CURRENCIES.map(c => <option key={c.code} value={c.code}>{c.code} — {c.name}</option>)}
               </Select>
             </div>
-            <Input label="Fuseau horaire" value={tenantForm.timezone} onChange={e => setTenantForm({ ...tenantForm, timezone: e.target.value })} disabled={!isAdmin} placeholder="Africa/Douala" />
+            <Select label="Fuseau horaire" value={tenantForm.timezone} onChange={e => setTenantForm({ ...tenantForm, timezone: e.target.value })} disabled={!isAdmin}>
+              {!TIMEZONES.includes(tenantForm.timezone) && <option value={tenantForm.timezone}>{tenantForm.timezone}</option>}
+              {TIMEZONES.map(tz => <option key={tz} value={tz}>{tz}</option>)}
+            </Select>
           </div>
 
           {isAdmin ? (
@@ -306,7 +330,7 @@ export function Settings() {
             </div>
           </div>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <button
               type="button"
               onClick={() => choosePaymentProvider('stripe')}
@@ -331,6 +355,14 @@ export function Settings() {
               <p className="font-semibold text-gray-900">PayUnit</p>
               <p className="mt-1 text-xs text-gray-500">Cartes, Mobile Money et autres moyens de paiement internationaux.</p>
             </button>
+            <button
+              type="button"
+              onClick={() => choosePaymentProvider('paystack')}
+              className={`rounded-xl border p-4 text-left transition-all ${paymentProvider === 'paystack' ? 'border-coral-500 ring-2 ring-coral-100 bg-coral-50/10' : 'border-gray-200 hover:bg-gray-50'}`}
+            >
+              <p className="font-semibold text-gray-900">Paystack</p>
+              <p className="mt-1 text-xs text-gray-500">Cartes et Mobile Money — Nigeria, Ghana, Afrique du Sud, Kenya.</p>
+            </button>
           </div>
 
           <p className="mt-4 text-xs text-gray-500">
@@ -338,6 +370,8 @@ export function Settings() {
               ? 'Vous avez choisi Flutterwave. Utilisez la page Facturation pour souscrire un plan via Orange Money, MTN MoMo, Wave ou M-Pesa.'
               : paymentProvider === 'payunit'
               ? 'Vous avez choisi PayUnit. Utilisez la page Facturation pour souscrire un plan via Orange Money, MTN MoMo ou carte.'
+              : paymentProvider === 'paystack'
+              ? 'Vous avez choisi Paystack. Utilisez la page Facturation pour souscrire un plan via carte ou Mobile Money.'
               : 'Vous avez choisi Stripe. Le portail de facturation est disponible pour gérer vos cartes et abonnements.'}
           </p>
           <div className="mt-4">

@@ -177,9 +177,44 @@ logs à la liste de repli.
 
 ---
 
-## 4. Choisir le fournisseur par défaut
+## 4. Paystack (Nigeria, Ghana, Afrique du Sud, Kenya)
 
-`src/lib/payments.ts` expose `getPaymentProvider(code)` — Stripe est utilisé par défaut. La page
-Facturation et la page Paramètres proposent déjà un sélecteur Stripe / Flutterwave / PayUnit qui
-passe le bon `provider` à `startCheckout()` — l'abstraction gère les trois de façon
+### a. Compte et clé
+1. https://dashboard.paystack.com → créez un compte (mode Test d'abord).
+2. **Settings → API Keys & Webhooks** → copiez la clé secrète (`sk_test_...`).
+
+### b. Déployer les fonctions
+```bash
+supabase functions deploy paystack-checkout
+supabase functions deploy paystack-webhook --no-verify-jwt
+supabase secrets set PAYSTACK_SECRET_KEY=sk_test_xxxxxxxxxxxxx
+```
+⚠️ **`--no-verify-jwt` est obligatoire pour `paystack-webhook`**, même raison que pour
+Stripe/Flutterwave/PayUnit : Paystack appelle cette fonction directement depuis ses serveurs,
+sans jeton Supabase.
+
+### c. Configurer le webhook
+Dans **Settings → API Keys & Webhooks → Webhook URL**, renseignez
+`https://<PROJECT_REF>.supabase.co/functions/v1/paystack-webhook`. Notez que Paystack a des URLs
+de webhook **séparées pour le mode Test et le mode Live** — configurez les deux.
+
+### d. Devises supportées
+Paystack ne facture officiellement que dans un nombre limité de devises selon le pays du compte
+marchand (principalement NGN, GHS, ZAR, KES, USD). La fonction de checkout se rabat
+automatiquement sur USD si la devise demandée n'est pas dans cette liste, plutôt que de risquer un
+montant erroné.
+
+### e. Signature de sécurité — particularité importante
+Contrairement à Stripe/Flutterwave (HMAC-SHA256), Paystack signe ses webhooks en
+**HMAC-SHA512** — c'est l'erreur la plus fréquente lors d'une implémentation manuelle. Déjà géré
+correctement dans `paystack-webhook/index.ts`.
+
+## 5. Choisir le fournisseur par défaut
+
+`src/lib/payments.ts` expose `getPreferredProvider(countryCode)` — sélectionne automatiquement
+Paystack (Nigeria/Ghana/Afrique du Sud/Kenya), PayUnit (autres marchés Mobile Money) ou Stripe
+(reste du monde) selon le pays du tenant, **sauf si l'utilisateur a déjà choisi manuellement un
+fournisseur** (ce choix est mémorisé et n'est plus jamais écrasé automatiquement). La page
+Facturation et la page Paramètres proposent un sélecteur Stripe / Flutterwave / PayUnit /
+Paystack qui passe le bon `provider` à `startCheckout()` — l'abstraction gère les quatre de façon
 interchangeable, aucun autre changement de code nécessaire pour en ajouter un nouveau.

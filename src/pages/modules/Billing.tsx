@@ -15,7 +15,7 @@ export function Billing() {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
-  const [selectedProvider, setSelectedProvider] = useState<'stripe' | 'flutterwave' | 'payunit'>(() => getPreferredProvider());
+  const [selectedProvider, setSelectedProvider] = useState<'stripe' | 'flutterwave' | 'payunit' | 'paystack'>(() => getPreferredProvider());
   const [autoSelected, setAutoSelected] = useState(false);
 
   // Auto-pick the provider from the tenant's country once it's loaded — but only if the person
@@ -27,7 +27,7 @@ export function Billing() {
     setAutoSelected(true);
   }, [tenant?.country_code]);
 
-  const chooseProvider = (provider: 'stripe' | 'flutterwave' | 'payunit') => {
+  const chooseProvider = (provider: 'stripe' | 'flutterwave' | 'payunit' | 'paystack') => {
     setSelectedProvider(provider);
     setAutoSelected(false);
     setManualProviderChoice(provider);
@@ -62,8 +62,8 @@ export function Billing() {
     });
     setBusy(null);
     if (!res.ok) {
-      if (res.error?.includes('non encore configuré') || res.error?.includes('Stripe') || res.error?.includes('Flutterwave') || res.error?.includes('PayUnit')) {
-        const providerName = selectedProvider === 'stripe' ? 'Stripe' : selectedProvider === 'flutterwave' ? 'Flutterwave' : 'PayUnit';
+      if (res.error?.includes('non encore configuré') || res.error?.includes('Stripe') || res.error?.includes('Flutterwave') || res.error?.includes('PayUnit') || res.error?.includes('Paystack')) {
+        const providerName = selectedProvider === 'stripe' ? 'Stripe' : selectedProvider === 'flutterwave' ? 'Flutterwave' : selectedProvider === 'paystack' ? 'Paystack' : 'PayUnit';
         setError(`${providerName} n'est pas encore configuré sur cette instance de test. Veuillez configurer les clés d'API correspondantes.`);
       } else {
         setError(res.error || 'Échec du paiement');
@@ -159,13 +159,13 @@ export function Billing() {
         </div>
       </Card>
 
-      {/* Choice of Payment Provider (Stripe vs Flutterwave vs PayUnit) - Microsoft 365 style */}
+      {/* Choice of Payment Provider (Stripe vs Flutterwave vs PayUnit vs Paystack) - Microsoft 365 style */}
       <Card className="mb-6 p-5">
         <h3 className="text-sm font-semibold text-gray-900 mb-3">1. Mode de règlement préféré</h3>
         {autoSelected && (
           <p className="mb-3 text-xs text-gray-500">Sélectionné automatiquement selon votre pays — changez librement si vous préférez un autre mode.</p>
         )}
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <button
             onClick={() => chooseProvider('stripe')}
             className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-all focus:outline-none ${selectedProvider === 'stripe' ? 'border-coral-500 ring-2 ring-coral-100 bg-coral-50/10' : 'border-gray-200 hover:bg-gray-50'}`}
@@ -216,6 +216,24 @@ export function Billing() {
               <div className="mt-2 flex flex-wrap gap-1.5">
                 <span className="rounded bg-coral-50 px-1.5 py-0.5 text-[10px] font-bold text-coral-700">Orange Money</span>
                 <span className="rounded bg-coral-50 px-1.5 py-0.5 text-[10px] font-bold text-coral-700">MTN MoMo</span>
+              </div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => chooseProvider('paystack')}
+            className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-all focus:outline-none ${selectedProvider === 'paystack' ? 'border-coral-500 ring-2 ring-coral-100 bg-coral-50/10' : 'border-gray-200 hover:bg-gray-50'}`}
+          >
+            <div className={`mt-1 flex h-4 w-4 items-center justify-center rounded-full border ${selectedProvider === 'paystack' ? 'border-coral-500 text-coral-600' : 'border-gray-300'}`}>
+              <div className={`h-2 w-2 rounded-full ${selectedProvider === 'paystack' ? 'bg-coral-500' : 'bg-transparent'}`} />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-gray-900">Cartes & Mobile Money (Paystack)</p>
+              <p className="mt-0.5 text-xs text-gray-500">Nigeria, Ghana, Afrique du Sud, Kenya.</p>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-600">Cartes</span>
+                <span className="rounded bg-coral-50 px-1.5 py-0.5 text-[10px] font-bold text-coral-700">Mobile Money</span>
+                <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-600">Virement</span>
               </div>
             </div>
           </button>
