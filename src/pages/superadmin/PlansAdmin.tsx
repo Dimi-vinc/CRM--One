@@ -19,7 +19,7 @@ export function PlansAdmin() {
   const save = async () => {
     if (!edit) return;
     await supabase.from('plans').update({
-      name: form.name, price_monthly: Number(form.price_monthly), currency: form.currency,
+      name: form.name, price_monthly: Number(form.price_monthly), currency: 'USD',
       max_users: Number(form.max_users), max_deals: Number(form.max_deals), is_active: form.is_active,
     }).eq('id', edit.id);
     await supabase.from('audit_log').insert({ actor_id: (await supabase.auth.getUser()).data.user?.id, action: 'plan.update', target_type: 'plan', target_id: edit.id, details: form });
@@ -54,8 +54,8 @@ export function PlansAdmin() {
         <div className="space-y-3">
           <Input label="Nom" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
           <div className="grid grid-cols-2 gap-3">
-            <Input label="Prix mensuel" type="number" value={form.price_monthly} onChange={e => setForm({ ...form, price_monthly: Number(e.target.value) })} />
-            <Input label="Devise" value={form.currency} onChange={e => setForm({ ...form, currency: e.target.value })} />
+            <Input label="Prix mensuel (USD)" type="number" value={form.price_monthly} onChange={e => setForm({ ...form, price_monthly: Number(e.target.value) })} />
+            <Input label="Devise" value="USD" disabled title="Le prix est toujours en USD ; il est converti automatiquement dans la devise du client au moment du paiement." />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <Input label="Max utilisateurs (0 = illimité)" type="number" value={form.max_users} onChange={e => setForm({ ...form, max_users: Number(e.target.value) })} />

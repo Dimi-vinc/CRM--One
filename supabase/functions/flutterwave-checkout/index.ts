@@ -60,12 +60,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
-// Same base prices as Stripe (in the plan's home currency's smallest coherent unit — Flutterwave
-// takes a plain decimal amount, not cents, unlike Stripe).
-const PLAN_PRICES_USD: Record<string, number> = {
-  starter: 9, pro: 29, premium: 69, entreprise: 159,
-};
-
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 200, headers: corsHeaders });
   const jsonHeaders = { ...corsHeaders, "Content-Type": "application/json" };
@@ -92,9 +86,11 @@ Deno.serve(async (req: Request) => {
     if (!planId || !tenantId || !email) {
       return new Response(JSON.stringify({ error: "Paramètres manquants" }), { status: 400, headers: jsonHeaders });
     }
-    if (!PLAN_PRICES_USD[planId]) {
-      return new Response(JSON.stringify({ error: "Plan inconnu" }), { status: 400, headers: jsonHeaders });
+    const { data: planRow } = await supabase.from("plans").select("price_monthly, is_active").eq("id", planId).maybeSingle();
+    if (!planRow || !planRow.is_active) {
+      return new Response(JSON.stringify({ error: "Plan inconnu ou inactif" }), { status: 400, headers: jsonHeaders });
     }
+    const planPriceUsd = Number(planRow.price_monthly);
 
     const { data: profile } = await supabase.from("profiles").select("tenant_id").eq("id", user.id).maybeSingle();
     if (!profile || profile.tenant_id !== tenantId) {
@@ -102,7 +98,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const cur = (currency || "USD").toUpperCase();
-    const amount = convertUsdTo(PLAN_PRICES_USD[planId], cur).amount;
+    const amount = convertUsdTo(planPriceUsd, cur).amount;
     const txRef = `crmone-${tenantId}-${planId}-${Date.now()}`;
 
     const res = await fetch("https://api.flutterwave.com/v3/payments", {

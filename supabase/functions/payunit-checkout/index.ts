@@ -76,11 +76,6 @@ const corsHeaders = {
 
 const PAYUNIT_BASE_URL = "https://gateway.payunit.net";
 
-// Same base USD prices as the other two providers (see stripe-checkout, flutterwave-checkout).
-const PLAN_PRICES_USD: Record<string, number> = {
-  starter: 9, pro: 29, premium: 69, entreprise: 159,
-};
-
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 200, headers: corsHeaders });
   const jsonHeaders = { ...corsHeaders, "Content-Type": "application/json" };
@@ -110,9 +105,14 @@ Deno.serve(async (req: Request) => {
     if (!planId || !tenantId) {
       return new Response(JSON.stringify({ error: "Paramètres manquants" }), { status: 400, headers: jsonHeaders });
     }
-    if (!PLAN_PRICES_USD[planId]) {
-      return new Response(JSON.stringify({ error: "Plan inconnu" }), { status: 400, headers: jsonHeaders });
+    // Read the real, current price from public.plans — this is the same table the Super Admin
+    // "Forfaits" page (PlansAdmin.tsx) edits, so a price change made there takes effect here
+    // immediately rather than being purely decorative.
+    const { data: planRow } = await supabase.from("plans").select("price_monthly, is_active").eq("id", planId).maybeSingle();
+    if (!planRow || !planRow.is_active) {
+      return new Response(JSON.stringify({ error: "Plan inconnu ou inactif" }), { status: 400, headers: jsonHeaders });
     }
+    const planPriceUsd = Number(planRow.price_monthly);
 
     const { data: profile } = await supabase.from("profiles").select("tenant_id").eq("id", user.id).maybeSingle();
     if (!profile || profile.tenant_id !== tenantId) {
@@ -124,7 +124,7 @@ Deno.serve(async (req: Request) => {
     // regardless of what the tenant selected, and let PayUnit reject it with a clear error if
     // unsupported for this account rather than silently defaulting.
     const cur = (currency || "USD").toUpperCase();
-    const converted = convertUsdTo(PLAN_PRICES_USD[planId], cur);
+    const converted = convertUsdTo(planPriceUsd, cur);
     const amount = converted.decimals === 0 ? Math.round(converted.amount) : Math.round(converted.amount * 100) / 100;
 
     // transaction_id is OUR identifier: PayUnit's docs warn special characters break Orange Money

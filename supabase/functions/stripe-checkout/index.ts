@@ -61,13 +61,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
-const PLAN_PRICES: Record<string, { usd: number }> = {
-  starter: { usd: 900 },    // $9.00 in cents
-  pro: { usd: 2900 },       // $29.00
-  premium: { usd: 6900 },   // $69.00
-  entreprise: { usd: 15900 }, // $159.00
-};
-
 // Currencies Stripe treats as having no decimal subunit (amount is already in whole units).
 const ZERO_DECIMAL_CURRENCIES = new Set(['XOF','XAF','UGX','TZS','RWF','BIF','DJF','GNF','KMF','CLP','JPY','VND']);
 
@@ -107,9 +100,14 @@ Deno.serve(async (req: Request) => {
     if (!planId || !tenantId || !email) {
       return new Response(JSON.stringify({ error: "Paramètres manquants" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
-    if (!PLAN_PRICES[planId]) {
-      return new Response(JSON.stringify({ error: "Plan inconnu" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    // Read the real, current price from public.plans — the same table the Super Admin
+    // "Forfaits" page (PlansAdmin.tsx) edits, so a price change made there takes effect here
+    // immediately rather than being purely decorative.
+    const { data: planRow } = await supabase.from("plans").select("price_monthly, is_active").eq("id", planId).maybeSingle();
+    if (!planRow || !planRow.is_active) {
+      return new Response(JSON.stringify({ error: "Plan inconnu ou inactif" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
+    const usdAmount = Number(planRow.price_monthly);
 
     // Verify tenant membership
     const { data: profile } = await supabase.from("profiles").select("tenant_id, role").eq("id", user.id).maybeSingle();
@@ -128,7 +126,6 @@ Deno.serve(async (req: Request) => {
     }
 
     const cur = (currency || "USD").toUpperCase();
-    const usdAmount = PLAN_PRICES[planId].usd / 100; // base price in whole USD
 
     async function createSession(chargeCurrencyLower: string, unitAmount: number) {
       return stripe.checkout.sessions.create({
@@ -168,7 +165,7 @@ Deno.serve(async (req: Request) => {
       // This Stripe account/region doesn't support the requested presentment currency — fall
       // back to USD rather than hard-failing the checkout.
       if (cur === "USD") throw stripeErr;
-      session = await createSession("usd", PLAN_PRICES[planId].usd);
+      session = await createSession("usd", Math.round(usdAmount * 100));
     }
 
     return new Response(JSON.stringify({ url: session.url, sessionId: session.id }), {

@@ -46,8 +46,6 @@ function convertUsdTo(usdAmount: number, currencyCode: string): { amount: number
 // Paystack only officially supports charging in a handful of currencies (NGN, GHS, ZAR, KES,
 // USD as of writing) depending on the merchant account's country — anything else will be
 // rejected by their API with a clear error, which we surface rather than guessing.
-const PLAN_PRICES_USD: Record<string, number> = { starter: 9, pro: 29, premium: 69, entreprise: 159 };
-
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 200, headers: corsHeaders });
   const jsonHeaders = { ...corsHeaders, "Content-Type": "application/json" };
@@ -70,9 +68,14 @@ Deno.serve(async (req: Request) => {
     if (authErr || !user) return new Response(JSON.stringify({ error: "Session invalide" }), { status: 401, headers: jsonHeaders });
 
     const { planId, currency, tenantId, email, successUrl } = await req.json();
-    if (!planId || !tenantId || !PLAN_PRICES_USD[planId]) {
+    if (!planId || !tenantId) {
       return new Response(JSON.stringify({ error: "Paramètres invalides" }), { status: 400, headers: jsonHeaders });
     }
+    const { data: planRow } = await supabase.from("plans").select("price_monthly, is_active").eq("id", planId).maybeSingle();
+    if (!planRow || !planRow.is_active) {
+      return new Response(JSON.stringify({ error: "Plan inconnu ou inactif" }), { status: 400, headers: jsonHeaders });
+    }
+    const planPriceUsd = Number(planRow.price_monthly);
 
     const { data: profile } = await supabase.from("profiles").select("tenant_id").eq("id", user.id).maybeSingle();
     if (!profile || profile.tenant_id !== tenantId) {
@@ -80,7 +83,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const cur = (currency || "NGN").toUpperCase();
-    const converted = convertUsdTo(PLAN_PRICES_USD[planId], cur);
+    const converted = convertUsdTo(planPriceUsd, cur);
     // Paystack amounts are always in the currency's smallest subunit (kobo for NGN, cents for
     // GHS/ZAR/KES/USD) — all currencies Paystack actually supports use 2 decimals, so *100.
     const amountSubunit = Math.round(converted.amount * 100);
