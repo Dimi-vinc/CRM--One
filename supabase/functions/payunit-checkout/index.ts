@@ -85,8 +85,16 @@ Deno.serve(async (req: Request) => {
     const apiUsername = Deno.env.get("PAYUNIT_API_USERNAME");
     const apiPassword = Deno.env.get("PAYUNIT_API_PASSWORD");
     const mode = Deno.env.get("PAYUNIT_MODE") === "live" ? "live" : "test";
-    if (!apiKey || !apiUsername || !apiPassword) {
-      return new Response(JSON.stringify({ error: "PayUnit n'est pas encore configuré.", notConfigured: true }), { status: 503, headers: jsonHeaders });
+    const missing = [
+      !apiKey && "PAYUNIT_API_KEY",
+      !apiUsername && "PAYUNIT_API_USERNAME",
+      !apiPassword && "PAYUNIT_API_PASSWORD",
+    ].filter(Boolean);
+    if (missing.length > 0) {
+      return new Response(JSON.stringify({
+        error: `PayUnit n'est pas configuré : secret(s) manquant(s) côté Supabase : ${missing.join(", ")}. Vérifiez avec "supabase secrets list" que ces noms exacts existent bien sur CE projet.`,
+        notConfigured: true,
+      }), { status: 503, headers: jsonHeaders });
     }
 
     const authHeader = req.headers.get("Authorization") || "";

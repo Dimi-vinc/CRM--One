@@ -20,8 +20,13 @@ Deno.serve(async (req: Request) => {
     const apiUsername = Deno.env.get("PAYUNIT_API_USERNAME");
     const apiPassword = Deno.env.get("PAYUNIT_API_PASSWORD");
     const mode = Deno.env.get("PAYUNIT_MODE") === "live" ? "live" : "test";
-    if (!apiKey || !apiUsername || !apiPassword) {
-      return new Response(JSON.stringify({ error: "PayUnit non configuré" }), { status: 503 });
+    const missing = [
+      !apiKey && "PAYUNIT_API_KEY",
+      !apiUsername && "PAYUNIT_API_USERNAME",
+      !apiPassword && "PAYUNIT_API_PASSWORD",
+    ].filter(Boolean);
+    if (missing.length > 0) {
+      return new Response(JSON.stringify({ error: `PayUnit non configuré : secret(s) manquant(s) : ${missing.join(", ")}` }), { status: 503 });
     }
 
     const payload = await req.json().catch(() => ({}));
