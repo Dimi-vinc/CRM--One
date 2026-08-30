@@ -7,6 +7,20 @@
 import { supabase } from './supabase';
 import { PLAN_BY_ID, CURRENCY_BY_CODE, COUNTRY_BY_CODE } from './constants';
 
+/**
+ * `fetch()` throws a bare `TypeError: Failed to fetch` for any network-level failure — the
+ * function isn't deployed, the URL is wrong, CORS rejected the request, DNS failed, etc. Showing
+ * that raw string to a person configuring payments for the first time is actively unhelpful (it
+ * gives zero indication of what to actually check). Translate it into something actionable.
+ */
+function describeNetworkError(error: unknown, providerLabel: string): string {
+  const message = error instanceof Error ? error.message : String(error);
+  if (message.toLowerCase().includes('failed to fetch') || message.toLowerCase().includes('networkerror')) {
+    return `Impossible de joindre le serveur de paiement ${providerLabel}. Vérifiez que la fonction correspondante a bien été déployée côté Supabase, et que l'URL/clé Supabase configurées sur ce site sont correctes.`;
+  }
+  return message || 'Échec réseau';
+}
+
 export type ProviderCode = 'stripe' | 'flutterwave' | 'payunit' | 'paystack';
 
 /**
@@ -118,8 +132,7 @@ const stripeProvider: PaymentProvider = {
       if (!data || !data.url) return { ok: false, provider: 'stripe', error: 'Réponse invalide' };
       return { ok: true, provider: 'stripe', url: data.url };
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      return { ok: false, provider: 'stripe', error: message || 'Échec réseau' };
+      return { ok: false, provider: 'stripe', error: describeNetworkError(error, 'Stripe') };
     }
   },
   async createPortalSession(tenantId: string, returnUrl: string): Promise<CheckoutResult> {
@@ -143,8 +156,7 @@ const stripeProvider: PaymentProvider = {
       if (!data?.url) return { ok: false, provider: 'stripe', error: 'Réponse invalide' };
       return { ok: true, provider: 'stripe', url: data.url };
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      return { ok: false, provider: 'stripe', error: message || 'Échec réseau' };
+      return { ok: false, provider: 'stripe', error: describeNetworkError(error, 'Stripe') };
     }
   },
 };
@@ -182,8 +194,7 @@ const flutterwaveProvider: PaymentProvider = {
       if (!data?.url) return { ok: false, provider: 'flutterwave', error: 'Réponse invalide' };
       return { ok: true, provider: 'flutterwave', url: data.url };
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      return { ok: false, provider: 'flutterwave', error: message || 'Échec réseau' };
+      return { ok: false, provider: 'flutterwave', error: describeNetworkError(error, 'Flutterwave') };
     }
   },
   async createPortalSession(): Promise<CheckoutResult> {
@@ -230,8 +241,7 @@ const payunitProvider: PaymentProvider = {
       if (!data?.url) return { ok: false, provider: 'payunit', error: 'Réponse invalide' };
       return { ok: true, provider: 'payunit', url: data.url };
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      return { ok: false, provider: 'payunit', error: message || 'Échec réseau' };
+      return { ok: false, provider: 'payunit', error: describeNetworkError(error, 'PayUnit') };
     }
   },
   async createPortalSession(): Promise<CheckoutResult> {
@@ -276,8 +286,7 @@ const paystackProvider: PaymentProvider = {
       if (!data?.url) return { ok: false, provider: 'paystack', error: 'Réponse invalide' };
       return { ok: true, provider: 'paystack', url: data.url };
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      return { ok: false, provider: 'paystack', error: message || 'Échec réseau' };
+      return { ok: false, provider: 'paystack', error: describeNetworkError(error, 'Paystack') };
     }
   },
   async createPortalSession(): Promise<CheckoutResult> {

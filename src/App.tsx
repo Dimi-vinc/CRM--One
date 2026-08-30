@@ -113,7 +113,7 @@ export default function App() {
             <Route path="/quotes-invoices" element={<RequireAuth moduleKey="quotes_invoices"><Shell><QuotesInvoices /></Shell></RequireAuth>} />
             <Route path="/campaigns" element={<RequireAuth moduleKey="campaigns"><Shell><Campaigns /></Shell></RequireAuth>} />
             <Route path="/web-forms" element={<RequireAuth moduleKey="web_forms"><Shell><WebForms /></Shell></RequireAuth>} />
-            <Route path="/developers" element={<RequireAuth roles={['admin']}><Shell><Developers /></Shell></RequireAuth>} />
+            <Route path="/developers" element={<RequireAuth roles={['admin']} moduleKey="developers"><Shell><Developers /></Shell></RequireAuth>} />
             <Route path="/knowledge-base" element={<RequireAuth moduleKey="knowledge_base"><Shell><KnowledgeBase /></Shell></RequireAuth>} />
             <Route path="/data-privacy" element={<RequireAuth><Shell><Privacy /></Shell></RequireAuth>} />
             <Route path="/territories" element={<RequireAuth moduleKey="territories"><Shell><Territories /></Shell></RequireAuth>} />
