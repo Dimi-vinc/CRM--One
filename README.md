@@ -58,7 +58,7 @@ fournisseur, ou visiteur anonyme remplissant un formulaire public) — sans ce f
 rejette l'appel avec une 401 avant même d'exécuter le code de la fonction. Pour les autres
 fonctions du projet (automatisations, API publique, chatbot/tickets publics, PayUnit,
 intégrations), voir `AUTOMATIONS_SETUP.md`, `API_DOCUMENTATION.md`, `CHATBOT_SETUP.md`,
-`STRIPE_FLUTTERWAVE_SETUP.md` et `INTEGRATIONS_SETUP.md`, qui documentent chacune le flag exact
+`PAYMENTS_SETUP.md` et `INTEGRATIONS_SETUP.md`, qui documentent chacune le flag exact
 requis pour leurs propres fonctions.
 
 3. Configurez les secrets uniquement côté Supabase. Ne placez jamais ces valeurs dans Cloudflare ni dans le frontend :

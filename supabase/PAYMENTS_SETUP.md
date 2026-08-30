@@ -1,8 +1,8 @@
-# Activer les paiements (Stripe + Flutterwave + PayUnit)
+# Activer les paiements (Stripe + Flutterwave + PayUnit + Paystack)
 
-Le code des trois fournisseurs est prêt. Rien ne fonctionne tant que les secrets ne sont pas
-configurés — mais aucun échec silencieux : les boutons afficheront un message clair
-("non configuré") jusqu'à ce que ce soit fait.
+Ce sont les 4 PSP actifs sur cette plateforme. Le code des quatre fournisseurs est prêt. Rien ne
+fonctionne tant que les secrets ne sont pas configurés — mais aucun échec silencieux : les
+boutons afficheront un message clair ("non configuré") jusqu'à ce que ce soit fait.
 
 ## ⚠️ Faille corrigée au passage
 L'ancien code activait un plan directement depuis l'URL (`/billing?status=success&plan=X`) —
