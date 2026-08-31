@@ -62,12 +62,7 @@ export function Billing() {
     });
     setBusy(null);
     if (!res.ok) {
-      if (res.error?.includes('non encore configuré') || res.error?.includes('Stripe') || res.error?.includes('Flutterwave') || res.error?.includes('PayUnit') || res.error?.includes('Paystack')) {
-        const providerName = selectedProvider === 'stripe' ? 'Stripe' : selectedProvider === 'flutterwave' ? 'Flutterwave' : selectedProvider === 'paystack' ? 'Paystack' : 'PayUnit';
-        setError(`${providerName} n'est pas encore configuré sur cette instance de test. Veuillez configurer les clés d'API correspondantes.`);
-      } else {
-        setError(res.error || 'Échec du paiement');
-      }
+      setError(res.error || 'Échec du paiement');
       return;
     }
     if (res.url) window.location.href = res.url;
