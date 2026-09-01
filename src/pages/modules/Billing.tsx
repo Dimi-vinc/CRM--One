@@ -71,7 +71,7 @@ export function Billing() {
   const openPortal = async () => {
     if (!tenant) return;
     setBusy('portal'); setError(null);
-    const provider = getPaymentProvider('stripe');
+    const provider = getPaymentProvider(selectedProvider);
     const res = await provider.createPortalSession(tenant.id, `${window.location.origin}/billing`);
     setBusy(null);
     if (res.ok && res.url) window.location.href = res.url;
